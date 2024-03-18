@@ -1,0 +1,26 @@
+{
+  "name": "inhouse-tracker-server",
+  "version": "0.0.1",
+  "description": "The server that ingests data from inhouse-tracker-client for processing",
+  "private": true,
+  "main": "",
+  "scripts": {
+    "dev": "nodemon ./src/index.ts"
+  },
+  "author": "DarkView",
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.28",
+    "nodemon": "^3.1.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "eventsource": "^2.0.2",
+    "express": "^4.18.3"
+  }
+}

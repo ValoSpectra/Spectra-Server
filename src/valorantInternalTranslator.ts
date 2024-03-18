@@ -1,0 +1,139 @@
+export enum WeaponsAndAbilities {
+    TX_Hud_Pistol_Classic = "Classic",
+    TX_Hud_Pistol_Glock_S = "Classic",
+
+    TX_Hud_Pistol_Slim = "Shorty",
+    TX_Hud_Pistol_SawedOff_S = "Shorty",
+
+    TX_Hud_Pistol_AutoPistol = "Frenzy",
+    TX_Hud_AutoPistol = "Frenzy",
+
+    TX_Hud_Pistol_Luger = "Ghost",
+    TX_Hud_Pistol_Luger_S = "Ghost",
+
+    TX_Hud_Pistol_Sheriff = "Sheriff",
+    TX_Hud_Pistol_Revolver_S = "Sheriff",
+
+    TX_Hud_Shotguns_Pump = "Bucky",
+    TX_Hud_Pump = "Bucky",
+
+    TX_Hud_Shotguns_Persuader = "Judge",
+    TX_Hud_Shotguns_Spas12_S = "Judge",
+
+    TX_Hud_SMGs_Vector = "Stinger",
+    TX_Hud_Vector = "Stinger",
+
+    TX_Hud_SMGs_Ninja = "Spectre",
+    TX_Hud_SMG_MP5_S = "Spectre",
+
+    TX_Hud_Rifles_Burst = "Bulldog",
+    TX_Hud_Burst = "Bulldog",
+
+    TX_Hud_Rifles_DMR = "Guardian",
+    tx_hud_dmr = "Guardian",
+
+    TX_Hud_Rifles_Ghost = "Phantom",
+    TX_Hud_Assault_AR10A2_S = "Phantom",
+
+    TX_Hud_Rifles_Volcano = "Vandal",
+    TX_Hud_Volcano = "Vandal",
+
+    TX_Hud_Sniper_Bolt = "Marshal",
+    TX_Hud_Sniper_BoltAction_S = "Marshal",
+
+    TX_Hud_Sniper_Operater = "Operator",
+    TX_Hud_Operator = "Operator",
+
+    TX_Hud_Sniper_DoubleSniper = "Outlaw",
+    TX_Hud_DoubleSniper = "Outlaw",
+
+    TX_Hud_LMG = "Ares",
+
+    TX_Hud_HMG = "Odin",
+
+    knife = "Knife",
+    TX_Hud_Knife_Standard_S = "Knife",
+
+    // Abilities
+    TX_Breach_FusionBlast = "Aftershock",
+    TX_Sarge_MolotovLauncher = "Incendiary",
+    TX_Sarge_OrbitalStrike = "Orbital Strike (ULT)",
+    TX_Pheonix_FireWall = "Blaze",
+    TX_Pheonix_Molotov = "Hot Hands",
+    TX_Hunter_ShockArrow = "Shock Bolt",
+    TX_Hunter_BowBlast = "Hunters Fury",
+    TX_Hud_Deadeye_Q_Pistol = "Headhunter",
+    TX_Hud_Deadeye_X_GiantSlayer = "Tour de Force (ULT)",
+    TX_Cable_FishingHook = "Annihilation (ULT)",
+    TX_Hud_Wushu_X_Dagger = "Blade Storm (ULT)",
+    TX_Neon_Ult = "Overdrive (ULT)",
+    TX_Thorne_Heal = "Resurrection (ULT)",
+    TX_Gumshoe_Tripwire = "Trapwire",
+    TX_Gren_Icon = "Frag/ment",
+    TX_Aggrobot_Bubbles = "Mosh Pit",
+    TX_KJ_Bees = "Nanoswarm",
+    tx_KJ_turret = "Turret",
+    TX_Clay_Boomba = "Boom bot",
+    TX_Clay_ClusterBomb = "Paint Shells",
+    TX_Clay_RocketLauncher = "Show stopper (ULT)",
+    TX_Guide4 = "Trail blazer",
+    TX_Pandemic_AcidLauncher = "Snake bite",
+
+}
+
+export enum Agents {
+    "Clay_PC_C" = "Raze",
+    "Pandemic_PC_C" = "Viper",
+    "Wraith_PC_C" = "Omen",
+    "Hunter_PC_C" = "Sova",
+    "Thorne_PC_C" = "Sage",
+    "Phoenix_PC_C" = "Phoenix",
+    "Wushu_PC_C" = "Jett",
+    "Gumshoe_PC_C" = "Cypher",
+    "Sarge_PC_C" = "Brimstone",
+    "Breach_PC_C" = "Breach",
+    "Vampire_PC_C" = "Reyna",
+    "Killjoy_PC_C" = "Killjoy",
+    "Guide_PC_C" = "Skye",
+    "Stealth_PC_C" = "Yoru",
+    "Rift_PC_C" = "Astra",
+    "Grenadier_PC_C" = "KAY/O",
+    "Deadeye_PC_C" = "Chamber",
+    "Sprinter_PC_C" = "Neon",
+    "BountyHunter_PC_C" = "Fade",
+    "Mage_PC_C" = "Harbor",
+    "AggroBot_PC_C" = "Gekko",
+    "Cable_PC_C" = "Deadlock",
+    "Sequoia_PC_C" = "Iso",
+}
+
+export const ranks: string[] = [
+    "Unranked",
+    "",
+    "",
+    "Iron_01",
+    "Iron_02",
+    "Iron_03",
+    "Bronze_01",
+    "Bronze_02",
+    "Bronze_03",
+    "Silver_01",
+    "Silver_02",
+    "Silver_03",
+    "Gold_01",
+    "Gold_02",
+    "Gold_03",
+    "Platinum_01",
+    "Platinum_02",
+    "Platinum_03",
+    "Diamond_01",
+    "Diamond_02",
+    "Diamond_03",
+    "Ascendant_1",
+    "Ascendant_2",
+    "Ascendant_3",
+    "Immortal_01",
+    "Immortal_02",
+    "Immortal_03",
+    "Radiant",
+]
