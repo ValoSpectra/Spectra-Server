@@ -1,8 +1,11 @@
 import WebSocket, {WebSocketServer} from "ws";
+import { DataTypes, isAuthedData } from "../model/eventData";
+import { MatchController } from "../controller/MatchController";
 
 export class WebsocketIncoming {
     wss: WebSocketServer;
     authedClients: ClientUser[] = [];
+    matchController = MatchController.getInstance();
 
     constructor() {
 
@@ -29,14 +32,20 @@ export class WebsocketIncoming {
                 console.log(`${user.name} encountered a Websocket error.`);
             });
 
-            ws.on('message', (msg) => {
-                console.log(`Received message ${msg} from ${user.name}`);
+            ws.once('message', (msg) => {
                 const json = JSON.parse(msg.toString());
-                if (json.type === "authenticate" && json.groupCode === "A") {
-                    ws.send(JSON.stringify({type: "authenticate", value: true}))
+                if (json.type === DataTypes.AUTH && this.matchController.isValidMatch(json)) {
+                    ws.send(JSON.stringify({type: DataTypes.AUTH, value: true}));
                     user.name = json.playerName;
-                    user.team = json.teamname;
+                    user.team = json.teamName;
                     this.authedClients.push(user);
+
+                    console.log(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
+                    this.onAuthSuccess(user);
+                } else {
+                    ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
+                    ws.close();
+                    console.log(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
                 }
             });
 
@@ -44,6 +53,16 @@ export class WebsocketIncoming {
 
         console.log(`InhouseTracker Server listening on port 5100!`);
     }
+
+    private onAuthSuccess(user: ClientUser) {
+        user.ws.on("message", (msg) => {
+            const data = JSON.parse(msg.toString());
+            if (isAuthedData(data)) {
+                this.matchController.receiveMatchData(data);
+            }
+        });
+    }
+
 }
 
 class ClientUser {
