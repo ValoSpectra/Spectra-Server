@@ -9,7 +9,7 @@ export function setupEventStream() {
     eventStreamSource.addEventListener("streamdeck", processStreamEvent);
 
     // Debug match setup
-    matchController.addMatch({type: "inhouse-tracker", name: "addMatch", groupCode: "A", team1: "TestTeam", team2: "Hooj"});
+    matchController.addMatch({type: "inhouse-tracker", name: "addMatch", groupCode: "A", team1: "TESTTEAM", team2: "Hooj"});
 }
 
 function processStreamEvent(event: any) {

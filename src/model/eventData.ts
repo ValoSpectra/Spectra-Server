@@ -1,4 +1,4 @@
-import { Agents } from "../util/valorantInternalTranslator";
+import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
 
 export interface IFormattedScoreboard {
     name: string,
@@ -6,7 +6,7 @@ export interface IFormattedScoreboard {
     agentInternal: keyof typeof Agents,
     isAlive: boolean,
     initialShield: number,
-    scoreboardWeaponInternal: string,
+    scoreboardWeaponInternal: keyof typeof WeaponsAndAbilities,
     currUltPoints: number,
     maxUltPoints: number,
     money: number,
@@ -18,7 +18,7 @@ export interface IFormattedScoreboard {
 export interface IFormattedKillfeed {
     attacker: string,
     victim: string,
-    weaponKillfeedInternal: string,
+    weaponKillfeedInternal: keyof typeof WeaponsAndAbilities,
     headshotKill: boolean,
     assists: string[],
     isTeamkill: boolean
@@ -32,18 +32,32 @@ export interface IFormattedRoster {
     rank: number,
 }
 
+export interface IFormattedRoundInfo {
+    roundPhase: string,
+    roundNumber: number
+}
+
+export interface IFormattedScore {
+    won: number,
+    lost: number
+}
+
 export interface IAuthedData {
     playerName: string,
     teamName: string,
     groupCode: string,
     type: string,
-    data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | boolean,
+    data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean,
 }
 
 export enum DataTypes {
     SCOREBOARD = "scoreboard",
     KILLFEED = "killfeed",
     ROSTER = "roster",
+    MATCH_START = "match_start",
+    ROUND_INFO = "round_info",
+    TEAM_IS_ATTACKER = "team_is_attacker",
+    SCORE = "score",
     AUTH = "authenticate"
 }
 

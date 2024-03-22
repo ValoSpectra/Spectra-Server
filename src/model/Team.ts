@@ -1,35 +1,16 @@
 import { Player } from "./Player";
-import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
+import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedScore, IFormattedScoreboard } from "./eventData";
 
 export class Team {
     public teamName;
-    public isAttacking: boolean = true;
+    public isAttacking: boolean = false;
+    public roundsWon: number = 0;
 
     private players: Record<string, Player> = {};
     private playerCount = 0;
 
     constructor(teamName: string) {
         this.teamName = teamName;
-        if (teamName == "TestTeam") {
-            this.receiveTeamSpecificData({
-                groupCode: "A", teamName: "TestTeam", playerName: "TestName", type: "roster", data: {
-                    name: 'Dunkel',
-                    tagline: 'Licht',
-                    agentInternal: '',
-                    locked: false,
-                    rank: 0
-                }
-            });
-            this.receiveTeamSpecificData({
-                groupCode: "A", teamName: "TestTeam", playerName: "TestName", type: "roster", data: {
-                    name: 'Dunkel',
-                    tagline: 'Licht',
-                    agentInternal: 'Gumshoe',
-                    locked: true,
-                    rank: 0
-                }
-            });
-        }
     }
 
     receiveTeamSpecificData(data: IAuthedData) {
@@ -40,12 +21,20 @@ export class Team {
                 break;
 
             case DataTypes.SCOREBOARD:
-
+                this.processScoreboardData(data.data as IFormattedScoreboard);
                 break;
 
             case DataTypes.KILLFEED:
-
+                this.processKillfeedData(data.data as IFormattedKillfeed);
                 break;
+
+            case DataTypes.TEAM_IS_ATTACKER:
+                this.isAttacking = data.data as boolean;
+
+            case DataTypes.SCORE:
+                this.roundsWon = (data.data as IFormattedScore).won;
+                break;
+
             default:
                 break;
         }
@@ -53,19 +42,27 @@ export class Team {
 
     private processRosterData(data: IFormattedRoster) {
         if (this.playerCount < 5) {
-            if (data.locked == false && data.agentInternal == "") {
+            if (data.locked == true) {
                 this.players[data.name] = new Player(data);
-                this.playerCount++;
-            } else if (data.locked == true) {
-                this.players[data.name].onAgentLock(data);
             }
         }
     }
 
     private processScoreboardData(data: IFormattedScoreboard) {
+        for (const player of Object.values(this.players)) {
+            if (player.name === data.name) {
+                player.updateFromScoreboard(data);
+                return;
+            }
+        }
     }
 
     private processKillfeedData(data: IFormattedKillfeed) {
-
+        for (const player of Object.values(this.players)) {
+            if (player.name === data.attacker) {
+                player.extractKillfeedInfo(data);
+                return;
+            }
+        }
     }
 }
