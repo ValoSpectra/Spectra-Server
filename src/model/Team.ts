@@ -44,6 +44,7 @@ export class Team {
         if (this.playerCount < 5) {
             if (data.locked == true) {
                 this.players[data.name] = new Player(data);
+                this.playerCount++;
             }
         }
     }

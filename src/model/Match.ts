@@ -1,6 +1,7 @@
 import { Team } from "./Team";
 import { DataTypes, IAuthedData, IFormattedRoundInfo } from "./eventData";
 
+
 export class Match {
     public groupCode;
     public isRanked: boolean = false;
