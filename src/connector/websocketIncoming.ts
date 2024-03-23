@@ -1,6 +1,8 @@
 import WebSocket, {WebSocketServer} from "ws";
 import { DataTypes, isAuthedData } from "../model/eventData";
 import { MatchController } from "../controller/MatchController";
+import logging from "../util/Logging";
+const Log = logging("WebsocketIncoming");
 
 export class WebsocketIncoming {
     wss: WebSocketServer;
@@ -29,7 +31,7 @@ export class WebsocketIncoming {
             const user = new ClientUser("New User", "Unknown Team", ws)
 
             ws.on('error', (e) => {
-                console.log(`${user.name} encountered a Websocket error.`);
+                Log.info(`${user.name} encountered a Websocket error.`);
             });
 
             ws.once('message', (msg) => {
@@ -40,18 +42,18 @@ export class WebsocketIncoming {
                     user.team = json.teamName;
                     this.authedClients.push(user);
 
-                    console.log(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
+                    Log.info(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
                     this.onAuthSuccess(user);
                 } else {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
                     ws.close();
-                    console.log(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
+                    Log.info(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
                 }
             });
 
         });
 
-        console.log(`InhouseTracker Server listening on port 5100!`);
+        Log.info(`InhouseTracker Server listening on port 5100!`);
     }
 
     private onAuthSuccess(user: ClientUser) {

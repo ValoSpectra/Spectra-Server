@@ -1,7 +1,8 @@
 import { WebSocket } from 'ws';
 import { DataTypes, IFormattedData } from './model/eventData';
 import { readFileSync } from "fs";
-import { resolve } from 'path';
+import logging from "./util/Logging";
+const Log = logging("Replay");
 
 const INGEST_SERVER_URL = "ws://localhost:5100/ingest";
 const REPLAY_GAME = "customGameTest.json";
@@ -39,12 +40,12 @@ class ConnectorService {
 
                 if (json.type === DataTypes.AUTH) {
                     if (json.value === true) {
-                        console.log('Authentication successful!');
+                        Log.info('Authentication successful!');
                         this.enabled = true;
                         this.websocketSetup();
                         resolve();
                     } else {
-                        console.log('Authentication failed!');
+                        Log.info('Authentication failed!');
                         this.enabled = false;
                         this.ws?.terminate();
                         reject();
@@ -53,11 +54,11 @@ class ConnectorService {
             });
 
             this.ws.on('close', () => {
-                console.log('Connection to ingest server closed');
+                Log.info('Connection to ingest server closed');
                 if (this.unreachable === true) {
-                    console.log(`Inhouse Tracker | Connection failed, server not reachable`);
+                    Log.info(`Inhouse Tracker | Connection failed, server not reachable`);
                 } else {
-                    console.log(`Inhouse Tracker | Connection closed`);
+                    Log.info(`Inhouse Tracker | Connection closed`);
                 }
                 this.enabled = false;
                 this.ws?.terminate();
@@ -65,14 +66,14 @@ class ConnectorService {
             });
 
             this.ws.on('error', (e: any) => {
-                console.log('Failed connection to ingest server - is it up?');
+                Log.info('Failed connection to ingest server - is it up?');
                 if (e.code === "ECONNREFUSED") {
-                    console.log(`Inhouse Tracker | Connection failed, server not reachable`);
+                    Log.info(`Inhouse Tracker | Connection failed, server not reachable`);
                     this.unreachable = true;
                 } else {
-                    console.log(`Inhouse Tracker | Connection failed`);
+                    Log.info(`Inhouse Tracker | Connection failed`);
                 }
-                console.log(e);
+                Log.info(e);
                 reject();
             });
         });
@@ -82,7 +83,7 @@ class ConnectorService {
     private websocketSetup() {
         this.ws.on('message', (msg) => {
             const json = JSON.parse(msg.toString());
-            console.log(json);
+            Log.info(json);
         });
     }
 

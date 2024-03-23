@@ -1,5 +1,7 @@
 import { Player } from "./Player";
 import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedScore, IFormattedScoreboard } from "./eventData";
+import logging from "../util/Logging";
+const Log = logging("Team");
 
 export class Team {
     public teamName;

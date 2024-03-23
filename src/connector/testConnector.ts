@@ -1,5 +1,7 @@
 import { compare } from "deep-diff-patcher";
 import { Match } from "../model/Match";
+import logging from "../util/Logging";
+const Log = logging("TestConnector");
 
 let oldMatchData: Match;
 let trackedMatch: Match;
@@ -15,7 +17,7 @@ export function testDiff(match: Match) {
 function startTimers() {
     setInterval(() => {
         const diff = compare(oldMatchData, trackedMatch);
-        console.log(diff);
+        Log.info(diff);
         oldMatchData = structuredClone(trackedMatch);
     }, 5000)
 }

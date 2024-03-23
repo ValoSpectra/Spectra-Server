@@ -1,6 +1,8 @@
 import { testDiff } from "../connector/testConnector";
 import { Match } from "../model/Match";
 import { IAuthedData, isAuthedData } from "../model/eventData";
+import logging from "../util/Logging";
+const Log = logging("MatchController");
 
 export class MatchController {
     private static instance: MatchController;
@@ -19,13 +21,13 @@ export class MatchController {
         this.matches[data.groupCode] = newMatch;
         testDiff(newMatch);
 
-        console.log(`New match "${newMatch.groupCode}" registered!`);
+        Log.info(`New match "${newMatch.groupCode}" registered!`);
     }
     
     removeMatch(data: any) {
         if (this.matches[data.groupCode]) {
             delete this.matches[data.groupCode];
-            console.log(`Removed match ${data.groupCode}!`);
+            Log.info(`Removed match ${data.groupCode}!`);
         }
     }
 
@@ -42,7 +44,7 @@ export class MatchController {
         const trackedMatch = this.matches[data.groupCode];
         if (trackedMatch == null) {
             // How did we even get here?
-            console.log(`Received match data with invalid game "${data.groupCode}"`);
+            Log.info(`Received match data with invalid game "${data.groupCode}"`);
             return;
         }
 

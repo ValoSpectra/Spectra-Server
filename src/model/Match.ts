@@ -1,5 +1,7 @@
 import { Team } from "./Team";
 import { DataTypes, IAuthedData, IFormattedRoundInfo } from "./eventData";
+import logging from "../util/Logging";
+const Log = logging("Match");
 
 
 export class Match {
@@ -62,7 +64,7 @@ export class Match {
         }
 
         if (correctTeam == null) {
-            console.log(`Received match data with invalid team "${data.teamName}"`);
+            Log.info(`Received match data with invalid team "${data.teamName}"`);
             return;
         }
 

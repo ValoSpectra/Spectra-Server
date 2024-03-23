@@ -1,5 +1,7 @@
 import { Agents, WeaponsAndAbilities, ranks } from "../util/valorantInternalTranslator";
 import { IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
+import logging from "../util/Logging";
+const Log = logging("Player");
 
 type ValueOf<T> = T[keyof T];
 

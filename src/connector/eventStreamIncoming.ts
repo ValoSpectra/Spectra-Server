@@ -1,11 +1,13 @@
 import { MatchController } from "../controller/MatchController";
+import logging from "../util/Logging";
+const Log = logging("EventstreamIncoming");
 
 var HoojEventSource = require('eventsource');
 let matchController = MatchController.getInstance();
 
 export function setupEventStream() {
     const eventStreamSource = new HoojEventSource("http://overlay.localhost:3000/stream/?channel=events", { https: { rejectUnauthorized: false } });
-    eventStreamSource.onerror = (err: any) => { console.log(err); };
+    eventStreamSource.onerror = (err: any) => { Log.info(err); };
     eventStreamSource.addEventListener("streamdeck", processStreamEvent);
 
     // Debug match setup
