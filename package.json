@@ -5,7 +5,8 @@
   "private": true,
   "main": "",
   "scripts": {
-    "dev": "nodemon ./src/index.ts"
+    "dev": "nodemon ./src/index.ts",
+    "replay": "ts-node ./src/replay.ts"
   },
   "author": "DarkView",
   "license": "GPL-3.0-only",

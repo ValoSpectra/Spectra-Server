@@ -50,6 +50,11 @@ export interface IAuthedData {
     data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean,
 }
 
+export interface IFormattedData {
+    type: string,
+    data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean,
+}
+
 export enum DataTypes {
     SCOREBOARD = "scoreboard",
     KILLFEED = "killfeed",
