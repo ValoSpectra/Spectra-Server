@@ -39,15 +39,15 @@ export class WebsocketIncoming {
                 if (json.type === DataTypes.AUTH && this.matchController.isValidMatch(json)) {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: true}));
                     user.name = json.playerName;
-                    user.team = json.teamName;
+                    user.team = json.teamName.toUpperCase();
                     this.authedClients.push(user);
 
-                    Log.info(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
+                    Log.info(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName.toUpperCase()}`);
                     this.onAuthSuccess(user);
                 } else {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
                     ws.close();
-                    Log.info(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName}`);
+                    Log.info(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName.toUpperCase()}`);
                 }
             });
 

@@ -17,7 +17,7 @@ export class MatchController {
     }
 
     addMatch(data: any ) {
-        const newMatch = new Match(data.groupCode, data.team1, data.team2, data.isRanked);
+        const newMatch = new Match(data.groupCode, data.team1.toUpperCase(), data.team2.toUpperCase(), data.isRanked);
         this.matches[data.groupCode] = newMatch;
         testDiff(newMatch);
 
@@ -34,7 +34,7 @@ export class MatchController {
     isValidMatch(json: any) {
         const match = this.matches[json.groupCode]
         if (match != null) {
-            return match.isValidTeam(json.teamName);
+            return match.isValidTeam(json.teamName.toUpperCase());
         }
 
         return false;

@@ -12,7 +12,7 @@ export class Team {
     private playerCount = 0;
 
     constructor(teamName: string) {
-        this.teamName = teamName;
+        this.teamName = teamName.toUpperCase();
     }
 
     receiveTeamSpecificData(data: IAuthedData) {

@@ -18,19 +18,19 @@ export class Match {
     constructor(groupCode: string, team1: string, team2: string, isRanked: boolean) {
         this.groupCode = groupCode;
 
-        const firstTeam = new Team(team1);
-        const secondTeam = new Team(team2);
+        const firstTeam = new Team(team1.toUpperCase());
+        const secondTeam = new Team(team2.toUpperCase());
 
         this.teams.push(firstTeam);
         this.teams.push(secondTeam);
 
-        this.globalEventsTeamName = team1;
+        this.globalEventsTeamName = team1.toUpperCase();
         this.isRanked = isRanked;
     }
 
     isValidTeam(teamName: string) {
         for (const team of this.teams) {
-            if (team.teamName === teamName) return true;
+            if (team.teamName === teamName.toUpperCase()) return true;
         }
         return false;
     }
@@ -38,7 +38,7 @@ export class Match {
     receiveMatchSpecificData(data: IAuthedData) {
 
         // Check for global events we only want once first
-        if (data.teamName == this.globalEventsTeamName) {
+        if (data.teamName.toUpperCase() == this.globalEventsTeamName) {
             if (data.type == DataTypes.MATCH_START) {
                 this.isRunning = true;
                 return;
@@ -58,13 +58,13 @@ export class Match {
 
         let correctTeam = null;
         for (const team of this.teams) {
-            if (team.teamName === data.teamName) {
+            if (team.teamName === data.teamName.toUpperCase()) {
                 correctTeam = team;
             }
         }
 
         if (correctTeam == null) {
-            Log.info(`Received match data with invalid team "${data.teamName}"`);
+            Log.info(`Received match data with invalid team "${data.teamName.toUpperCase()}"`);
             return;
         }
 
