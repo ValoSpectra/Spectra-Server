@@ -6,6 +6,7 @@ const Log = logging("Replay");
 
 const INGEST_SERVER_URL = "ws://localhost:5100/ingest";
 const REPLAY_GAME = "customGameTest.json";
+const DELAY_MS = 1000;
 
 
 class ConnectorService {
@@ -95,7 +96,7 @@ class ConnectorService {
     }
 
     sendToIngestNoOverhead(formatted: IFormattedData) {
-        if (this.enabled) {            
+        if (this.enabled) {
             this.ws.send(JSON.stringify(formatted));
         }
     }
@@ -107,9 +108,23 @@ conn.handleAuthProcess("Dunkel#Licht", "TestTeam", "A").then(() => {
     const game = readFileSync(REPLAY_GAME).toString();
     const gameObj: IFormattedData[] = JSON.parse(game);
 
-    gameObj.forEach(element => {
-        conn.sendToIngestNoOverhead(element);
-    });
+    if (DELAY_MS > 0) {
+
+        let idx = 0;
+        setInterval(() => {
+            const curr = gameObj[idx];
+            conn.sendToIngestNoOverhead(curr);
+            idx++;
+            Log.info(`Sent ${curr.type} event, waiting ${DELAY_MS}ms`);
+        }, DELAY_MS);
+
+    } else {
+
+        gameObj.forEach(element => {
+            conn.sendToIngestNoOverhead(element);
+        });
+
+    }
 
 });
 
