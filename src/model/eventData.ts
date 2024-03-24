@@ -28,6 +28,8 @@ export interface IFormattedRoster {
     name: string,
     tagline: string,
     agentInternal: keyof typeof Agents,
+    playerId: string,
+    position: number,
     locked: boolean,
     rank: number,
 }
@@ -47,7 +49,7 @@ export interface IAuthedData {
     teamName: string,
     groupCode: string,
     type: string,
-    data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean,
+    data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean | string,
 }
 
 export interface IFormattedData {
@@ -63,6 +65,8 @@ export enum DataTypes {
     ROUND_INFO = "round_info",
     TEAM_IS_ATTACKER = "team_is_attacker",
     SCORE = "score",
+    MAP = "map",
+    SPIKE_PLANTED = "spike_planted",
     AUTH = "authenticate"
 }
 

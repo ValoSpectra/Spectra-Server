@@ -3,10 +3,19 @@
        "playerName":"Dunkel#Licht",
        "teamName":"TestTeam",
        "groupCode":"A",
+       "type":"map",
+       "data": "Ascent"
+    },
+    {
+       "playerName":"Dunkel#Licht",
+       "teamName":"TestTeam",
+       "groupCode":"A",
        "type":"roster",
        "data":{
           "name":"Dunkel",
           "tagline":"Licht",
+          "position": 0,
+          "playerId": "lorem",
           "agentInternal":"",
           "locked":false,
           "rank":0
@@ -20,6 +29,8 @@
        "data":{
           "name":"Chief Sosa",
           "tagline":"300yo",
+          "position": 1,
+          "playerId": "ipsum",
           "agentInternal":"",
           "locked":false,
           "rank":0
@@ -33,6 +44,8 @@
        "data":{
           "name":"Chief Sosa",
           "tagline":"300yo",
+          "position": 1,
+          "playerId": "ipsum",
           "agentInternal":"Wraith",
           "locked":true,
           "rank":0
@@ -46,6 +59,8 @@
        "data":{
           "name":"Dunkel",
           "tagline":"Licht",
+          "position": 0,
+          "playerId": "lorem",
           "agentInternal":"Gumshoe",
           "locked":false,
           "rank":0
@@ -59,6 +74,8 @@
        "data":{
           "name":"Dunkel",
           "tagline":"Licht",
+          "position": 0,
+          "playerId": "lorem",
           "agentInternal":"Gumshoe",
           "locked":true,
           "rank":0

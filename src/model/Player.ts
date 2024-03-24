@@ -8,41 +8,53 @@ type ValueOf<T> = T[keyof T];
 export class Player {
     public name: string;
     public tagline: string;
-    private agentInternal: string;
-    public agentProper: ValueOf<Agents>;
-    public rankName: string;
-
-    public isAlive: boolean = true;
-
-    public kills: number = 0;
-    public deaths: number = 0;
-    public assists: number = 0;
-    public kdRatio: number = 0;
-
-    public currUltPoints: number = 0;
-    public maxUltPoints: number = 999;
-    public ultReady: boolean = false;
+    public playerId: string;
     
-    public initialShield: number = 0;
-    public money: number = 0;
-    public highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["knife"];
+    private position: number;
+    private locked: boolean = false;
+    private agentInternal: string = "";
+    private agentProper: ValueOf<Agents> = "";
+    private rankName: string;
+
+    private isAlive: boolean = true;
+
+    private kills: number = 0;
+    private deaths: number = 0;
+    private assists: number = 0;
+    private kdRatio: number = 0;
+
+    private currUltPoints: number = 0;
+    private maxUltPoints: number = 999;
+    private ultReady: boolean = false;
+    
+    private initialShield: number = 0;
+    private money: number = 0;
+    private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["knife"];
 
     // Data extrapolated from Killfeed
-    public teamkills: number = 0;
-    public headshotkills: number = 0;
-    public headshotRatio: number = 0;
+    private teamkills: number = 0;
+    private headshotkills: number = 0;
+    private headshotRatio: number = 0;
 
-    public killsByWeaponsAndAbilities: Record<string, number> = {};
-    public killsOnEnemyPlayer: Record<string, number> = {};
-    public killsOnTeammatePlayer: Record<string, number> = {};
-    public assistsFromTeammate: Record<string, number> = {};
+    private killsByWeaponsAndAbilities: Record<string, number> = {};
+    private killsOnEnemyPlayer: Record<string, number> = {};
+    private killsOnTeammatePlayer: Record<string, number> = {};
+    private assistsFromTeammate: Record<string, number> = {};
 
     constructor (data: IFormattedRoster) {
         this.name = data.name;
         this.tagline = data.tagline;
+        this.playerId = data.playerId;
+        this.position = data.position;
+        this.rankName = ranks[data.rank];
+    }
+
+    public onRosterUpdate(data: IFormattedRoster) {
+        this.name = data.name;
+        this.tagline = data.tagline;
         this.agentInternal = data.agentInternal;
         this.agentProper = Agents[data.agentInternal];
-        this.rankName = ranks[data.rank];
+        this.locked = data.locked;
     }
 
     public updateFromScoreboard(data: IFormattedScoreboard) {

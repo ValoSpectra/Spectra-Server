@@ -43,11 +43,13 @@ export class Team {
     }
 
     private processRosterData(data: IFormattedRoster) {
-        if (this.playerCount < 5) {
-            if (data.locked == true) {
-                this.players[data.name] = new Player(data);
+        if (data.agentInternal == "") {
+            if (this.playerCount < 5) {
+                this.players[data.playerId] = new Player(data);
                 this.playerCount++;
             }
+        } else {
+            this.players[data.playerId].onRosterUpdate(data);
         }
     }
 

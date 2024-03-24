@@ -14,6 +14,8 @@ export class Match {
 
     private teams: Team[] = [];
     private globalEventsTeamName: string = "";
+    private map: string = "";
+    private spikePlanted = false;
 
     constructor(groupCode: string, team1: string, team2: string, isRanked: boolean) {
         this.groupCode = groupCode;
@@ -46,12 +48,22 @@ export class Match {
                 this.roundNumber = (data.data as IFormattedRoundInfo).roundNumber;
                 this.roundPhase = (data.data as IFormattedRoundInfo).roundPhase;
 
+                if (this.roundPhase == "shopping") {
+                    this.spikePlanted = false;
+                }
+
                 if ((this.roundNumber == 13 || this.roundNumber >= 25) && this.roundPhase == "shopping") {
                     for (const team of this.teams) {
                         team.isAttacking = !team.isAttacking;
                     }
                 }
 
+                return;
+            } else if (data.type === DataTypes.MAP) {
+                this.map = data.data as string;
+                return;
+            } else if (data.type === DataTypes.SPIKE_PLANTED) {
+                this.spikePlanted = true;
                 return;
             }
         }
