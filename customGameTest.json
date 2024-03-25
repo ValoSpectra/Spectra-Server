@@ -42,9 +42,54 @@
        "groupCode":"A",
        "type":"roster",
        "data":{
+          "name":"Three",
+          "tagline":"Three",
+          "position": 2,
+          "playerId": "dolor",
+          "agentInternal":"",
+          "locked":false,
+          "rank":0
+       }
+    },
+    {
+       "playerName":"Dunkel#Licht",
+       "teamName":"TestTeam",
+       "groupCode":"A",
+       "type":"roster",
+       "data":{
+          "name":"Four",
+          "tagline":"Four",
+          "position": 3,
+          "playerId": "sit",
+          "agentInternal":"",
+          "locked":false,
+          "rank":0
+       }
+    },
+    {
+       "playerName":"Dunkel#Licht",
+       "teamName":"TestTeam",
+       "groupCode":"A",
+       "type":"roster",
+       "data":{
+          "name":"Five",
+          "tagline":"Five",
+          "position": 4,
+          "playerId": "amet",
+          "agentInternal":"",
+          "locked":false,
+          "rank":0
+       }
+    },
+    {
+       "playerName":"Dunkel#Licht",
+       "teamName":"TestTeam",
+       "groupCode":"A",
+       "type":"roster",
+       "data":{
           "name":"Chief Sosa",
           "tagline":"300yo",
-          "position": 1,
+          "position": 5,
           "playerId": "ipsum",
           "agentInternal":"Wraith",
           "locked":true,

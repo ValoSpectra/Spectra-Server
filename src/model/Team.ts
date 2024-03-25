@@ -8,7 +8,7 @@ export class Team {
     public isAttacking: boolean = false;
     public roundsWon: number = 0;
 
-    private players: Record<string, Player> = {};
+    private players: Player[] = [];
     private playerCount = 0;
 
     constructor(teamName: string) {
@@ -45,11 +45,16 @@ export class Team {
     private processRosterData(data: IFormattedRoster) {
         if (data.agentInternal == "") {
             if (this.playerCount < 5) {
-                this.players[data.playerId] = new Player(data);
+                this.players.push(new Player(data));
                 this.playerCount++;
             }
         } else {
-            this.players[data.playerId].onRosterUpdate(data);
+            for (const player of this.players) {
+                if (player.playerId === data.playerId) {
+                    player.onRosterUpdate(data);
+                    break;
+                }
+            }
         }
     }
 

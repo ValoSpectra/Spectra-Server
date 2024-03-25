@@ -1,6 +1,7 @@
 import { Team } from "./Team";
 import { DataTypes, IAuthedData, IFormattedRoundInfo } from "./eventData";
 import logging from "../util/Logging";
+import { sendMatchToEventstream } from "../connector/eventStreamOutgoing";
 const Log = logging("Match");
 
 
@@ -28,6 +29,14 @@ export class Match {
 
         this.globalEventsTeamName = team1.toUpperCase();
         this.isRanked = isRanked;
+
+        this.startLoop();
+    }
+
+    startLoop() {
+        setInterval(() => {
+            sendMatchToEventstream(this);
+        }, 1500);
     }
 
     isValidTeam(teamName: string) {
