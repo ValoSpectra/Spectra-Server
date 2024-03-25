@@ -5,8 +5,12 @@
   "private": true,
   "main": "",
   "scripts": {
+    "start": "npm run dev",
+    "start_single": "ts-node ./src/index.ts", 
     "dev": "nodemon ./src/index.ts",
-    "replay": "ts-node ./src/replay.ts",
+    "replay_instant": "ts-node ./src/replay.ts -delay 0",
+    "replay_delay": "ts-node ./src/replay.ts -delay 500",
+    "replay_file": "npm run replay_instant -- -game customGameTest.replay",
     "build": "tsc"
   },
   "author": "DarkView",

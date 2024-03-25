@@ -2,12 +2,29 @@ import { WebSocket } from 'ws';
 import { DataTypes, IFormattedData } from './model/eventData';
 import { readFileSync } from "fs";
 import logging from "./util/Logging";
-const Log = logging("Replay");
+const Log = logging("Replay").level(1);
 
 const INGEST_SERVER_URL = "ws://localhost:5100/ingest";
-const REPLAY_GAME = "customGameTest.json";
-const DELAY_MS = 1000;
+let REPLAY_GAME = "customGameTest.replay";
+let DELAY_MS = 1000;
 
+const args = process.argv;
+for (let i = 0; i < args.length; i++) {
+    let arg = args[i];
+    let logString = `Parameter ${arg}`;
+
+    switch(arg) {
+        case "-delay":
+            DELAY_MS = parseInt(args[++i]);
+            logString += ` = ${DELAY_MS}`;
+            break;
+        case "-game":
+            REPLAY_GAME = args[++i];
+            logString += ` = ${REPLAY_GAME}`;
+            break;
+    }
+    Log.debug(logString);
+}
 
 class ConnectorService {
     private PLAYER_NAME = "";
@@ -100,19 +117,38 @@ class ConnectorService {
             this.ws.send(JSON.stringify(formatted));
         }
     }
+
+    close() {
+        if (this.enabled) {
+            this.ws.close();
+            this.enabled = false;
+        }
+    }
 }
 
 const conn = ConnectorService.getInstance();
 conn.handleAuthProcess("Dunkel#Licht", "TestTeam", "A").then(() => {
 
-    const game = readFileSync(REPLAY_GAME).toString();
-    const gameObj: IFormattedData[] = JSON.parse(game);
+    const replayContent = readFileSync(REPLAY_GAME).toString();
+    const replayObj = JSON.parse(`[${replayContent}]`);
+    const replayHeader = replayObj.shift();
+    const gameObj: IFormattedData[] = replayObj;
+
+    Log.info(`Loaded replay file ${REPLAY_GAME}`);
+    Log.info("Header info is:");
+    Log.info(replayHeader);
 
     if (DELAY_MS > 0) {
 
         let idx = 0;
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             const curr = gameObj[idx];
+            if (curr == null) {
+                //exit condition
+                clearInterval(intervalId);
+                finished();
+                return;
+            }
             conn.sendToIngestNoOverhead(curr);
             idx++;
             Log.info(`Sent ${curr.type} event, waiting ${DELAY_MS}ms`);
@@ -123,9 +159,13 @@ conn.handleAuthProcess("Dunkel#Licht", "TestTeam", "A").then(() => {
         gameObj.forEach(element => {
             conn.sendToIngestNoOverhead(element);
         });
+        finished();
 
     }
 
 });
 
-
+function finished() {
+    Log.info("Replay finished");
+    conn.close();
+}

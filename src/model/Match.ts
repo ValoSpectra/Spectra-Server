@@ -2,6 +2,7 @@ import { Team } from "./Team";
 import { DataTypes, IAuthedData, IFormattedRoundInfo } from "./eventData";
 import logging from "../util/Logging";
 import { sendMatchToEventstream } from "../connector/eventStreamOutgoing";
+import { ReplayLogging } from "../util/ReplayLogging";
 const Log = logging("Match");
 
 
@@ -18,8 +19,12 @@ export class Match {
     private map: string = "";
     private spikePlanted = false;
 
+    private replayLog: ReplayLogging;
+
     constructor(groupCode: string, team1: string, team2: string, isRanked: boolean) {
         this.groupCode = groupCode;
+
+        this.replayLog = new ReplayLogging(this.groupCode);
 
         const firstTeam = new Team(team1.toUpperCase());
         const secondTeam = new Team(team2.toUpperCase());
@@ -47,6 +52,7 @@ export class Match {
     }
 
     receiveMatchSpecificData(data: IAuthedData) {
+        this.replayLog.write(data);
 
         // Check for global events we only want once first
         if (data.teamName.toUpperCase() == this.globalEventsTeamName) {

@@ -3,7 +3,8 @@ import fs from "fs";
 
 class Logging {
 
-    public static logLevel: number = 2;
+    public static globalLogLevel: number = 2;
+    public static forceGlobalLogLevel = false;
     public static writeFile: boolean = false;
 
     private static writeStream: fs.WriteStream;
@@ -61,9 +62,19 @@ class Logging {
     }
 
     private name: string;
+    private localLogLevel: number;
 
     public constructor(name: string) {
         this.name = name;
+        this.localLogLevel = Logging.globalLogLevel;
+    }
+
+    public level(level: number): Logging {
+        if (level <= Logging.globalLogLevel 
+            && !Logging.forceGlobalLogLevel) {
+            this.localLogLevel = level;
+        }
+        return this;
     }
 
     private log(data: any, color: string) {
@@ -79,19 +90,19 @@ class Logging {
     }
 
     info(data: any) {
-        if (Logging.logLevel >= 1)
+        if (this.localLogLevel >= 1)
             this.log(data, Logging.colorInfo);
         return data;
     }
 
     debug(data: any) {
-        if (Logging.logLevel >= 2)
+        if (this.localLogLevel >= 2)
             this.log(data, Logging.colorDebug);
         return data;
     }
 
     error(data: any) {
-        if (Logging.logLevel >= 0)
+        if (this.localLogLevel >= 0)
             this.log(data, Logging.colorError);
         return data;
     }

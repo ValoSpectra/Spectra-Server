@@ -1,4 +1,3 @@
-import { testDiff } from "../connector/testConnector";
 import { Match } from "../model/Match";
 import { IAuthedData, isAuthedData } from "../model/eventData";
 import logging from "../util/Logging";
@@ -19,7 +18,6 @@ export class MatchController {
     addMatch(data: any ) {
         const newMatch = new Match(data.groupCode, data.team1.toUpperCase(), data.team2.toUpperCase(), data.isRanked);
         this.matches[data.groupCode] = newMatch;
-        testDiff(newMatch);
 
         Log.info(`New match "${newMatch.groupCode}" registered!`);
     }
