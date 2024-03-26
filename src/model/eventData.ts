@@ -49,6 +49,7 @@ export interface IAuthedData {
     teamName: string,
     groupCode: string,
     type: string,
+    timestamp: number,
     data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean | string,
 }
 
