@@ -154,6 +154,25 @@ export enum Agents {
     "Sequoia" = "Iso",
 }
 
+export enum Maps {
+    "Triad" = "Haven",
+    "Duality" = "Bind",
+    "Bonsai" = "Split",
+    "Ascent" = "Ascent",
+    "Port" = "Icebox",
+    "Foxtrot" = "Breeze",
+    "Canyon" = "Fracture",
+    "Pitt" = "Pearl",
+    "Jam" = "Lotus",
+    "Juliett" = "Sunset",
+    "Range" = "Practice Range",
+    "HURM_Alley" = "District",
+    "HURM_Yard" = "Piazza ",
+    "HURM_Bowl" = "Kasbah",
+    "HURM_Helix" = "Drift",
+
+}
+
 export const ranks: string[] = [
     "Unranked",
     "",
