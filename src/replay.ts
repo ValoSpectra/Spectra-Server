@@ -1,12 +1,16 @@
 import { WebSocket } from 'ws';
-import { DataTypes, IFormattedData } from './model/eventData';
+import { DataTypes, IAuthedData, IFormattedData } from './model/eventData';
 import { readFileSync } from "fs";
 import logging from "./util/Logging";
-const Log = logging("Replay").level(1);
+const Log = logging("Replay").level(2);
 
 const INGEST_SERVER_URL = "ws://localhost:5100/ingest";
 let REPLAY_GAME = "customGameTest.replay";
 let DELAY_MS = 1000;
+let REPLAY_MODE = "instant"; //instant / delay / timestamps / manual
+
+
+let gameData: IAuthedData[] = [];
 
 const args = process.argv;
 for (let i = 0; i < args.length; i++) {
@@ -16,11 +20,20 @@ for (let i = 0; i < args.length; i++) {
     switch(arg) {
         case "-delay":
             DELAY_MS = parseInt(args[++i]);
+            REPLAY_MODE = "delay";
             logString += ` = ${DELAY_MS}`;
             break;
         case "-game":
             REPLAY_GAME = args[++i];
             logString += ` = ${REPLAY_GAME}`;
+            break;
+        case "-timestamps":
+            REPLAY_MODE = "timestamps";
+            Log.info("Using timestamps mode");
+            break;
+        case "-manual":
+            REPLAY_MODE = "manual";
+            Log.info("Using manual mode");
             break;
     }
     Log.debug(logString);
@@ -63,7 +76,7 @@ class ConnectorService {
                         this.websocketSetup();
                         resolve();
                     } else {
-                        Log.info('Authentication failed!');
+                        Log.error('Authentication failed!');
                         this.enabled = false;
                         this.ws?.terminate();
                         reject();
@@ -74,7 +87,7 @@ class ConnectorService {
             this.ws.on('close', () => {
                 Log.info('Connection to ingest server closed');
                 if (this.unreachable === true) {
-                    Log.info(`Inhouse Tracker | Connection failed, server not reachable`);
+                    Log.error(`Inhouse Tracker | Connection failed, server not reachable`);
                 } else {
                     Log.info(`Inhouse Tracker | Connection closed`);
                 }
@@ -84,12 +97,12 @@ class ConnectorService {
             });
 
             this.ws.on('error', (e: any) => {
-                Log.info('Failed connection to ingest server - is it up?');
+                Log.error('Failed connection to ingest server - is it up?');
                 if (e.code === "ECONNREFUSED") {
-                    Log.info(`Inhouse Tracker | Connection failed, server not reachable`);
+                    Log.error(`Inhouse Tracker | Connection failed, server not reachable`);
                     this.unreachable = true;
                 } else {
-                    Log.info(`Inhouse Tracker | Connection failed`);
+                    Log.error(`Inhouse Tracker | Connection failed`);
                 }
                 Log.info(e);
                 reject();
@@ -132,35 +145,40 @@ conn.handleAuthProcess("Dunkel#Licht", "TestTeam", "A").then(() => {
     const replayContent = readFileSync(REPLAY_GAME).toString();
     const replayObj = JSON.parse(`[${replayContent}]`);
     const replayHeader = replayObj.shift();
-    const gameObj: IFormattedData[] = replayObj;
+    gameData = replayObj;
 
     Log.info(`Loaded replay file ${REPLAY_GAME}`);
     Log.info("Header info is:");
     Log.info(replayHeader);
 
-    if (DELAY_MS > 0) {
-
-        let idx = 0;
-        const intervalId = setInterval(() => {
-            const curr = gameObj[idx];
-            if (curr == null) {
-                //exit condition
-                clearInterval(intervalId);
-                finished();
-                return;
-            }
-            conn.sendToIngestNoOverhead(curr);
-            idx++;
-            Log.info(`Sent ${curr.type} event, waiting ${DELAY_MS}ms`);
-        }, DELAY_MS);
-
-    } else {
-
-        gameObj.forEach(element => {
-            conn.sendToIngestNoOverhead(element);
-        });
-        finished();
-
+    switch(REPLAY_MODE) {
+        case "instant":
+            gameData.forEach(element => {
+                conn.sendToIngestNoOverhead(element as IFormattedData);
+            });
+            finished();
+            break;
+        case "delay":
+            let idx = 0;
+            const intervalId = setInterval(() => {
+                const curr = gameData[idx] as IFormattedData;
+                if (curr == null) {
+                    //exit condition
+                    clearInterval(intervalId);
+                    finished();
+                    return;
+                }
+                conn.sendToIngestNoOverhead(curr);
+                idx++;
+                Log.info(`Sent ${curr.type} event, waiting ${DELAY_MS}ms`);
+            }, DELAY_MS);
+            break;
+        case "timestamps":
+            sendWithTimestamp(0);
+            break;
+        case "manual":
+            sendWithManual();
+            break;
     }
 
 });
@@ -168,4 +186,55 @@ conn.handleAuthProcess("Dunkel#Licht", "TestTeam", "A").then(() => {
 function finished() {
     Log.info("Replay finished");
     conn.close();
+    process.exit(0);
+}
+
+function sendWithTimestamp(index: number) {
+
+    const obj = gameData[index];
+    conn.sendToIngestNoOverhead(obj as IFormattedData);
+
+    index++;
+    if (index >= gameData.length) {
+        finished();
+        return;
+    }
+    
+    const obj2 = gameData[index]; // new index
+    const delay = obj2.timestamp - obj.timestamp;
+    Log.info(`Sent ${obj.type} event, waiting ${delay}ms`);
+    setTimeout(() => {
+        sendWithTimestamp(index);
+    }, delay);
+
+}
+
+function sendWithManual() {
+
+    let index = 0;
+
+    Log.info("Ready to send");
+    process.stdin.on("data", (data) => {
+        let s = data.toString();
+        let amount = Number.parseInt(s);
+        if (!Number.isNaN(amount)) {
+            Log.info(`Sending the next ${amount} events`);
+            for (let i = 0; i  < amount; i++) {
+                conn.sendToIngestNoOverhead(gameData[index] as IFormattedData);
+                Log.info(`Sent ${gameData[index].type} event`);
+                index++;
+                if (index >= gameData.length) break;
+            }
+        }
+        else if (s == "\n") {
+            conn.sendToIngestNoOverhead(gameData[index] as IFormattedData);
+            Log.info(`Sent ${gameData[index].type} event`);
+            index++;
+        }
+        else if (s == "exit\n") {
+            finished();
+        }
+        if (index >= gameData.length) finished();
+    });
+
 }
