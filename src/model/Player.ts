@@ -68,7 +68,7 @@ export class Player {
         this.ultReady = this.currUltPoints >= this.maxUltPoints;
 
         this.money = data.money;
-        this.initialShield = data.initialShield * 25;
+        this.initialShield = Math.min(Math.max(data.initialShield * 25, 0), 50);
         this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal]
 
         this.agentInternal = data.agentInternal;

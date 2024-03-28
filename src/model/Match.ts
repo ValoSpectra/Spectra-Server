@@ -12,7 +12,7 @@ export class Match {
     public isRunning: boolean = false;
 
     public roundNumber: number = 0;
-    public roundPhase: string = "";
+    public roundPhase: string = "LOBBY";
 
     private teams: Team[] = [];
     private globalEventsTeamName: string = "";
