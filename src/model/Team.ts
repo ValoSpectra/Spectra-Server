@@ -7,6 +7,7 @@ export class Team {
     public teamName;
     public isAttacking: boolean = false;
     public roundsWon: number = 0;
+    private roundRecord: boolean[] = [];
 
     private players: Player[] = [];
     private playerCount = 0;
@@ -36,11 +37,22 @@ export class Team {
             case DataTypes.SCORE:
                 const newWon = (data.data as IFormattedScore).won;
                 if (newWon == null) break;
-                this.roundsWon = newWon;
+                if (newWon > this.roundsWon) {
+                    this.roundRecord.push(true);
+                    this.roundsWon = newWon;
+                } else {
+                    this.roundRecord.push(false);
+                }
                 break;
 
             default:
                 break;
+        }
+    }
+
+    resetRoundSpent() {
+        for (const player of this.players) {
+            player.moneySpent = 0;
         }
     }
 

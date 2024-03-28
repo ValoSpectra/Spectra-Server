@@ -9,7 +9,7 @@ let REPLAY_MODE = ReplayMode.INSTANT;
 let DELAY_MS = 500;
 
 const args = process.argv;
-for (let i = 0; i < args.length; i++) {
+for (let i = 2; i < args.length; i++) {
     let arg = args[i];
     let logString = `Parameter ${arg}`;
 

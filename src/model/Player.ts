@@ -28,6 +28,7 @@ export class Player {
     private ultReady: boolean = false;
     
     private initialShield: number = 0;
+    public moneySpent: number = 0;
     private money: number = 0;
     private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["knife"];
 
@@ -67,6 +68,9 @@ export class Player {
         this.maxUltPoints = data.maxUltPoints;
         this.ultReady = this.currUltPoints >= this.maxUltPoints;
 
+        if (data.money < this.money) {
+            this.moneySpent += this.money - data.money;
+        }
         this.money = data.money;
         this.initialShield = Math.min(Math.max(data.initialShield * 25, 0), 50);
         this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal]
