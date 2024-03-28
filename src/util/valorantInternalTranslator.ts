@@ -152,6 +152,9 @@ export enum Agents {
 
     "Sequoia_PC_C" = "Iso",
     "Sequoia" = "Iso",
+
+    "Smonk_PC_C" = "Clove",
+    "Smonk" = "Clove"
 }
 
 export enum Maps {
