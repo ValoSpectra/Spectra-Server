@@ -24,7 +24,7 @@ export class Player {
     private kdRatio: number = 0;
 
     private currUltPoints: number = 0;
-    private maxUltPoints: number = 999;
+    private maxUltPoints: number = 10;
     private ultReady: boolean = false;
     
     private initialShield: number = 0;

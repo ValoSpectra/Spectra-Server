@@ -34,7 +34,9 @@ export class Team {
                 this.isAttacking = data.data as boolean;
 
             case DataTypes.SCORE:
-                this.roundsWon = (data.data as IFormattedScore).won;
+                const newWon = (data.data as IFormattedScore).won;
+                if (newWon == null) break;
+                this.roundsWon = newWon;
                 break;
 
             default:

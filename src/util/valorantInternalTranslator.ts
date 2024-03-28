@@ -129,8 +129,8 @@ export enum Agents {
     "Rift_PC_C" = "Astra",
     "Rift" = "Astra",
 
-    "Grenadier_PC_C" = "KAY/O",
-    "Grenadier" = "KAY/O",
+    "Grenadier_PC_C" = "KAYO", // No / for overlay image reasons
+    "Grenadier" = "KAYO",
 
     "Deadeye_PC_C" = "Chamber",
     "Deadeye" = "Chamber",
