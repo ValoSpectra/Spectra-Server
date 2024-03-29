@@ -3,6 +3,7 @@ import { DataTypes, IAuthedData, IFormattedRoundInfo } from "./eventData";
 import logging from "../util/Logging";
 import { sendMatchToEventstream } from "../connector/eventStreamOutgoing";
 import { ReplayLogging } from "../util/ReplayLogging";
+import { Maps } from "../util/valorantInternalTranslator";
 const Log = logging("Match");
 
 
@@ -18,8 +19,11 @@ export class Match {
     private globalEventsTeamName: string = "";
     private map: string = "";
     private spikePlanted = false;
+    private spikeDetonated: boolean = false;
+    private spikeDefused: boolean = false;
 
     private replayLog: ReplayLogging;
+    public eventNumber: number = 0;
 
     constructor(groupCode: string, team1: string, team2: string, isRanked: boolean) {
         this.groupCode = groupCode;
@@ -35,13 +39,13 @@ export class Match {
         this.globalEventsTeamName = team1.toUpperCase();
         this.isRanked = isRanked;
 
-        this.startLoop();
+        this.startSendLoop();
     }
 
-    startLoop() {
+    startSendLoop() {
         setInterval(() => {
             sendMatchToEventstream(this);
-        }, 1500);
+        }, 1000);
     }
 
     isValidTeam(teamName: string) {
@@ -58,6 +62,7 @@ export class Match {
         if (data.teamName.toUpperCase() == this.globalEventsTeamName) {
             if (data.type == DataTypes.MATCH_START) {
                 this.isRunning = true;
+                this.eventNumber++;
                 return;
             } else if (data.type == DataTypes.ROUND_INFO) {
                 this.roundNumber = (data.data as IFormattedRoundInfo).roundNumber;
@@ -65,6 +70,14 @@ export class Match {
 
                 if (this.roundPhase == "shopping") {
                     this.spikePlanted = false;
+                    this.spikeDetonated = false;
+                    this.spikeDefused = false;
+                }
+
+                if (this.roundPhase == "shopping" && (this.roundNumber == 13 || this.roundNumber >= 25)) {
+                    for (const team of this.teams) {
+                        team.isAttacking = !team.isAttacking;
+                    }
                 }
 
                 if (this.roundPhase == "end") {
@@ -73,18 +86,33 @@ export class Match {
                     }
                 }
 
-                if ((this.roundNumber == 13 || this.roundNumber >= 25) && this.roundPhase == "shopping") {
-                    for (const team of this.teams) {
-                        team.isAttacking = !team.isAttacking;
-                    }
-                }
-
+                this.eventNumber++;
                 return;
             } else if (data.type === DataTypes.MAP) {
-                this.map = data.data as string;
+                this.map = Maps[data.data as keyof typeof Maps];
+                this.eventNumber++;
                 return;
             } else if (data.type === DataTypes.SPIKE_PLANTED) {
                 this.spikePlanted = true;
+                this.eventNumber++;
+                return;
+            } else if (data.type === DataTypes.SPIKE_DETONATED) {
+                this.spikeDetonated = true;
+                for (const team of this.teams) {
+                    if (team.isAttacking) {
+                        team.spikeDetonated();
+                    }
+                }
+                this.eventNumber++;
+                return;
+            } else if (data.type === DataTypes.SPIKE_DEFUSED) {
+                this.spikeDefused = true;
+                for (const team of this.teams) {
+                    if (!team.isAttacking) {
+                        team.spikeDefused();
+                    }
+                }
+                this.eventNumber++;
                 return;
             }
         }
@@ -101,6 +129,7 @@ export class Match {
             return;
         }
 
+        this.eventNumber++;
         correctTeam.receiveTeamSpecificData(data);
     }
 

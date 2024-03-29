@@ -22,14 +22,18 @@ export class Player {
     private deaths: number = 0;
     private assists: number = 0;
     private kdRatio: number = 0;
+    public killsThisRound: number = 0;
 
     private currUltPoints: number = 0;
     private maxUltPoints: number = 10;
     private ultReady: boolean = false;
     
-    private initialShield: number = 0;
-    public moneySpent: number = 0;
     private money: number = 0;
+    public moneySpent: number = 0;
+    public spentMoneyThisRound: boolean = false;
+    public loadoutValue: number = 0;
+
+    private initialShield: number = 0;
     private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["knife"];
 
     // Data extrapolated from Killfeed
@@ -59,6 +63,9 @@ export class Player {
     }
 
     public updateFromScoreboard(data: IFormattedScoreboard) {
+        if (data.kills > this.kills) {
+            this.killsThisRound += data.kills;
+        }
         this.kills = data.kills;
         this.deaths = data.deaths;
         this.assists = data.assists;
@@ -68,15 +75,23 @@ export class Player {
         this.maxUltPoints = data.maxUltPoints;
         this.ultReady = this.currUltPoints >= this.maxUltPoints;
 
-        if (data.money < this.money) {
+        if (!this.spentMoneyThisRound && data.money < this.money) {
+            this.spentMoneyThisRound = true;
+        }
+        if (this.spentMoneyThisRound && data.money != this.money) {
             this.moneySpent += this.money - data.money;
         }
         this.money = data.money;
+
         this.initialShield = Math.min(Math.max(data.initialShield * 25, 0), 50);
         this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal]
 
         this.agentInternal = data.agentInternal;
         this.agentProper = Agents[data.agentInternal];
+
+        if (!data.isAlive) {
+            this.loadoutValue = 0;
+        }
         this.isAlive = data.isAlive;
     }
 

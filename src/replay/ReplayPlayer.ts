@@ -59,6 +59,9 @@ export class ReplayPlayer {
     }
 
     private sendNextEvent(): boolean {
+        if (this.currentReplayIndex % 50 === 0) {
+            Log.info(`Current Event: ${this.currentReplayIndex}`);
+        }
         this.connector.sendReplayData(this.replayData[this.currentReplayIndex]);
         this.currentReplayIndex++;
         return this.currentReplayIndex < this.replayData.length;
@@ -118,6 +121,7 @@ export class ReplayPlayer {
             else if (!Number.isNaN(amount)) {
                 Log.info(`Sending the next ${amount} events`);
                 for (let i = 0; i < amount && (ready = this.sendNextEvent()); i++) {} //empty for body on purpose
+                Log.info(`Now on event ${this.currentReplayIndex}`);
             }
 
             if (!ready) {

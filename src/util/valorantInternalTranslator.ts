@@ -81,6 +81,28 @@ export enum WeaponsAndAbilities {
 
 }
 
+export enum WeaponCosts {
+    "Knife" = 0,
+    "Classic" = 0,
+    "Shorty" = 300,
+    "Frenzy" = 450,
+    "Ghost" = 500,
+    "Sheriff" = 800,
+    "Bucky" = 850,
+    "Judge" = 1850,
+    "Stinger" = 1100,
+    "Spectre" = 1600,
+    "Bulldog" = 2050,
+    "Guardian" = 2250,
+    "Phantom" = 2900,
+    "Vandal"= 2900,
+    "Marshal" = 950,
+    "Operator" = 4700,
+    "Outlaw" = 2400,
+    "Ares" = 1600,
+    "Odin" = 3200
+}
+
 export enum Agents {
     "" = "No Agent selected",
 
