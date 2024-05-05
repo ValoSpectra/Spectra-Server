@@ -29,6 +29,12 @@ export class MatchController {
         }
     }
 
+    setRanks(data: any) {
+        if (this.matches[data.groupCode] != null ) {
+            this.matches[data.groupCode]!.setRanks(data);
+        }
+    }
+
     isValidMatch(json: any) {
         const match = this.matches[json.groupCode]
         if (match != null) {

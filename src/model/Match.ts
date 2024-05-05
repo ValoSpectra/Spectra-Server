@@ -22,6 +22,8 @@ export class Match {
     private spikeDetonated: boolean = false;
     private spikeDefused: boolean = false;
 
+    public ranks: {team1: string[], team2: string[]} = {team1: [], team2: []};
+
     private replayLog: ReplayLogging;
     public eventNumber: number = 0;
 
@@ -53,6 +55,10 @@ export class Match {
             if (team.teamName === teamName.toUpperCase()) return true;
         }
         return false;
+    }
+
+    setRanks(data: any) {
+        this.ranks = data.ranks;
     }
 
     receiveMatchSpecificData(data: IAuthedData) {
