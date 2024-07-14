@@ -1,10 +1,13 @@
 import { Player } from "./Player";
 import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedScore, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
+import { AuthTeam } from "../connector/websocketIncoming";
 const Log = logging("Team");
 
 export class Team {
-    public teamName;
+    public teamName: string;
+    public teamTricode: string;
+    public teamUrl: string = "";
     public isAttacking: boolean = false;
     private hasHandledTeam: boolean = false;
     public roundsWon: number = 0;
@@ -15,8 +18,10 @@ export class Team {
     private players: Player[] = [];
     private playerCount = 0;
 
-    constructor(teamName: string) {
-        this.teamName = teamName.toUpperCase();
+    constructor(team: AuthTeam) {
+        this.teamName = team.name;
+        this.teamTricode = team.tricode;
+        this.teamUrl = team.url;
     }
 
     receiveTeamSpecificData(data: IAuthedData) {
@@ -73,19 +78,22 @@ export class Team {
         this.spikeState = "defused";
     }
 
+    hasTeamMember(playerName: string): boolean {
+        return this.players.some(player => player.name === playerName);
+    }
+
     private processRosterData(data: IFormattedRoster) {
-        if (data.agentInternal == "") {
-            if (this.playerCount < 5) {
-                this.players.push(new Player(data));
-                this.playerCount++;
-            }
+        if (data.playerId !== "") return;
+        const correctPlayer = this.players.find(player => player.playerId === data.playerId);
+        
+        if (correctPlayer) {
+            correctPlayer.onRosterUpdate(data);
+            return;
+        } else if (this.playerCount < 5) {
+            this.players.push(new Player(data));
+            this.playerCount++;
         } else {
-            for (const player of this.players) {
-                if (player.playerId === data.playerId) {
-                    player.onRosterUpdate(data);
-                    break;
-                }
-            }
+            Log.error(`Received roster data for ${data.name} but team ${this.teamName} is full!`);
         }
     }
 

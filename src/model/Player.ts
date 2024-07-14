@@ -17,6 +17,7 @@ export class Player {
     private rankName: string;
 
     private isAlive: boolean = true;
+    private hasSpike: boolean = false;
 
     private kills: number = 0;
     private deaths: number = 0;
@@ -52,6 +53,9 @@ export class Player {
         this.playerId = data.playerId;
         this.position = data.position;
         this.rankName = ranks[data.rank];
+        this.agentInternal = data.agentInternal;
+        this.agentProper = Agents[data.agentInternal];
+        this.locked = data.locked;
     }
 
     public onRosterUpdate(data: IFormattedRoster) {
@@ -93,6 +97,7 @@ export class Player {
             this.loadoutValue = 0;
         }
         this.isAlive = data.isAlive;
+        this.hasSpike = data.hasSpike;
     }
 
     public extractKillfeedInfo(data: IFormattedKillfeed) {

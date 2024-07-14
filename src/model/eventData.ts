@@ -1,14 +1,17 @@
+import { AuthTeam } from "../connector/websocketIncoming";
 import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
 
 export interface IFormattedScoreboard {
     name: string,
     tagline: string,
+    startTeam: number,
     agentInternal: keyof typeof Agents,
     isAlive: boolean,
     initialShield: number,
     scoreboardWeaponInternal: keyof typeof WeaponsAndAbilities,
     currUltPoints: number,
     maxUltPoints: number,
+    hasSpike: boolean,
     money: number,
     kills: number,
     deaths: number,
@@ -27,6 +30,7 @@ export interface IFormattedKillfeed {
 export interface IFormattedRoster {
     name: string,
     tagline: string,
+    startTeam: number,
     agentInternal: keyof typeof Agents,
     playerId: string,
     position: number,
@@ -45,8 +49,7 @@ export interface IFormattedScore {
 }
 
 export interface IAuthedData {
-    playerName: string,
-    teamName: string,
+    obsName: string,
     groupCode: string,
     type: string,
     timestamp: number,
@@ -56,6 +59,13 @@ export interface IAuthedData {
 export interface IFormattedData {
     type: string,
     data: IFormattedScoreboard | IFormattedKillfeed | IFormattedRoster | IFormattedRoundInfo | IFormattedScore | boolean,
+}
+
+export interface IAUthenticationData {
+    obsName: string,
+    groupCode: string,
+    leftTeam: AuthTeam,
+    rightTeam: AuthTeam,
 }
 
 export enum DataTypes {

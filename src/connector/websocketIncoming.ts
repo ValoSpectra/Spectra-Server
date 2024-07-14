@@ -36,18 +36,18 @@ export class WebsocketIncoming {
 
             ws.once('message', (msg) => {
                 const json = JSON.parse(msg.toString());
-                if (json.type === DataTypes.AUTH && this.matchController.isValidMatch(json)) {
+                if (json.type === DataTypes.AUTH && this.matchController.createMatch(json)) {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: true}));
                     user.name = json.playerName;
-                    user.team = json.teamName.toUpperCase();
+                    user.groupCode = json.groupCode;
                     this.authedClients.push(user);
 
-                    Log.info(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName.toUpperCase()}`);
+                    Log.info(`Received VALID auth request from ${json.playerName}, using Group Code ${json.groupCode}`);
                     this.onAuthSuccess(user);
                 } else {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
                     ws.close();
-                    Log.info(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode} and Team name ${json.teamName.toUpperCase()}`);
+                    Log.info(`Received BAD auth request from ${json.playerName}, using Group Code ${json.groupCode}`);
                 }
             });
 
@@ -57,7 +57,7 @@ export class WebsocketIncoming {
     }
 
     private onAuthSuccess(user: ClientUser) {
-        user.ws.on("message", (msg) => {
+        user.ws.on("message", (msg: any) => {
             const data = JSON.parse(msg.toString());
             if (isAuthedData(data)) {
                 this.matchController.receiveMatchData(data);
@@ -69,12 +69,19 @@ export class WebsocketIncoming {
 
 class ClientUser {
     name: string;
-    team: string;
+    groupCode: string;
     ws: WebSocket;
     
-    constructor(name: string, team: string, ws: WebSocket) {
+    constructor(name: string, groupCode: string, ws: WebSocket) {
         this.name = name;
-        this.team = team;
+        this.groupCode = groupCode;
         this.ws = ws;
     }
+}
+
+
+export interface AuthTeam {
+    name: string,
+    tricode: string,
+    url: string
 }

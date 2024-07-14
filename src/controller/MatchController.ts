@@ -1,5 +1,5 @@
 import { Match } from "../model/Match";
-import { IAuthedData, isAuthedData } from "../model/eventData";
+import { IAuthedData, IAUthenticationData, isAuthedData } from "../model/eventData";
 import logging from "../util/Logging";
 const Log = logging("MatchController");
 
@@ -13,13 +13,6 @@ export class MatchController {
     public static getInstance(): MatchController{
         if (MatchController.instance == null) MatchController.instance = new MatchController();
         return MatchController.instance;
-    }
-
-    addMatch(data: any ) {
-        const newMatch = new Match(data.groupCode, data.team1.toUpperCase(), data.team2.toUpperCase(), data.isRanked);
-        this.matches[data.groupCode] = newMatch;
-
-        Log.info(`New match "${newMatch.groupCode}" registered!`);
     }
     
     removeMatch(data: any) {
@@ -35,13 +28,16 @@ export class MatchController {
         }
     }
 
-    isValidMatch(json: any) {
-        const match = this.matches[json.groupCode]
-        if (match != null) {
-            return match.isValidTeam(json.teamName.toUpperCase());
+    createMatch(data: IAUthenticationData) {
+        try {
+            const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
+            this.matches[data.groupCode] = newMatch;
+            Log.info(`New match "${newMatch.groupCode}" registered!`);
+            return true;
+        } catch (e) {
+            Log.info(`Failed to create match with group code ${data.groupCode}`);
+            return false;
         }
-
-        return false;
     }
 
     receiveMatchData(data: IAuthedData) {

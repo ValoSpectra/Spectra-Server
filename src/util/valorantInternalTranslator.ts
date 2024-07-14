@@ -180,6 +180,7 @@ export enum Agents {
 }
 
 export enum Maps {
+    "Infinity" = "Abyss",
     "Triad" = "Haven",
     "Duality" = "Bind",
     "Bonsai" = "Split",
