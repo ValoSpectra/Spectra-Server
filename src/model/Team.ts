@@ -116,7 +116,7 @@ export class Team {
             if (spikeState.detonated) {
                 this.roundRecord.push("detonated");
                 this.roundsWon++;
-            } else if (teamKills >= 5) {
+            } else if (teamKills >= 5 && spikeState.defused == false) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
             } else {
@@ -126,7 +126,7 @@ export class Team {
             if (spikeState.defused) {
                 this.roundRecord.push("defused");
                 this.roundsWon++;
-            } else if (teamKills >= 5) {
+            } else if (teamKills >= 5 && spikeState.detonated == false) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
             } else if (spikeState.detonated == false) {
