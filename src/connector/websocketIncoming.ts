@@ -42,7 +42,7 @@ export class WebsocketIncoming {
                     user.groupCode = json.groupCode;
                     this.authedClients.push(user);
 
-                    Log.info(`Received VALID auth request from ${json.obsName}, using Group Code ${json.groupCode}`);
+                    Log.info(`Received VALID auth request from ${json.obsName}, using Group Code ${json.groupCode} with teams ${json.leftTeam.name} and ${json.rightTeam.name}`);
                     this.onAuthSuccess(user);
                 } else {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
