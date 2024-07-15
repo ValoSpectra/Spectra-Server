@@ -53,7 +53,7 @@ const player = new ReplayPlayer(connector, REPLAY_MODE, DELAY_MS);
 
 player.loadReplayFile(REPLAY_FILE);
 const { playerName, teamName, gameCode } = player.getReplayHeader();
-connector.setAuthValues("Dunkel#Licht", "TestTeam", "A");
+connector.setAuthValues("Dunkel#Licht", "A", {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7"}, {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE"});
 connector.open().then(() => {
     player.play(() => {
         connector.close();

@@ -1,13 +1,15 @@
 import { DataTypes, IAuthedData, IFormattedData } from "../model/eventData";
 import { WebSocket } from "ws";
 import logging from "../util/Logging";
+import { AuthTeam } from "../connector/websocketIncoming";
 const Log = logging("ReplayConnectorService");
 
 export class ReplayConnectorService {
     
-    private playerName = "Replayuser#test";
-    private teamName = "TestTeam";
+    private obsName = "Replayuser#test";
     private groupCode = "A";
+    private leftTeam: AuthTeam = {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7"};
+    private rightTeam: AuthTeam = {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE"};
     private ingestServerUrl: string;
     private enabled = false;
     private unreachable = false;
@@ -17,10 +19,11 @@ export class ReplayConnectorService {
         this.ingestServerUrl = ingestServerUrl;
     }
 
-    public setAuthValues(playerName: string, teamName: string, groupCode: string) {
-        this.playerName = playerName;
-        this.teamName = teamName;
+    public setAuthValues(obsName: string, groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam) {
+        this.obsName = obsName;
         this.groupCode = groupCode;
+        this.leftTeam = leftTeam;
+        this.rightTeam = rightTeam;
     }
 
     public open(): Promise<void> {
@@ -43,9 +46,10 @@ export class ReplayConnectorService {
             this.ws.once('open', () => {
                 this.ws.send(JSON.stringify({ 
                     type: DataTypes.AUTH, 
-                    playerName: this.playerName, 
-                    teamName: this.teamName, 
-                    groupCode: this.groupCode 
+                    obsName: this.obsName, 
+                    groupCode: this.groupCode,
+                    leftTeam: this.leftTeam,
+                    rightTeam: this.rightTeam
                 }));
             });
             this.ws.once('message', (msg) => {
