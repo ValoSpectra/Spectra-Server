@@ -2,7 +2,10 @@ import { Player } from "./Player";
 import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedScore, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
+import { SpikeStates } from "./Match";
 const Log = logging("Team");
+
+type RecordType = "detonated" | "defused" | "kills" | "timeout" | "lost";
 
 export class Team {
     public teamName: string;
@@ -12,16 +15,16 @@ export class Team {
     private hasHandledTeam: boolean = false;
     public roundsWon: number = 0;
     private spentThisRound: number = 0;
-    private spikeState: "defused" | "detonated" | "" = "";
-    private roundRecord: string[] = [];
+    private roundRecord: RecordType[] = [];
 
     private players: Player[] = [];
     private playerCount = 0;
 
-    constructor(team: AuthTeam) {
+    constructor(team: AuthTeam, isAttackStart: boolean = false) {
         this.teamName = team.name;
         this.teamTricode = team.tricode;
         this.teamUrl = team.url;
+        this.isAttacking = isAttackStart;
     }
 
     receiveTeamSpecificData(data: IAuthedData) {
@@ -40,14 +43,14 @@ export class Team {
                 break;
 
             case DataTypes.TEAM_IS_ATTACKER:
-                if (!this.hasHandledTeam) {
-                    this.isAttacking = data.data as boolean;
-                    this.hasHandledTeam = true;
-                }
+                // if (!this.hasHandledTeam) {
+                //     this.isAttacking = data.data as boolean;
+                //     this.hasHandledTeam = true;
+                // }
                 break;
 
             case DataTypes.SCORE:
-                this.processScoreData(data.data as IFormattedScore);
+                // this.processScoreData(data.data as IFormattedScore);
                 break;
 
             default:
@@ -70,16 +73,12 @@ export class Team {
         return total;
     }
 
-    spikeDetonated() {
-        this.spikeState = "detonated";
-    }
-
-    spikeDefused() {
-        this.spikeState = "defused";
-    }
-
     hasTeamMember(playerName: string): boolean {
         return this.players.some(player => player.name === playerName);
+    }
+
+    switchSides() {
+        this.isAttacking = !this.isAttacking;
     }
 
     private processRosterData(data: IFormattedRoster) {
@@ -98,46 +97,70 @@ export class Team {
     }
 
     private processScoreboardData(data: IFormattedScoreboard) {
-        for (const player of Object.values(this.players)) {
-            if (player.name === data.name) {
-                player.updateFromScoreboard(data);
-                break;
-            }
-        }
+        const player = this.players.find(player => player.name === data.name);
+        if (!player) return;
+        player.updateFromScoreboard(data);
         this.spentThisRound = this.getSpentThisRound();
     }
 
     private processKillfeedData(data: IFormattedKillfeed) {
-        for (const player of Object.values(this.players)) {
-            if (player.name === data.attacker) {
-                player.extractKillfeedInfo(data);
-                return;
-            }
-        }
+        const player = this.players.find(player => player.name === data.attacker);
+        if (!player) return;
+        player.extractKillfeedInfo(data);
     }
 
-    private processScoreData(data: IFormattedScore) {
-        const newWon = data.won;
-        if (newWon == null) return;
+    processRoundEnd(spikeState: SpikeStates) {
+        const teamKills = this.teamKills();
 
-        if (newWon > this.roundsWon) {
-
-            const teamKills = this.teamKills();
-            if (this.spikeState !== "") {
-                this.roundRecord.push(this.spikeState);
+        if (this.isAttacking) {
+            if (spikeState.detonated) {
+                this.roundRecord.push("detonated");
+                this.roundsWon++;
             } else if (teamKills >= 5) {
                 this.roundRecord.push("kills");
+                this.roundsWon++;
             } else {
-                this.roundRecord.push("timeout");
+                this.roundRecord.push("lost");
             }
-            this.roundsWon = newWon;
-
         } else {
-            this.roundRecord.push("lost");
+            if (spikeState.defused) {
+                this.roundRecord.push("defused");
+                this.roundsWon++;
+            } else if (teamKills >= 5) {
+                this.roundRecord.push("kills");
+                this.roundsWon++;
+            } else if (spikeState.detonated == false) {
+                this.roundRecord.push("timeout");
+                this.roundsWon++;
+            } else {
+                this.roundRecord.push("lost");
+            }
         }
 
-        this.spikeState = "";
         this.resetTeamKills();
+
+        // SCORE DATA IS CURRENTLY BROKEN, WORKAROUND ABOVE
+        // const newWon = data.won;
+        // if (newWon == null) return;
+
+        // if (newWon > this.roundsWon) {
+
+        //     const teamKills = this.teamKills();
+        //     if (this.spikeState !== "") {
+        //         this.roundRecord.push(this.spikeState);
+        //     } else if (teamKills >= 5) {
+        //         this.roundRecord.push("kills");
+        //     } else {
+        //         this.roundRecord.push("timeout");
+        //     }
+        //     this.roundsWon = newWon;
+
+        // } else {
+        //     this.roundRecord.push("lost");
+        // }
+
+        // this.spikeState = "";
+        // this.resetTeamKills();
     }
 
     private teamKills(): number {

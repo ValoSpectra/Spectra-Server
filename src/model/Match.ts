@@ -1,5 +1,5 @@
 import { Team } from "./Team";
-import { DataTypes, IAuthedData, IFormattedRoster, IFormattedRoundInfo, IFormattedScoreboard } from "./eventData";
+import { DataTypes, IAuthedData, IFormattedRoster, IFormattedRoundInfo, IFormattedScore, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
 import { sendMatchToEventstream } from "../connector/eventStreamOutgoing";
 import { ReplayLogging } from "../util/ReplayLogging";
@@ -9,6 +9,9 @@ const Log = logging("Match");
 
 
 export class Match {
+    private switchRound = 13;
+    private firstOtRound = 25;
+
     public groupCode;
     public isRanked: boolean = false;
     public isRunning: boolean = false;
@@ -18,9 +21,7 @@ export class Match {
 
     private teams: Team[] = [];
     private map: string = "";
-    private spikePlanted = false;
-    private spikeDetonated: boolean = false;
-    private spikeDefused: boolean = false;
+    private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
 
     public ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
 
@@ -32,7 +33,7 @@ export class Match {
 
         this.replayLog = new ReplayLogging(this.groupCode);
 
-        const firstTeam = new Team(leftTeam);
+        const firstTeam = new Team(leftTeam, true);
         const secondTeam = new Team(rightTeam);
 
         this.teams.push(firstTeam);
@@ -73,19 +74,20 @@ export class Match {
             this.roundPhase = (data.data as IFormattedRoundInfo).roundPhase;
 
             if (this.roundPhase == "shopping") {
-                this.spikePlanted = false;
-                this.spikeDetonated = false;
-                this.spikeDefused = false;
-            }
+                this.spikeState.planted = false;
+                this.spikeState.detonated = false;
+                this.spikeState.defused = false;
 
-            if (this.roundPhase == "shopping" && (this.roundNumber == 13 || this.roundNumber >= 25)) {
-                for (const team of this.teams) {
-                    team.isAttacking = !team.isAttacking;
+                if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
+                    for (const team of this.teams) {
+                        team.switchSides();
+                    }
                 }
             }
 
             if (this.roundPhase == "end") {
                 for (const team of this.teams) {
+                    team.processRoundEnd(this.spikeState);
                     team.resetRoundSpent();
                 }
             }
@@ -97,25 +99,15 @@ export class Match {
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.SPIKE_PLANTED) {
-            this.spikePlanted = true;
+            this.spikeState.planted = true;
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.SPIKE_DETONATED) {
-            this.spikeDetonated = true;
-            for (const team of this.teams) {
-                if (team.isAttacking) {
-                    team.spikeDetonated();
-                }
-            }
+            this.spikeState.detonated = true;
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.SPIKE_DEFUSED) {
-            this.spikeDefused = true;
-            for (const team of this.teams) {
-                if (!team.isAttacking) {
-                    team.spikeDefused();
-                }
-            }
+            this.spikeState.defused = true;
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.KILLFEED) {
@@ -142,4 +134,10 @@ export class Match {
         correctTeam.receiveTeamSpecificData(data);
     }
 
+}
+
+export interface SpikeStates {
+    planted: boolean;
+    detonated: boolean;
+    defused: boolean;
 }

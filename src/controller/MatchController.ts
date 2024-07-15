@@ -1,10 +1,13 @@
 import { Match } from "../model/Match";
 import { IAuthedData, IAUthenticationData, isAuthedData } from "../model/eventData";
 import logging from "../util/Logging";
+import { RedisController } from "../util/RedisController";
 const Log = logging("MatchController");
 
 export class MatchController {
     private static instance: MatchController;
+    private redisCon = RedisController.getInstance();
+    private sendInterval: NodeJS.Timeout | null = null;
 
     private matches: Record<string, Match | null> = {};
 
@@ -32,6 +35,7 @@ export class MatchController {
         try {
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
             this.matches[data.groupCode] = newMatch;
+            this.setMatchToSend(data.groupCode);
             Log.info(`New match "${newMatch.groupCode}" registered!`);
             return true;
         } catch (e) {
@@ -50,6 +54,15 @@ export class MatchController {
         }
 
         trackedMatch.receiveMatchSpecificData(data)
+    }
+
+    setMatchToSend(groupCode: string) {
+        if (this.matches[groupCode] != null) {
+            if (this.sendInterval != null) clearInterval(this.sendInterval);
+            this.sendInterval = setInterval(() => {
+                this.redisCon.sendMatchToFrontend(this.matches[groupCode]!);
+            }, 100);
+        }
     }
 
 }
