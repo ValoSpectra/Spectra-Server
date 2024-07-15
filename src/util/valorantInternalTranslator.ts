@@ -180,7 +180,7 @@ export enum Agents {
 }
 
 export enum Maps {
-    "Infinity" = "Abyss",
+    "Infinityy" = "Abyss",
     "Triad" = "Haven",
     "Duality" = "Bind",
     "Bonsai" = "Split",
@@ -196,7 +196,6 @@ export enum Maps {
     "HURM_Yard" = "Piazza ",
     "HURM_Bowl" = "Kasbah",
     "HURM_Helix" = "Drift",
-
 }
 
 export const ranks: string[] = [

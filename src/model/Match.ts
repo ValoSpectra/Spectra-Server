@@ -1,7 +1,6 @@
 import { Team } from "./Team";
 import { DataTypes, IAuthedData, IFormattedRoster, IFormattedRoundInfo, IFormattedScore, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
-import { sendMatchToEventstream } from "../connector/eventStreamOutgoing";
 import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/valorantInternalTranslator";
 import { AuthTeam } from "../connector/websocketIncoming";
@@ -40,14 +39,6 @@ export class Match {
         this.teams.push(secondTeam);
 
         this.isRanked = isRanked;
-
-        this.startSendLoop();
-    }
-
-    startSendLoop() {
-        setInterval(() => {
-            sendMatchToEventstream(this);
-        }, 1000);
     }
 
     isValidTeam(teamName: string) {
