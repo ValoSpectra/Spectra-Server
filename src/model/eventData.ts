@@ -84,7 +84,7 @@ export enum DataTypes {
 }
 
 export function isAuthedData(data: object): data is IAuthedData {
-    if ("playerName" in data && "teamName" in data && "groupCode" in data && "type" in data && "data" in data) {
+    if ("obsName" in data && "groupCode" in data && "type" in data && "data" in data) {
         return true;
     }
     return false;
