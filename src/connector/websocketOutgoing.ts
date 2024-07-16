@@ -1,25 +1,20 @@
-import WebSocket, { WebSocketServer } from "ws";
+import { Server } from "socket.io";
 import logging from "../util/Logging";
 const Log = logging("WebsocketIncoming");
 
-interface CustomWebSocket extends WebSocket {
-    groupCode?: string;
-}
-
 export class WebsocketOutgoing {
     private static instance: WebsocketOutgoing;
-    wss: WebSocketServer;
+    wss: Server;
 
-    
-    public static getInstance(): WebsocketOutgoing{
+
+    public static getInstance(): WebsocketOutgoing {
         if (WebsocketOutgoing.instance == null) WebsocketOutgoing.instance = new WebsocketOutgoing();
         return WebsocketOutgoing.instance;
     }
 
     constructor() {
 
-        this.wss = new WebSocketServer({
-            port: 5200,
+        this.wss = new Server(5200, {
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -31,31 +26,31 @@ export class WebsocketOutgoing {
                 },
                 threshold: 1024
             },
-            path: "/output"
+            cors: { origin: "http://localhost:4200" }
         });
 
-        this.wss.on(`connection`, (ws: CustomWebSocket) => {
+        this.wss.on(`connection`, (ws) => {
             ws.on('error', (e) => {
-                Log.info(`Someone in ${ws.groupCode} encountered a Websocket error: ${e}`);
+                Log.info(`Someone in ${ws.rooms} encountered a Websocket error: ${e}`);
             });
 
-            ws.once('message', (msg) => {
-                const json = JSON.parse(msg.toString());
-                ws.groupCode = json.groupCode;
-                ws.send(JSON.stringify({ groupCode: json.groupCode, msg: `Logon succeeded for group code ${json.groupCode}` }));
+            ws.once('logon', (msg: string) => {
+                const json = JSON.parse(msg);
+                ws.join(json.groupCode);
+                ws.emit("logon_success", JSON.stringify({ groupCode: json.groupCode, msg: `Logon succeeded for group code ${json.groupCode}` }));
                 Log.info(`Received output logon using Group Code ${json.groupCode}`);
             });
         });
 
+        this.wss.engine.on("connection_error", (err) => {
+            console.log("Socket.IO error: ", err);
+        });
+
         Log.info(`InhouseTracker Server outputting on port 5200!`);
     }
-    
+
     sendMatchData(groupCode: string, data: any) {
-        this.wss.clients.forEach((ws: CustomWebSocket) => {
-            if (ws.groupCode === groupCode && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(data));
-            }
-        });
+        this.wss.to(groupCode).emit("match_data", JSON.stringify(data));
     }
 
 }
