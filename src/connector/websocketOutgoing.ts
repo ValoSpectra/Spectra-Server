@@ -1,5 +1,4 @@
 import WebSocket, { WebSocketServer } from "ws";
-import { MatchController } from "../controller/MatchController";
 import logging from "../util/Logging";
 const Log = logging("WebsocketIncoming");
 
@@ -10,7 +9,6 @@ interface CustomWebSocket extends WebSocket {
 export class WebsocketOutgoing {
     private static instance: WebsocketOutgoing;
     wss: WebSocketServer;
-    matchController = MatchController.getInstance();
 
     
     public static getInstance(): WebsocketOutgoing{
@@ -18,7 +16,7 @@ export class WebsocketOutgoing {
         return WebsocketOutgoing.instance;
     }
 
-    private constructor() {
+    constructor() {
 
         this.wss = new WebSocketServer({
             port: 5200,

@@ -53,7 +53,7 @@ export class WebsocketIncoming {
 
         });
 
-        Log.info(`InhouseTracker Server listening on port 5100!`);
+        Log.info(`InhouseTracker Server ingesting on port 5100!`);
     }
 
     private onAuthSuccess(user: ClientUser) {
