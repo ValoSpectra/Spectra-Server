@@ -1,23 +1,23 @@
+import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
 import { IAuthedData, IAUthenticationData, isAuthedData } from "../model/eventData";
 import logging from "../util/Logging";
-import { RedisController } from "../util/RedisController";
 const Log = logging("MatchController");
 
 export class MatchController {
     private static instance: MatchController;
-    private redisCon = RedisController.getInstance();
+    private outgoingWebsocketServer: WebsocketOutgoing = WebsocketOutgoing.getInstance();
     private sendInterval: NodeJS.Timeout | null = null;
 
-    private matches: Record<string, Match | null> = {};
+    private matches: Record<string, Match> = {};
 
-    private constructor() {};
+    private constructor() { };
 
-    public static getInstance(): MatchController{
+    public static getInstance(): MatchController {
         if (MatchController.instance == null) MatchController.instance = new MatchController();
         return MatchController.instance;
     }
-    
+
     removeMatch(data: any) {
         if (this.matches[data.groupCode]) {
             delete this.matches[data.groupCode];
@@ -26,7 +26,7 @@ export class MatchController {
     }
 
     setRanks(data: any) {
-        if (this.matches[data.groupCode] != null ) {
+        if (this.matches[data.groupCode] != null) {
             this.matches[data.groupCode]!.setRanks(data);
         }
     }
@@ -35,7 +35,7 @@ export class MatchController {
         try {
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
             this.matches[data.groupCode] = newMatch;
-            this.setMatchToSend(data.groupCode);
+            this.startOutgoingSendLoop();
             Log.info(`New match "${newMatch.groupCode}" registered!`);
             return true;
         } catch (e) {
@@ -56,13 +56,13 @@ export class MatchController {
         trackedMatch.receiveMatchSpecificData(data)
     }
 
-    setMatchToSend(groupCode: string) {
-        if (this.matches[groupCode] != null) {
-            if (this.sendInterval != null) clearInterval(this.sendInterval);
-            this.sendInterval = setInterval(() => {
-                this.redisCon.sendMatchToFrontend(this.matches[groupCode]!);
-            }, 100);
-        }
+    private startOutgoingSendLoop() {
+        if (this.sendInterval != null) return;
+        this.sendInterval = setInterval(() => {
+            for (const groupCode in this.matches) {
+                this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]!);
+            }
+        }, 100);
     }
 
 }
