@@ -33,10 +33,10 @@ export class WebsocketIncoming {
                 Log.info(`${user.name} encountered a Websocket error.`);
             });
 
-            ws.once('message', (msg) => {
+            ws.once('obs_logon', (msg) => {
                 const json = JSON.parse(msg.toString());
                 if (json.type === DataTypes.AUTH && this.matchController.createMatch(json)) {
-                    ws.send(JSON.stringify({type: DataTypes.AUTH, value: true}));
+                    ws.emit("obs_logon_ack", JSON.stringify({type: DataTypes.AUTH, value: true}));
                     user.name = json.obsName;
                     user.groupCode = json.groupCode;
                     this.authedClients.push(user);
@@ -44,7 +44,7 @@ export class WebsocketIncoming {
                     Log.info(`Received VALID auth request from ${json.obsName}, using Group Code ${json.groupCode} with teams ${json.leftTeam.name} and ${json.rightTeam.name}`);
                     this.onAuthSuccess(user);
                 } else {
-                    ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
+                    ws.emit("obs_logon_ack", JSON.stringify({type: DataTypes.AUTH, value: false}));
                     ws.disconnect();
                     Log.info(`Received BAD auth request from ${json.obsName}, using Group Code ${json.groupCode}`);
                 }
