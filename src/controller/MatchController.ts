@@ -1,6 +1,6 @@
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
-import { IAuthedData, IAUthenticationData, isAuthedData } from "../model/eventData";
+import { IAuthedData, IAUthenticationData } from "../model/eventData";
 import logging from "../util/Logging";
 const Log = logging("MatchController");
 
@@ -60,7 +60,7 @@ export class MatchController {
         if (this.sendInterval != null) return;
         this.sendInterval = setInterval(() => {
             for (const groupCode in this.matches) {
-                this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]!);
+                this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
             }
         }, 100);
     }

@@ -1,18 +1,17 @@
-import WebSocket, {WebSocketServer} from "ws";
+import { Server, Socket } from "socket.io";
 import { DataTypes, isAuthedData } from "../model/eventData";
 import { MatchController } from "../controller/MatchController";
 import logging from "../util/Logging";
 const Log = logging("WebsocketIncoming");
 
 export class WebsocketIncoming {
-    wss: WebSocketServer;
+    wss: Server;
     authedClients: ClientUser[] = [];
     matchController = MatchController.getInstance();
 
     constructor() {
 
-        this.wss = new WebSocketServer({ 
-            port: 5100,
+        this.wss = new Server(5100, { 
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -24,7 +23,8 @@ export class WebsocketIncoming {
                 },
                 threshold: 1024
             },
-            path: "/ingest"
+            path: "/ingest",
+            cors: { origin: "*" }	
         });
 
         this.wss.on(`connection`, (ws) => {
@@ -46,7 +46,7 @@ export class WebsocketIncoming {
                     this.onAuthSuccess(user);
                 } else {
                     ws.send(JSON.stringify({type: DataTypes.AUTH, value: false}));
-                    ws.close();
+                    ws.disconnect();
                     Log.info(`Received BAD auth request from ${json.obsName}, using Group Code ${json.groupCode}`);
                 }
             });
@@ -57,7 +57,7 @@ export class WebsocketIncoming {
     }
 
     private onAuthSuccess(user: ClientUser) {
-        user.ws.on("message", (msg: any) => {
+        user.ws.on("obs_data", (msg: any) => {
             const data = JSON.parse(msg.toString());
             if (isAuthedData(data)) {
                 this.matchController.receiveMatchData(data);
@@ -70,9 +70,9 @@ export class WebsocketIncoming {
 class ClientUser {
     name: string;
     groupCode: string;
-    ws: WebSocket;
+    ws: Socket;
     
-    constructor(name: string, groupCode: string, ws: WebSocket) {
+    constructor(name: string, groupCode: string, ws: Socket) {
         this.name = name;
         this.groupCode = groupCode;
         this.ws = ws;

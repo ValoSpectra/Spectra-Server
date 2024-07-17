@@ -26,7 +26,7 @@ export class WebsocketOutgoing {
                 },
                 threshold: 1024
             },
-            cors: { origin: "http://localhost:4200" }
+            cors: { origin: "*" }
         });
 
         this.wss.on(`connection`, (ws) => {
