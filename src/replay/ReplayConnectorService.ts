@@ -1,7 +1,7 @@
 import { DataTypes, IAuthedData, IFormattedData } from "../model/eventData";
-import { WebSocket } from "ws";
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
+import * as io from "socket.io-client";
 const Log = logging("ReplayConnectorService");
 
 export class ReplayConnectorService {
@@ -13,7 +13,7 @@ export class ReplayConnectorService {
     private ingestServerUrl: string;
     private enabled = false;
     private unreachable = false;
-    private ws!: WebSocket;
+    private ws!: io.Socket;
 
     public constructor(ingestServerUrl: string) { 
         this.ingestServerUrl = ingestServerUrl;
@@ -42,8 +42,8 @@ export class ReplayConnectorService {
     private handleAuthProcess() {
         return new Promise<void>((resolve, reject) => {
 
-            this.ws = new WebSocket(this.ingestServerUrl);
-            this.ws.once('open', () => {
+            this.ws = io.connect(this.ingestServerUrl);
+            this.ws.emit('obs_logon', () => {
                 this.ws.send(JSON.stringify({ 
                     type: DataTypes.AUTH, 
                     obsName: this.obsName, 
@@ -52,7 +52,7 @@ export class ReplayConnectorService {
                     rightTeam: this.rightTeam
                 }));
             });
-            this.ws.once('message', (msg) => {
+            this.ws.once('obs_logon_ack', (msg) => {
                 const json = JSON.parse(msg.toString());
 
                 if (json.type === DataTypes.AUTH) {
@@ -64,13 +64,13 @@ export class ReplayConnectorService {
                     } else {
                         Log.error('Authentication failed!');
                         this.enabled = false;
-                        this.ws?.terminate();
+                        this.ws?.disconnect();
                         reject();
                     }
                 }
             });
 
-            this.ws.on('close', () => {
+            this.ws.io.on('close', () => {
                 this.onSocketClose();
                 reject();
             });
@@ -90,7 +90,7 @@ export class ReplayConnectorService {
             Log.info(`Inhouse Tracker | Connection closed`);
         }
         this.enabled = false;
-        this.ws?.terminate();
+        this.ws?.disconnect();
     }
 
     private onSocketError(e: any) {
@@ -114,7 +114,7 @@ export class ReplayConnectorService {
     public sendReplayData(data: IAuthedData) {
         if (this.enabled) {
             Log.info(`Sending ${data.type} event`);
-            this.ws.send(JSON.stringify(data));
+            this.ws.emit("obs_data", JSON.stringify(data));
         }
         else {
             Log.error("Tried to send event anthough webservice is not enabled. Too early?");
