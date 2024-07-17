@@ -23,8 +23,7 @@ export class WebsocketIncoming {
                 },
                 threshold: 1024
             },
-            path: "/ingest",
-            cors: { origin: "*" }	
+            cors: { origin: "*" }
         });
 
         this.wss.on(`connection`, (ws) => {
