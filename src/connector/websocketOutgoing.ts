@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import logging from "../util/Logging";
-const Log = logging("WebsocketIncoming");
+const Log = logging("WebsocketOutgoing");
 
 export class WebsocketOutgoing {
     private static instance: WebsocketOutgoing;
@@ -31,14 +31,18 @@ export class WebsocketOutgoing {
 
         this.wss.on(`connection`, (ws) => {
             ws.on('error', (e) => {
-                Log.info(`Someone in ${ws.rooms} encountered a Websocket error: ${e}`);
+                Log.error(`Someone in ${ws.rooms} encountered a Websocket error: ${e}`);
             });
 
             ws.once('logon', (msg: string) => {
-                const json = JSON.parse(msg);
-                ws.join(json.groupCode);
-                ws.emit("logon_success", JSON.stringify({ groupCode: json.groupCode, msg: `Logon succeeded for group code ${json.groupCode}` }));
-                Log.info(`Received output logon using Group Code ${json.groupCode}`);
+                try {
+                    const json = JSON.parse(msg);
+                    ws.join(json.groupCode);
+                    ws.emit("logon_success", JSON.stringify({ groupCode: json.groupCode, msg: `Logon succeeded for group code ${json.groupCode}` }));
+                    Log.info(`Received output logon using Group Code ${json.groupCode}`);
+                } catch (e) {
+                    Log.error(`Error parsing outgoing logon request: ${e}`);
+                }
             });
         });
 

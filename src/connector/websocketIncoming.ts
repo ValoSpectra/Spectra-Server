@@ -11,7 +11,7 @@ export class WebsocketIncoming {
 
     constructor() {
 
-        this.wss = new Server(5100, { 
+        this.wss = new Server(5100, {
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -30,23 +30,27 @@ export class WebsocketIncoming {
             const user = new ClientUser("New User", "Unknown Team", ws)
 
             ws.on('error', (e) => {
-                Log.info(`${user.name} encountered a Websocket error.`);
+                Log.error(`${user.name} encountered a Websocket error.`);
             });
 
             ws.once('obs_logon', (msg) => {
-                const json = JSON.parse(msg.toString());
-                if (json.type === DataTypes.AUTH && this.matchController.createMatch(json)) {
-                    ws.emit("obs_logon_ack", JSON.stringify({type: DataTypes.AUTH, value: true}));
-                    user.name = json.obsName;
-                    user.groupCode = json.groupCode;
-                    this.authedClients.push(user);
+                try {
+                    const json = JSON.parse(msg.toString());
+                    if (json.type === DataTypes.AUTH && this.matchController.createMatch(json)) {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
+                        user.name = json.obsName;
+                        user.groupCode = json.groupCode;
+                        this.authedClients.push(user);
 
-                    Log.info(`Received VALID auth request from ${json.obsName}, using Group Code ${json.groupCode} with teams ${json.leftTeam.name} and ${json.rightTeam.name}`);
-                    this.onAuthSuccess(user);
-                } else {
-                    ws.emit("obs_logon_ack", JSON.stringify({type: DataTypes.AUTH, value: false}));
-                    ws.disconnect();
-                    Log.info(`Received BAD auth request from ${json.obsName}, using Group Code ${json.groupCode}`);
+                        Log.info(`Received VALID auth request from ${json.obsName}, using Group Code ${json.groupCode} with teams ${json.leftTeam.name} and ${json.rightTeam.name}`);
+                        this.onAuthSuccess(user);
+                    } else {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false }));
+                        ws.disconnect();
+                        Log.info(`Received BAD auth request from ${json.obsName}, using Group Code ${json.groupCode}`);
+                    }
+                } catch (e) {
+                    Log.error(`Error parsing incoming auth request: ${e}`);
                 }
             });
 
@@ -57,10 +61,15 @@ export class WebsocketIncoming {
 
     private onAuthSuccess(user: ClientUser) {
         user.ws.on("obs_data", (msg: any) => {
-            const data = JSON.parse(msg.toString());
-            if (isAuthedData(data)) {
-                this.matchController.receiveMatchData(data);
+            try {
+                const data = JSON.parse(msg.toString());
+                if (isAuthedData(data)) {
+                    this.matchController.receiveMatchData(data);
+                }
+            } catch (e) {
+                Log.error(`Error parsing obs_data: ${e}`);
             }
+            
         });
     }
 
@@ -70,7 +79,7 @@ class ClientUser {
     name: string;
     groupCode: string;
     ws: Socket;
-    
+
     constructor(name: string, groupCode: string, ws: Socket) {
         this.name = name;
         this.groupCode = groupCode;
