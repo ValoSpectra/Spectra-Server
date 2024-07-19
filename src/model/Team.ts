@@ -3,7 +3,7 @@ import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormatte
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
 import { SpikeStates } from "./Match";
-const Log = logging("Team");
+const Log = logging("Team").level(1);
 
 type RecordType = "detonated" | "defused" | "kills" | "timeout" | "lost";
 
@@ -143,7 +143,7 @@ export class Team {
             } else if (spikeState.planted == false && teamKills >= enemyPlayerCount) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
-            } else if (spikeState.detonated == false) {
+            } else if (spikeState.planted == false && this.deathsThisRound() < this.playerCount) {
                 this.roundRecord.push("timeout");
                 this.roundsWon++;
             } else {
@@ -152,6 +152,11 @@ export class Team {
         }
 
         this.resetTeamKills();
+        this.resetTeamDeaths();
+
+        Log.debug("Process Round End event for team");
+        Log.debug("TeamID: " + this.ingameTeamId);
+        Log.debug("Outcome: " + this.roundRecord[this.roundRecord.length-1]);
 
         // SCORE DATA IS CURRENTLY BROKEN, WORKAROUND ABOVE
         // const newWon = data.won;
@@ -186,9 +191,23 @@ export class Team {
         return count;
     }
 
+    private deathsThisRound(): number {
+        let count = 0;
+        for (const player of this.players) {
+            count += player.deathsThisRound;
+        }
+        return count;
+    }
+
     private resetTeamKills() {
         for (const player of this.players) {
             player.killsThisRound = 0;
+        }
+    }
+
+    private resetTeamDeaths() {
+        for (const player of this.players) {
+            player.deathsThisRound = 0;
         }
     }
 }

@@ -8,8 +8,8 @@ export class ReplayConnectorService {
     
     private obsName = "Replayuser#test";
     private groupCode = "A";
-    private leftTeam: AuthTeam = {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7"};
-    private rightTeam: AuthTeam = {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE"};
+    private leftTeam: AuthTeam = {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7", attackStart: true};
+    private rightTeam: AuthTeam = {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE", attackStart: false};
     private ingestServerUrl: string;
     private enabled = false;
     private unreachable = false;
@@ -43,15 +43,14 @@ export class ReplayConnectorService {
         return new Promise<void>((resolve, reject) => {
 
             this.ws = io.connect(this.ingestServerUrl);
-            this.ws.emit('obs_logon', () => {
-                this.ws.send(JSON.stringify({ 
+            this.ws.emit('obs_logon', JSON.stringify({ 
                     type: DataTypes.AUTH, 
                     obsName: this.obsName, 
                     groupCode: this.groupCode,
                     leftTeam: this.leftTeam,
                     rightTeam: this.rightTeam
-                }));
-            });
+                })
+            );
             this.ws.once('obs_logon_ack', (msg) => {
                 const json = JSON.parse(msg.toString());
 
@@ -90,7 +89,6 @@ export class ReplayConnectorService {
             Log.info(`Inhouse Tracker | Connection closed`);
         }
         this.enabled = false;
-        this.ws?.disconnect();
     }
 
     private onSocketError(e: any) {

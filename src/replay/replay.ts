@@ -3,7 +3,7 @@ import { ReplayConnectorService } from "./ReplayConnectorService";
 import logging from "../util/Logging";
 const Log = logging("Replay").level(1);
 
-let INGEST_SERVER_URL = "ws://localhost:5100/ingest";
+let INGEST_SERVER_URL = "http://localhost:5100/";
 let REPLAY_FILE = "customGameTest.replay";
 let REPLAY_MODE = ReplayMode.INSTANT;
 let DELAY_MS = 500;
@@ -53,7 +53,7 @@ const player = new ReplayPlayer(connector, REPLAY_MODE, DELAY_MS);
 
 player.loadReplayFile(REPLAY_FILE);
 const { obsName, gameCode, leftTeam, rightTeam } = player.getReplayHeader();
-connector.setAuthValues("Dunkel#Licht", "A", {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7"}, {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE"});
+connector.setAuthValues("Dunkel#Licht", "TEST2", {name: "Left Team", tricode: "PELU", url: "https://dnkl.gg/PHtt7", attackStart: true}, {name: "Right Team", tricode: "HANU", url: "https://dnkl.gg/8GKvE", attackStart: false});
 connector.open().then(() => {
     player.play(() => {
         connector.close();

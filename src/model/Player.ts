@@ -26,6 +26,7 @@ export class Player {
     private assists: number = 0;
     private kdRatio: number = 0;
     public killsThisRound: number = 0;
+    public deathsThisRound: number = 0;
 
     private currUltPoints: number = 0;
     private maxUltPoints: number = 10;
@@ -71,9 +72,13 @@ export class Player {
 
     public updateFromScoreboard(data: IFormattedScoreboard) {
         if (data.kills > this.kills) {
-            this.killsThisRound += data.kills;
+            this.killsThisRound++;
         }
         this.kills = data.kills;
+
+        if (data.deaths > this.deaths) {
+            this.deathsThisRound++;
+        }
         this.deaths = data.deaths;
         this.assists = data.assists;
         this.kdRatio = this.kills / this.deaths;

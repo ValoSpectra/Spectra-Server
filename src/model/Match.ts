@@ -70,17 +70,14 @@ export class Match {
             }
 
             if (this.roundPhase == "end") {
-                // Wait for 75ms to ensure detonation event has been processed (was about 9ms behind round end event in testing)
-                setTimeout(() => {
-                    const leftTeam = this.teams[0];
-                    const rightTeam = this.teams[1];
+                const leftTeam = this.teams[0];
+                const rightTeam = this.teams[1];
 
-                    leftTeam.processRoundEnd(this.spikeState, rightTeam.getPlayerCount());
-                    rightTeam.processRoundEnd(this.spikeState, leftTeam.getPlayerCount());
+                leftTeam.processRoundEnd(this.spikeState, rightTeam.getPlayerCount());
+                rightTeam.processRoundEnd(this.spikeState, leftTeam.getPlayerCount());
 
-                    leftTeam.resetRoundSpent();
-                    rightTeam.resetRoundSpent();
-                }, 75);
+                leftTeam.resetRoundSpent();
+                rightTeam.resetRoundSpent();
             }
 
             this.eventNumber++;
@@ -105,8 +102,8 @@ export class Match {
             correctTeam = this.teams.find(team => team.hasTeamMemberByName((data.data as IFormattedKillfeed).attacker));
 
             if (correctTeam == null) {
-                Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
-                Log.info(`Data: ${JSON.stringify(data)}`);
+                Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
+                Log.debug(`Data: ${JSON.stringify(data)}`);
                 return;
             }
 
@@ -124,11 +121,11 @@ export class Match {
             return;
         }
 
-        correctTeam = this.teams.find(team => team.ingameTeamId === (data.data as IFormattedScoreboard).startTeam);
-
+        correctTeam = this.teams.find(team => team.ingameTeamId == (data.data as IFormattedScoreboard).startTeam);
+        
         if (correctTeam == null) {
-            Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
-            Log.info(`Data: ${JSON.stringify(data)}`);
+            Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
+            Log.debug(`Data: ${JSON.stringify(data)}`);
             return;
         }
 
