@@ -1,6 +1,6 @@
 {
     "apps": [{
-        "name": "Spectra-Server",
+        "name": "Spectra Server",
         "cwd": "./",
         "script": "dist/index.js",
         "log_date_format": "YYYY-MM-DD HH:mm Z"
