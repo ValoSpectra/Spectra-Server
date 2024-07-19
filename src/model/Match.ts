@@ -1,5 +1,5 @@
 import { Team } from "./Team";
-import { DataTypes, IAuthedData, IFormattedRoster, IFormattedRoundInfo, IFormattedScore, IFormattedScoreboard } from "./eventData";
+import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedRoundInfo, IFormattedScore, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
 import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/valorantInternalTranslator";
@@ -109,7 +109,7 @@ export class Match {
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.KILLFEED) {
-            correctTeam = this.teams.find(team => team.hasTeamMemberByName(data.obsName));
+            correctTeam = this.teams.find(team => team.hasTeamMemberByName((data.data as IFormattedKillfeed).attacker));
 
             if (correctTeam == null) {
                 Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
@@ -124,6 +124,11 @@ export class Match {
             for (const team of this.teams) {
                 team.setObservedPlayer(data.data as string);
             }
+        } else if (data.type === DataTypes.TEAM_IS_ATTACKER) {
+            return;
+        } else if (data.type === DataTypes.SCORE) {
+            // Score does not work properly atm, so we ignore it
+            return;
         }
 
         correctTeam = this.teams[(data.data as IFormattedScoreboard).startTeam]
