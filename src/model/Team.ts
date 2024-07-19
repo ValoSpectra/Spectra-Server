@@ -74,17 +74,23 @@ export class Team {
     }
 
     hasTeamMember(playerName: string): boolean {
-        return this.players.some(player => player.name === playerName);
+        return this.players.some(player => player.searchName === playerName);
     }
 
     switchSides() {
         this.isAttacking = !this.isAttacking;
     }
 
+    setObservedPlayer(observedName: string) {
+        for (const player of this.players) {
+            player.processObservedEvent(observedName);
+        }
+    }
+
     private processRosterData(data: IFormattedRoster) {
-        if (data.playerId !== "") return;
+        if (data.playerId == "" || data.name == "" || data.tagline == "") return;
         const correctPlayer = this.players.find(player => player.playerId === data.playerId);
-        
+
         if (correctPlayer) {
             correctPlayer.onRosterUpdate(data);
             return;
@@ -97,7 +103,7 @@ export class Team {
     }
 
     private processScoreboardData(data: IFormattedScoreboard) {
-        const player = this.players.find(player => player.name === data.name);
+        const player = this.players.find(player => player.searchName === `${data.name} #${data.tagline}`);
         if (!player) return;
         player.updateFromScoreboard(data);
         this.spentThisRound = this.getSpentThisRound();

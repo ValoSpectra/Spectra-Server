@@ -112,6 +112,10 @@ export class Match {
             correctTeam.receiveTeamSpecificData(data);
             this.eventNumber++;
             return;
+        } else if (data.type === DataTypes.OBSERVING) {
+            for (const team of this.teams) {
+                team.setObservedPlayer(data.data as string);
+            }
         }
 
         correctTeam = this.teams[(data.data as IFormattedScoreboard).startTeam]

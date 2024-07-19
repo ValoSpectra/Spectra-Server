@@ -9,6 +9,7 @@ export class Player {
     public name: string;
     public tagline: string;
     public playerId: string;
+    public searchName: string;
     
     private position: number;
     private locked: boolean = false;
@@ -18,6 +19,7 @@ export class Player {
 
     private isAlive: boolean = true;
     private hasSpike: boolean = false;
+    public isObserved: boolean = false;
 
     private kills: number = 0;
     private deaths: number = 0;
@@ -51,6 +53,7 @@ export class Player {
         this.name = data.name;
         this.tagline = data.tagline;
         this.playerId = data.playerId;
+        this.searchName = `${data.name} #${data.tagline}`;
         this.position = data.position;
         this.rankName = ranks[data.rank];
         this.agentInternal = data.agentInternal;
@@ -149,5 +152,13 @@ export class Player {
             }
         }
 
+    }
+
+    public processObservedEvent(observedName: string) {
+        if (this.searchName === observedName) {
+            this.isObserved = true;
+        } else {
+            this.isObserved = false;
+        }
     }
 }
