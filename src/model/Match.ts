@@ -41,13 +41,6 @@ export class Match {
         this.isRanked = isRanked;
     }
 
-    isValidTeam(teamName: string) {
-        for (const team of this.teams) {
-            if (team.teamName === teamName.toUpperCase()) return true;
-        }
-        return false;
-    }
-
     setRanks(data: any) {
         this.ranks = data.ranks;
     }
@@ -131,7 +124,7 @@ export class Match {
             return;
         }
 
-        correctTeam = this.teams[(data.data as IFormattedScoreboard).startTeam]
+        correctTeam = this.teams.find(team => team.ingameTeamId === (data.data as IFormattedScoreboard).startTeam);
 
         if (correctTeam == null) {
             Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);

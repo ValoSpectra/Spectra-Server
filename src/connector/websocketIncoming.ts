@@ -91,5 +91,6 @@ class ClientUser {
 export interface AuthTeam {
     name: string,
     tricode: string,
-    url: string
+    url: string,
+    attackStart: boolean
 }

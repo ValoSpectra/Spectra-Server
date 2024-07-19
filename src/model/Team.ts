@@ -11,6 +11,7 @@ export class Team {
     public teamName: string;
     public teamTricode: string;
     public teamUrl: string = "";
+    public ingameTeamId: number = 0;
     public isAttacking: boolean = false;
     private hasHandledTeam: boolean = false;
     public roundsWon: number = 0;
@@ -20,10 +21,13 @@ export class Team {
     private players: Player[] = [];
     private playerCount = 0;
 
-    constructor(team: AuthTeam, isAttackStart: boolean = false) {
+    constructor(team: AuthTeam) {
         this.teamName = team.name;
         this.teamTricode = team.tricode;
         this.teamUrl = team.url;
+
+        this.isAttacking = team.attackStart;
+        this.ingameTeamId = team.attackStart ? 0 : 1;
     }
 
     receiveTeamSpecificData(data: IAuthedData) {
@@ -40,18 +44,7 @@ export class Team {
             case DataTypes.KILLFEED:
                 this.processKillfeedData(data.data as IFormattedKillfeed);
                 break;
-
-            case DataTypes.TEAM_IS_ATTACKER:
-                // if (!this.hasHandledTeam) {
-                //     this.isAttacking = data.data as boolean;
-                //     this.hasHandledTeam = true;
-                // }
-                break;
-
-            case DataTypes.SCORE:
-                // this.processScoreData(data.data as IFormattedScore);
-                break;
-
+                
             default:
                 break;
         }
@@ -135,7 +128,7 @@ export class Team {
             if (spikeState.detonated) {
                 this.roundRecord.push("detonated");
                 this.roundsWon++;
-            } else if (teamKills >= enemyPlayerCount && spikeState.defused == false) {
+            } else if (spikeState.defused == false && teamKills >= enemyPlayerCount) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
             } else {
@@ -143,11 +136,11 @@ export class Team {
             }
             
         // DEFENDER LOGIC
-        } else if (!this.isAttacking) {
+        } else {
             if (spikeState.defused) {
                 this.roundRecord.push("defused");
                 this.roundsWon++;
-            } else if (teamKills >= enemyPlayerCount && spikeState.detonated == false) {
+            } else if (spikeState.planted == false && teamKills >= enemyPlayerCount) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
             } else if (spikeState.detonated == false) {
