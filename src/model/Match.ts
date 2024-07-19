@@ -113,7 +113,7 @@ export class Match {
 
             if (correctTeam == null) {
                 Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
-                Log.info(`Data: ${data}`);
+                Log.info(`Data: ${JSON.stringify(data)}`);
                 return;
             }
 
@@ -130,7 +130,7 @@ export class Match {
 
         if (correctTeam == null) {
             Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
-            Log.info(`Data: ${data}`);
+            Log.info(`Data: ${JSON.stringify(data)}`);
             return;
         }
 
