@@ -166,8 +166,8 @@ export enum Agents {
     "Mage_PC_C" = "Harbor",
     "Mage" = "Harbor",
 
-    "AggroBot_PC_C" = "Gekko",
-    "AggroBot" = "Gekko",
+    "Aggrobot_PC_C" = "Gekko",
+    "Aggrobot" = "Gekko",
 
     "Cable_PC_C" = "Deadlock",
     "Cable" = "Deadlock",
