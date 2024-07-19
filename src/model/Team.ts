@@ -24,7 +24,6 @@ export class Team {
         this.teamName = team.name;
         this.teamTricode = team.tricode;
         this.teamUrl = team.url;
-        this.isAttacking = isAttackStart;
     }
 
     receiveTeamSpecificData(data: IAuthedData) {
@@ -73,8 +72,20 @@ export class Team {
         return total;
     }
 
-    hasTeamMember(playerName: string): boolean {
-        return this.players.some(player => player.searchName === playerName);
+    hasTeamMemberByName(playerName: string): boolean {
+        return this.players.some(player => player.name === playerName);
+    }
+
+    hasTeamMemberBySearchName(playerSearchName: string): boolean {
+        return this.players.some(player => player.searchName === playerSearchName);
+    }
+
+    hasTeamMemberById(playerId: string): boolean {
+        return this.players.some(player => player.playerId === playerId);
+    }
+
+    getPlayerCount(): number {
+        return this.playerCount;
     }
 
     switchSides() {
@@ -96,6 +107,7 @@ export class Team {
             return;
         } else if (this.playerCount < 5) {
             this.players.push(new Player(data));
+            this.isAttacking = data.startTeam == 0 ? true : false;
             this.playerCount++;
         } else {
             Log.error(`Received roster data for ${data.name} but team ${this.teamName} is full!`);
@@ -103,7 +115,7 @@ export class Team {
     }
 
     private processScoreboardData(data: IFormattedScoreboard) {
-        const player = this.players.find(player => player.searchName === `${data.name} #${data.tagline}`);
+        const player = this.players.find(player => player.playerId === data.playerId);
         if (!player) return;
         player.updateFromScoreboard(data);
         this.spentThisRound = this.getSpentThisRound();
@@ -115,24 +127,27 @@ export class Team {
         player.extractKillfeedInfo(data);
     }
 
-    processRoundEnd(spikeState: SpikeStates) {
+    processRoundEnd(spikeState: SpikeStates, enemyPlayerCount: number) {
         const teamKills = this.teamKills();
 
+        // ATTACKER LOGIC
         if (this.isAttacking) {
             if (spikeState.detonated) {
                 this.roundRecord.push("detonated");
                 this.roundsWon++;
-            } else if (teamKills >= 5 && spikeState.defused == false) {
+            } else if (teamKills >= enemyPlayerCount && spikeState.defused == false) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
             } else {
                 this.roundRecord.push("lost");
             }
-        } else {
+            
+        // DEFENDER LOGIC
+        } else if (!this.isAttacking) {
             if (spikeState.defused) {
                 this.roundRecord.push("defused");
                 this.roundsWon++;
-            } else if (teamKills >= 5 && spikeState.detonated == false) {
+            } else if (teamKills >= enemyPlayerCount && spikeState.detonated == false) {
                 this.roundRecord.push("kills");
                 this.roundsWon++;
             } else if (spikeState.detonated == false) {

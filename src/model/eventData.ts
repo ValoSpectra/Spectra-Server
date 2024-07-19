@@ -4,6 +4,7 @@ import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator"
 export interface IFormattedScoreboard {
     name: string,
     tagline: string,
+    playerId: string,
     startTeam: number,
     agentInternal: keyof typeof Agents,
     isAlive: boolean,

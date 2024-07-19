@@ -32,7 +32,7 @@ export class Match {
 
         this.replayLog = new ReplayLogging(this.groupCode);
 
-        const firstTeam = new Team(leftTeam, true);
+        const firstTeam = new Team(leftTeam);
         const secondTeam = new Team(rightTeam);
 
         this.teams.push(firstTeam);
@@ -77,10 +77,17 @@ export class Match {
             }
 
             if (this.roundPhase == "end") {
-                for (const team of this.teams) {
-                    team.processRoundEnd(this.spikeState);
-                    team.resetRoundSpent();
-                }
+                // Wait for 75ms to ensure detonation event has been processed (was about 9ms behind round end event in testing)
+                setTimeout(() => {
+                    const leftTeam = this.teams[0];
+                    const rightTeam = this.teams[1];
+
+                    leftTeam.processRoundEnd(this.spikeState, rightTeam.getPlayerCount());
+                    rightTeam.processRoundEnd(this.spikeState, leftTeam.getPlayerCount());
+
+                    leftTeam.resetRoundSpent();
+                    rightTeam.resetRoundSpent();
+                }, 75);
             }
 
             this.eventNumber++;
@@ -102,10 +109,11 @@ export class Match {
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.KILLFEED) {
-            correctTeam = this.teams.find(team => team.hasTeamMember(data.obsName));
+            correctTeam = this.teams.find(team => team.hasTeamMemberByName(data.obsName));
 
             if (correctTeam == null) {
                 Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
+                Log.info(`Data: ${data}`);
                 return;
             }
 
@@ -122,6 +130,7 @@ export class Match {
 
         if (correctTeam == null) {
             Log.info(`Received match data with invalid team for group code "${data.groupCode}"`);
+            Log.info(`Data: ${data}`);
             return;
         }
 
