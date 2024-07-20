@@ -70,14 +70,7 @@ export class Match {
             }
 
             if (this.roundPhase == "end") {
-                const leftTeam = this.teams[0];
-                const rightTeam = this.teams[1];
-
-                leftTeam.processRoundEnd(this.spikeState, rightTeam.getPlayerCount());
-                rightTeam.processRoundEnd(this.spikeState, leftTeam.getPlayerCount());
-
-                leftTeam.resetRoundSpent();
-                rightTeam.resetRoundSpent();
+                this.processScoreCalculation();
             }
 
             this.eventNumber++;
@@ -131,6 +124,39 @@ export class Match {
 
         this.eventNumber++;
         correctTeam.receiveTeamSpecificData(data);
+    }
+
+    private processScoreCalculation() {
+        const attackingTeam = this.teams.find(team => team.isAttacking);
+        const defendingTeam = this.teams.find(team => !team.isAttacking);
+
+        if (this.spikeState.planted === true) {
+            if (this.spikeState.detonated) {
+                attackingTeam?.addRoundReason("detonated");
+                defendingTeam?.addRoundReason("lost");
+            } else if (this.spikeState.defused) {
+                defendingTeam?.addRoundReason("defused");
+                attackingTeam?.addRoundReason("lost");
+            } else {
+                attackingTeam?.addRoundReason("kills");
+                defendingTeam?.addRoundReason("lost");
+            }
+        }
+
+        if (this.spikeState.planted === false) {
+            if (attackingTeam?.alivePlayers() == 0) {
+                defendingTeam?.addRoundReason("kills");
+                attackingTeam?.addRoundReason("lost");
+            } else if (defendingTeam?.alivePlayers() == 0) {
+                attackingTeam?.addRoundReason("kills");
+                defendingTeam?.addRoundReason("lost");
+            } else {
+                defendingTeam?.addRoundReason("timeout");
+                attackingTeam?.addRoundReason("lost");
+            }
+        }
+
+        
     }
 
 }

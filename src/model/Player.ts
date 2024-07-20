@@ -17,7 +17,7 @@ export class Player {
     private agentProper: ValueOf<Agents> = "";
     private rankName: string;
 
-    private isAlive: boolean = true;
+    public isAlive: boolean = true;
     private hasSpike: boolean = false;
     public isObserved: boolean = false;
 
@@ -26,7 +26,6 @@ export class Player {
     private assists: number = 0;
     private kdRatio: number = 0;
     public killsThisRound: number = 0;
-    public deathsThisRound: number = 0;
 
     private currUltPoints: number = 0;
     private maxUltPoints: number = 10;
@@ -76,9 +75,6 @@ export class Player {
         }
         this.kills = data.kills;
 
-        if (data.deaths > this.deaths) {
-            this.deathsThisRound++;
-        }
         this.deaths = data.deaths;
         this.assists = data.assists;
         this.kdRatio = this.kills / this.deaths;

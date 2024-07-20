@@ -120,68 +120,6 @@ export class Team {
         player.extractKillfeedInfo(data);
     }
 
-    processRoundEnd(spikeState: SpikeStates, enemyPlayerCount: number) {
-        const teamKills = this.teamKills();
-
-        // ATTACKER LOGIC
-        if (this.isAttacking) {
-            if (spikeState.detonated) {
-                this.roundRecord.push("detonated");
-                this.roundsWon++;
-            } else if (spikeState.defused == false && teamKills >= enemyPlayerCount) {
-                this.roundRecord.push("kills");
-                this.roundsWon++;
-            } else {
-                this.roundRecord.push("lost");
-            }
-            
-        // DEFENDER LOGIC
-        } else {
-            if (spikeState.defused) {
-                this.roundRecord.push("defused");
-                this.roundsWon++;
-            } else if (spikeState.planted == false && teamKills >= enemyPlayerCount) {
-                this.roundRecord.push("kills");
-                this.roundsWon++;
-            } else if (spikeState.planted == false && this.deathsThisRound() < this.playerCount) {
-                this.roundRecord.push("timeout");
-                this.roundsWon++;
-            } else {
-                this.roundRecord.push("lost");
-            }
-        }
-
-        this.resetTeamKills();
-        this.resetTeamDeaths();
-
-        Log.debug("Process Round End event for team");
-        Log.debug("TeamID: " + this.ingameTeamId);
-        Log.debug("Outcome: " + this.roundRecord[this.roundRecord.length-1]);
-
-        // SCORE DATA IS CURRENTLY BROKEN, WORKAROUND ABOVE
-        // const newWon = data.won;
-        // if (newWon == null) return;
-
-        // if (newWon > this.roundsWon) {
-
-        //     const teamKills = this.teamKills();
-        //     if (this.spikeState !== "") {
-        //         this.roundRecord.push(this.spikeState);
-        //     } else if (teamKills >= 5) {
-        //         this.roundRecord.push("kills");
-        //     } else {
-        //         this.roundRecord.push("timeout");
-        //     }
-        //     this.roundsWon = newWon;
-
-        // } else {
-        //     this.roundRecord.push("lost");
-        // }
-
-        // this.spikeState = "";
-        // this.resetTeamKills();
-    }
-
     private teamKills(): number {
         let count = 0;
         for (const player of this.players) {
@@ -191,23 +129,27 @@ export class Team {
         return count;
     }
 
-    private deathsThisRound(): number {
-        let count = 0;
-        for (const player of this.players) {
-            count += player.deathsThisRound;
-        }
-        return count;
-    }
-
     private resetTeamKills() {
         for (const player of this.players) {
             player.killsThisRound = 0;
         }
     }
 
-    private resetTeamDeaths() {
+    public alivePlayers(): number {
+        if (this.playerCount == 0) return 1;
+        let count = 0;
+
         for (const player of this.players) {
-            player.deathsThisRound = 0;
+            count += player.isAlive ? 0 : 1;
+        }
+        return count;
+    }
+
+    public addRoundReason(reason: RecordType) {
+        this.roundRecord.push(reason);
+        if (reason != "lost") {
+            this.roundsWon++;
         }
     }
+
 }
