@@ -17,10 +17,12 @@ export class Match {
 
     public roundNumber: number = 0;
     public roundPhase: string = "LOBBY";
+    private roundTimeoutTime?: number = undefined;
 
     private teams: Team[] = [];
     private map: string = "";
     private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
+    private waitingOnKills: boolean = false;
 
     public ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
 
@@ -61,6 +63,7 @@ export class Match {
                 this.spikeState.planted = false;
                 this.spikeState.detonated = false;
                 this.spikeState.defused = false;
+                this.waitingOnKills = false;
 
                 if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
                     for (const team of this.teams) {
@@ -69,8 +72,13 @@ export class Match {
                 }
             }
 
+            if (this.roundPhase == "combat") {
+                this.roundTimeoutTime = data.timestamp + (100 * 1000); // Add 100 seconds to the current time
+            }
+
             if (this.roundPhase == "end") {
-                this.processScoreCalculation();
+                this.processScoreCalculation(data.timestamp);
+                this.roundTimeoutTime = undefined;
             }
 
             this.eventNumber++;
@@ -81,6 +89,7 @@ export class Match {
             return;
         } else if (data.type === DataTypes.SPIKE_PLANTED) {
             this.spikeState.planted = true;
+            this.roundTimeoutTime = undefined;
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.SPIKE_DETONATED) {
@@ -115,7 +124,7 @@ export class Match {
         }
 
         correctTeam = this.teams.find(team => team.ingameTeamId == (data.data as IFormattedScoreboard).startTeam);
-        
+
         if (correctTeam == null) {
             Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
             Log.debug(`Data: ${JSON.stringify(data)}`);
@@ -124,9 +133,13 @@ export class Match {
 
         this.eventNumber++;
         correctTeam.receiveTeamSpecificData(data);
+
+        if (this.waitingOnKills && data.type === DataTypes.SCOREBOARD) {
+            this.checkKillStatus();
+        }
     }
 
-    private processScoreCalculation() {
+    private processScoreCalculation(eventTimestamp: number) {
         const attackingTeam = this.teams.find(team => team.isAttacking);
         const defendingTeam = this.teams.find(team => !team.isAttacking);
 
@@ -150,13 +163,34 @@ export class Match {
             } else if (defendingTeam?.alivePlayers() == 0) {
                 attackingTeam?.addRoundReason("kills");
                 defendingTeam?.addRoundReason("lost");
-            } else {
+            } else if (this.roundTimeoutTime && eventTimestamp >= this.roundTimeoutTime) {
                 defendingTeam?.addRoundReason("timeout");
                 attackingTeam?.addRoundReason("lost");
+            } else {
+                // Has to be a win by kills - but we didn't receive all the data yet
+                // Activate the waiting on kills flag to enable checkKillStatus function
+                this.waitingOnKills = true;
             }
         }
 
-        
+
+    }
+
+    private checkKillStatus() {
+        const attackingTeam = this.teams.find(team => team.isAttacking);
+        const defendingTeam = this.teams.find(team => !team.isAttacking);
+
+        if (attackingTeam?.alivePlayers() == 0) {
+            defendingTeam?.addRoundReason("kills");
+            attackingTeam?.addRoundReason("lost");
+            this.waitingOnKills = false;
+        } else if (defendingTeam?.alivePlayers() == 0) {
+            attackingTeam?.addRoundReason("kills");
+            defendingTeam?.addRoundReason("lost");
+            this.waitingOnKills = false;
+        }
+
+        // Triggering scoreboard data did not include a death, waiting...
     }
 
 }
