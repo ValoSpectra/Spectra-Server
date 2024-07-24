@@ -95,10 +95,20 @@ export class Match {
         } else if (data.type === DataTypes.SPIKE_DETONATED) {
             this.spikeState.detonated = true;
             this.eventNumber++;
+            
+            if (this.waitingOnKills) {
+                this.spikeDuringTimeout();
+            }
+
             return;
         } else if (data.type === DataTypes.SPIKE_DEFUSED) {
             this.spikeState.defused = true;
             this.eventNumber++;
+
+            if (this.waitingOnKills) {
+                this.spikeDuringTimeout();
+            }
+
             return;
         } else if (data.type === DataTypes.KILLFEED) {
             correctTeam = this.teams.find(team => team.hasTeamMemberByName((data.data as IFormattedKillfeed).attacker));
@@ -191,6 +201,22 @@ export class Match {
         }
 
         // Triggering scoreboard data did not include a death, waiting...
+    }
+
+    // This should only ever happen in very rare cases where the spike event is delayed for some reason
+    private spikeDuringTimeout() {
+        const attackingTeam = this.teams.find(team => team.isAttacking);
+        const defendingTeam = this.teams.find(team => !team.isAttacking);
+
+        if (this.spikeState.detonated) {
+            attackingTeam?.addRoundReason("detonated");
+            defendingTeam?.addRoundReason("lost");
+        } else if (this.spikeState.defused) {
+            defendingTeam?.addRoundReason("defused");
+            attackingTeam?.addRoundReason("lost");
+        }
+
+        this.waitingOnKills = false;
     }
 
 }
