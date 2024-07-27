@@ -45,6 +45,9 @@ export class MatchController {
     }
 
     receiveMatchData(data: IAuthedData) {
+        if (data.timestamp == null) {
+            data.timestamp = Date.now();
+        }
         data.timestamp = Date.now();
         const trackedMatch = this.matches[data.groupCode];
         if (trackedMatch == null) {

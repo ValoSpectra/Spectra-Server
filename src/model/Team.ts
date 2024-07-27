@@ -137,10 +137,12 @@ export class Team {
 
     public alivePlayers(): number {
         if (this.playerCount == 0) return 1;
-        let count = 0;
 
+        let count = 0;
         for (const player of this.players) {
-            count += player.isAlive ? 0 : 1;
+            if (player.isAlive) {
+                count++;
+            }
         }
         return count;
     }

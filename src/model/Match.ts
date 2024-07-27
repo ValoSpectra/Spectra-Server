@@ -80,7 +80,7 @@ export class Match {
                 this.processScoreCalculation(data.timestamp);
                 this.roundTimeoutTime = undefined;
             }
-
+            
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.MAP) {
@@ -88,6 +88,7 @@ export class Match {
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.SPIKE_PLANTED) {
+            if (this.roundPhase !== "combat") return;
             this.spikeState.planted = true;
             this.roundTimeoutTime = undefined;
             this.eventNumber++;
@@ -179,6 +180,7 @@ export class Match {
             } else {
                 // Has to be a win by kills - but we didn't receive all the data yet
                 // Activate the waiting on kills flag to enable checkKillStatus function
+                Log.debug(`Waiting on kills for round ${this.roundNumber}`);
                 this.waitingOnKills = true;
             }
         }
@@ -217,6 +219,15 @@ export class Match {
         }
 
         this.waitingOnKills = false;
+    }
+
+    private debugLogRoundInfo() {
+        Log.debug(`Round ${this.roundNumber} - ${this.roundPhase}`);
+        Log.debug(`Round Timeout: ${this.roundTimeoutTime}`);
+        Log.debug(`Spike State: ${JSON.stringify(this.spikeState)}`);
+        const attackingTeam = this.teams.find(team => team.isAttacking);
+        const defendingTeam = this.teams.find(team => !team.isAttacking);
+        Log.debug(`Attacking Team: ${attackingTeam?.alivePlayers()} - Defending Team: ${defendingTeam?.alivePlayers()}`);
     }
 
 }

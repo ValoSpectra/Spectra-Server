@@ -52,7 +52,7 @@ const connector = new ReplayConnectorService(INGEST_SERVER_URL);
 const player = new ReplayPlayer(connector, REPLAY_MODE, DELAY_MS);
 
 player.loadReplayFile(REPLAY_FILE);
-const { obsName, gameCode, leftTeam, rightTeam } = player.getReplayHeader();
+// const { obsName, gameCode, leftTeam, rightTeam } = player.getReplayHeader();
 connector.setAuthValues("Dunkel#Licht", "TEST2", {name: "Left Team", tricode: "PELU", url: "https://dnkl.gg/PHtt7", attackStart: true}, {name: "Right Team", tricode: "HANU", url: "https://dnkl.gg/8GKvE", attackStart: false});
 connector.open().then(() => {
     player.play(() => {
