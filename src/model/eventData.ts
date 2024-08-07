@@ -45,8 +45,8 @@ export interface IFormattedRoundInfo {
 }
 
 export interface IFormattedScore {
-    won: number,
-    lost: number
+    team_0: number,
+    team_1: number
 }
 
 export interface IAuthedData {

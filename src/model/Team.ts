@@ -149,9 +149,9 @@ export class Team {
 
     public addRoundReason(reason: RecordType) {
         this.roundRecord.push(reason);
-        if (reason != "lost") {
-            this.roundsWon++;
-        }
+        // if (reason != "lost") {
+        //     this.roundsWon++;
+        // }
     }
 
 }

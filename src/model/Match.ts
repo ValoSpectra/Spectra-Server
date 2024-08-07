@@ -130,7 +130,12 @@ export class Match {
         } else if (data.type === DataTypes.TEAM_IS_ATTACKER) {
             return;
         } else if (data.type === DataTypes.SCORE) {
-            // Score does not work properly atm, so we ignore it
+            const team0Score = (data.data as IFormattedScore).team_0;
+            const team1Score = (data.data as IFormattedScore).team_1;
+            const team0 = this.teams.find(team => team.ingameTeamId == 0);
+            const team1 = this.teams.find(team => team.ingameTeamId == 1);
+            team0!.roundsWon = team0Score;
+            team1!.roundsWon = team1Score;
             return;
         }
 
