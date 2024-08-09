@@ -22,7 +22,6 @@ export class Match {
     private teams: Team[] = [];
     private map: string = "";
     private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
-    private waitingOnKills: boolean = false;
 
     public ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
 
@@ -63,7 +62,6 @@ export class Match {
                 this.spikeState.planted = false;
                 this.spikeState.detonated = false;
                 this.spikeState.defused = false;
-                this.waitingOnKills = false;
 
                 if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
                     for (const team of this.teams) {
@@ -77,10 +75,9 @@ export class Match {
             }
 
             if (this.roundPhase == "end") {
-                this.processScoreCalculation(data.timestamp);
                 this.roundTimeoutTime = undefined;
             }
-            
+
             this.eventNumber++;
             return;
         } else if (data.type === DataTypes.MAP) {
@@ -96,19 +93,11 @@ export class Match {
         } else if (data.type === DataTypes.SPIKE_DETONATED) {
             this.spikeState.detonated = true;
             this.eventNumber++;
-            
-            if (this.waitingOnKills) {
-                this.spikeDuringTimeout();
-            }
 
             return;
         } else if (data.type === DataTypes.SPIKE_DEFUSED) {
             this.spikeState.defused = true;
             this.eventNumber++;
-
-            if (this.waitingOnKills) {
-                this.spikeDuringTimeout();
-            }
 
             return;
         } else if (data.type === DataTypes.KILLFEED) {
@@ -130,12 +119,7 @@ export class Match {
         } else if (data.type === DataTypes.TEAM_IS_ATTACKER) {
             return;
         } else if (data.type === DataTypes.SCORE) {
-            const team0Score = (data.data as IFormattedScore).team_0;
-            const team1Score = (data.data as IFormattedScore).team_1;
-            const team0 = this.teams.find(team => team.ingameTeamId == 0);
-            const team1 = this.teams.find(team => team.ingameTeamId == 1);
-            team0!.roundsWon = team0Score;
-            team1!.roundsWon = team1Score;
+            this.processScoreCalculation((data.data as IFormattedScore), data.timestamp);
             return;
         }
 
@@ -149,81 +133,49 @@ export class Match {
 
         this.eventNumber++;
         correctTeam.receiveTeamSpecificData(data);
-
-        if (this.waitingOnKills && data.type === DataTypes.SCOREBOARD) {
-            this.checkKillStatus();
-        }
     }
 
-    private processScoreCalculation(eventTimestamp: number) {
-        const attackingTeam = this.teams.find(team => team.isAttacking);
-        const defendingTeam = this.teams.find(team => !team.isAttacking);
+    private processScoreCalculation(data: IFormattedScore, eventTimestamp: number) {
+        const team0NewScore = data.team_0;
+        const team1NewScore = data.team_1;
+        const team0 = this.teams.find(team => team.ingameTeamId == 0)!;
+        const team1 = this.teams.find(team => team.ingameTeamId == 1)!;
 
-        if (this.spikeState.planted === true) {
+        let attackerWon: boolean = false;
+        if (team0NewScore > team0.roundsWon) {
+            attackerWon = team0.isAttacking;
+        } else if (team1NewScore > team1.roundsWon) {
+            attackerWon = team1.isAttacking;
+        }
+
+        team0.roundsWon = team0NewScore;
+        team1.roundsWon = team1NewScore;
+
+        const attackingTeam = team0.isAttacking ? team0 : team1;
+        const defendingTeam = team1.isAttacking ? team0 : team1;
+
+        if (attackerWon) {
             if (this.spikeState.detonated) {
-                attackingTeam?.addRoundReason("detonated");
-                defendingTeam?.addRoundReason("lost");
-            } else if (this.spikeState.defused) {
-                defendingTeam?.addRoundReason("defused");
-                attackingTeam?.addRoundReason("lost");
+                attackingTeam.addRoundReason("detonated");
             } else {
-                attackingTeam?.addRoundReason("kills");
-                defendingTeam?.addRoundReason("lost");
+                attackingTeam.addRoundReason("kills");
             }
-        }
 
-        if (this.spikeState.planted === false) {
-            if (attackingTeam?.alivePlayers() == 0) {
-                defendingTeam?.addRoundReason("kills");
-                attackingTeam?.addRoundReason("lost");
-            } else if (defendingTeam?.alivePlayers() == 0) {
-                attackingTeam?.addRoundReason("kills");
-                defendingTeam?.addRoundReason("lost");
+            defendingTeam.addRoundReason("lost");
+
+        } else {
+
+            if (this.spikeState.defused) {
+                defendingTeam.addRoundReason("defused");
             } else if (this.roundTimeoutTime && eventTimestamp >= this.roundTimeoutTime) {
-                defendingTeam?.addRoundReason("timeout");
-                attackingTeam?.addRoundReason("lost");
+                defendingTeam.addRoundReason("timeout");
             } else {
-                // Has to be a win by kills - but we didn't receive all the data yet
-                // Activate the waiting on kills flag to enable checkKillStatus function
-                Log.debug(`Waiting on kills for round ${this.roundNumber}`);
-                this.waitingOnKills = true;
+                defendingTeam.addRoundReason("kills");
             }
+            
+            attackingTeam.addRoundReason("lost");
         }
 
-
-    }
-
-    private checkKillStatus() {
-        const attackingTeam = this.teams.find(team => team.isAttacking);
-        const defendingTeam = this.teams.find(team => !team.isAttacking);
-
-        if (attackingTeam?.alivePlayers() == 0) {
-            defendingTeam?.addRoundReason("kills");
-            attackingTeam?.addRoundReason("lost");
-            this.waitingOnKills = false;
-        } else if (defendingTeam?.alivePlayers() == 0) {
-            attackingTeam?.addRoundReason("kills");
-            defendingTeam?.addRoundReason("lost");
-            this.waitingOnKills = false;
-        }
-
-        // Triggering scoreboard data did not include a death, waiting...
-    }
-
-    // This should only ever happen in very rare cases where the spike event is delayed for some reason
-    private spikeDuringTimeout() {
-        const attackingTeam = this.teams.find(team => team.isAttacking);
-        const defendingTeam = this.teams.find(team => !team.isAttacking);
-
-        if (this.spikeState.detonated) {
-            attackingTeam?.addRoundReason("detonated");
-            defendingTeam?.addRoundReason("lost");
-        } else if (this.spikeState.defused) {
-            defendingTeam?.addRoundReason("defused");
-            attackingTeam?.addRoundReason("lost");
-        }
-
-        this.waitingOnKills = false;
     }
 
     private debugLogRoundInfo() {
