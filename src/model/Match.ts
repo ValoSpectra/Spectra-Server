@@ -76,6 +76,7 @@ export class Match {
 
             if (this.roundPhase == "end") {
                 this.roundTimeoutTime = undefined;
+                this.teams.forEach(team => team.resetRoundSpent());
             }
 
             this.eventNumber++;
@@ -120,6 +121,7 @@ export class Match {
             return;
         } else if (data.type === DataTypes.SCORE) {
             this.processScoreCalculation((data.data as IFormattedScore), data.timestamp);
+            this.teams.forEach(team => team.resetRoundSpent());
             return;
         }
 
