@@ -59,6 +59,8 @@ export class Match {
             this.roundPhase = (data.data as IFormattedRoundInfo).roundPhase;
 
             if (this.roundPhase == "shopping") {
+                this.teams.forEach(team => team.resetRoundSpent((data.data as IFormattedRoundInfo).roundNumber === this.switchRound));
+
                 this.spikeState.planted = false;
                 this.spikeState.detonated = false;
                 this.spikeState.defused = false;
@@ -76,7 +78,6 @@ export class Match {
 
             if (this.roundPhase == "end") {
                 this.roundTimeoutTime = undefined;
-                this.teams.forEach(team => team.resetRoundSpent());
             }
 
             this.eventNumber++;
@@ -121,7 +122,6 @@ export class Match {
             return;
         } else if (data.type === DataTypes.SCORE) {
             this.processScoreCalculation((data.data as IFormattedScore), data.timestamp);
-            this.teams.forEach(team => team.resetRoundSpent());
             return;
         }
 

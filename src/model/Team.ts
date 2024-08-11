@@ -50,10 +50,13 @@ export class Team {
         }
     }
 
-    resetRoundSpent() {
+    resetRoundSpent(isSideSwitch: boolean) {
         for (const player of this.players) {
             player.moneySpent = 0;
             player.spentMoneyThisRound = false;
+            if (isSideSwitch) {
+                player.money = 800;
+            }
         }
     }
 

@@ -31,7 +31,7 @@ export class Player {
     private maxUltPoints: number = 10;
     private ultReady: boolean = false;
     
-    private money: number = 0;
+    public money: number = 0;
     public moneySpent: number = 0;
     public spentMoneyThisRound: boolean = false;
     public loadoutValue: number = 0;
