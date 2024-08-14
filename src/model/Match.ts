@@ -20,6 +20,7 @@ export class Match {
     public roundPhase: string = "LOBBY";
     private roundTimeoutTime?: number = undefined;
     private wasTimeout: boolean = false;
+    private spikeDetonationTime?: number = undefined;
 
     private teams: Team[] = [];
     private map: string = "";
@@ -88,11 +89,13 @@ export class Match {
                 if (this.roundPhase !== "combat") break;
                 this.spikeState.planted = true;
                 this.roundTimeoutTime = undefined;
+                this.spikeDetonationTime = data.timestamp + (45 * 1000); // Add 45 seconds to the current time
                 this.eventNumber++;
                 break;
 
             case DataTypes.SPIKE_DETONATED:
                 this.spikeState.detonated = true;
+                this.spikeDetonationTime = undefined;
                 this.eventNumber++;
                 break;
 
@@ -103,6 +106,7 @@ export class Match {
 
             case DataTypes.SCORE:
                 this.processScoreCalculation((data.data as IFormattedScore), data.timestamp);
+                this.spikeState.planted = false;
                 break;
 
             case DataTypes.ROUND_INFO:
@@ -134,6 +138,7 @@ export class Match {
 
                     case "end":
                         this.roundTimeoutTime = undefined;
+                        this.spikeDetonationTime = undefined;
                         break;
 
                     case "game_end":
