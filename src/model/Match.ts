@@ -4,6 +4,7 @@ import logging from "../util/Logging";
 import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/valorantInternalTranslator";
 import { AuthTeam } from "../connector/websocketIncoming";
+import { MatchController } from "../controller/MatchController";
 const Log = logging("Match");
 
 
@@ -18,12 +19,14 @@ export class Match {
     public roundNumber: number = 0;
     public roundPhase: string = "LOBBY";
     private roundTimeoutTime?: number = undefined;
+    private wasTimeout: boolean = false;
 
     private teams: Team[] = [];
     private map: string = "";
     private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
+    private attackersWon: boolean = false;
 
-    public ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
+    private ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
 
     private replayLog: ReplayLogging;
     public eventNumber: number = 0;
@@ -42,99 +45,118 @@ export class Match {
         this.isRanked = isRanked;
     }
 
-    setRanks(data: any) {
-        this.ranks = data.ranks;
-    }
-
     receiveMatchSpecificData(data: IAuthedData) {
         this.replayLog.write(data);
 
         let correctTeam = null;
-        if (data.type == DataTypes.MATCH_START) {
-            this.isRunning = true;
-            this.eventNumber++;
-            return;
-        } else if (data.type == DataTypes.ROUND_INFO) {
-            this.roundNumber = (data.data as IFormattedRoundInfo).roundNumber;
-            this.roundPhase = (data.data as IFormattedRoundInfo).roundPhase;
+        switch (data.type) {
 
-            if (this.roundPhase == "shopping") {
-                this.teams.forEach(team => team.resetRoundSpent((data.data as IFormattedRoundInfo).roundNumber === this.switchRound));
+            case DataTypes.SCOREBOARD:
+            case DataTypes.ROSTER:
+                correctTeam = this.teams.find(team => team.ingameTeamId == (data.data as IFormattedScoreboard).startTeam);
 
-                this.spikeState.planted = false;
-                this.spikeState.detonated = false;
-                this.spikeState.defused = false;
-
-                if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
-                    for (const team of this.teams) {
-                        team.switchSides();
-                    }
+                if (correctTeam == null) {
+                    Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
+                    Log.debug(`Data: ${JSON.stringify(data)}`);
+                    break;
                 }
-            }
 
-            if (this.roundPhase == "combat") {
-                this.roundTimeoutTime = data.timestamp + (100 * 1000); // Add 100 seconds to the current time
-            }
+                this.eventNumber++;
+                correctTeam.receiveTeamSpecificData(data);
+                break;
 
-            if (this.roundPhase == "end") {
+            case DataTypes.KILLFEED:
+                correctTeam = this.teams.find(team => team.hasTeamMemberByName((data.data as IFormattedKillfeed).attacker));
+
+                if (correctTeam == null) {
+                    Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
+                    Log.debug(`Data: ${JSON.stringify(data)}`);
+                    break;
+                }
+
+                correctTeam.receiveTeamSpecificData(data);
+                this.eventNumber++;
+                break;
+
+            case DataTypes.OBSERVING:
+                for (const team of this.teams) {
+                    team.setObservedPlayer(data.data as string);
+                }
+                break;
+
+            case DataTypes.SPIKE_PLANTED:
+                if (this.roundPhase !== "combat") break;
+                this.spikeState.planted = true;
                 this.roundTimeoutTime = undefined;
-            }
+                this.eventNumber++;
+                break;
 
-            this.eventNumber++;
-            return;
-        } else if (data.type === DataTypes.MAP) {
-            this.map = Maps[data.data as keyof typeof Maps];
-            this.eventNumber++;
-            return;
-        } else if (data.type === DataTypes.SPIKE_PLANTED) {
-            if (this.roundPhase !== "combat") return;
-            this.spikeState.planted = true;
-            this.roundTimeoutTime = undefined;
-            this.eventNumber++;
-            return;
-        } else if (data.type === DataTypes.SPIKE_DETONATED) {
-            this.spikeState.detonated = true;
-            this.eventNumber++;
+            case DataTypes.SPIKE_DETONATED:
+                this.spikeState.detonated = true;
+                this.eventNumber++;
+                break;
 
-            return;
-        } else if (data.type === DataTypes.SPIKE_DEFUSED) {
-            this.spikeState.defused = true;
-            this.eventNumber++;
+            case DataTypes.SPIKE_DEFUSED:
+                this.spikeState.defused = true;
+                this.eventNumber++;
+                break;
 
-            return;
-        } else if (data.type === DataTypes.KILLFEED) {
-            correctTeam = this.teams.find(team => team.hasTeamMemberByName((data.data as IFormattedKillfeed).attacker));
+            case DataTypes.SCORE:
+                this.processScoreCalculation((data.data as IFormattedScore), data.timestamp);
+                break;
 
-            if (correctTeam == null) {
-                Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
-                Log.debug(`Data: ${JSON.stringify(data)}`);
-                return;
-            }
+            case DataTypes.ROUND_INFO:
+                this.roundNumber = (data.data as IFormattedRoundInfo).roundNumber;
+                this.roundPhase = (data.data as IFormattedRoundInfo).roundPhase;
 
-            correctTeam.receiveTeamSpecificData(data);
-            this.eventNumber++;
-            return;
-        } else if (data.type === DataTypes.OBSERVING) {
-            for (const team of this.teams) {
-                team.setObservedPlayer(data.data as string);
-            }
-        } else if (data.type === DataTypes.TEAM_IS_ATTACKER) {
-            return;
-        } else if (data.type === DataTypes.SCORE) {
-            this.processScoreCalculation((data.data as IFormattedScore), data.timestamp);
-            return;
+                switch (this.roundPhase) {
+                    case "shopping":
+                        this.processRoundReasons();
+
+                        this.spikeState.planted = false;
+                        this.spikeState.detonated = false;
+                        this.spikeState.defused = false;
+
+                        let isSwitchRound = false;
+                        if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
+                            for (const team of this.teams) {
+                                team.switchSides();
+                            }
+                            isSwitchRound = true;
+                        }
+
+                        this.teams.forEach(team => team.resetRoundSpecificValues(isSwitchRound));
+                        break;
+
+                    case "combat":
+                        this.roundTimeoutTime = data.timestamp + (100 * 1000); // Add 100 seconds to the current time
+                        break;
+
+                    case "end":
+                        this.roundTimeoutTime = undefined;
+                        break;
+
+                    case "game_end":
+                        this.isRunning = false;
+                        this.eventNumber++;
+                        MatchController.getInstance().removeMatch(this.groupCode);
+                        break;
+                }
+
+                this.eventNumber++;
+                break;
+
+            case DataTypes.MATCH_START:
+                this.isRunning = true;
+                this.eventNumber++;
+                break;
+
+            case DataTypes.MAP:
+                this.map = Maps[data.data as keyof typeof Maps];
+                this.eventNumber++;
+                break;
+
         }
-
-        correctTeam = this.teams.find(team => team.ingameTeamId == (data.data as IFormattedScoreboard).startTeam);
-
-        if (correctTeam == null) {
-            Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
-            Log.debug(`Data: ${JSON.stringify(data)}`);
-            return;
-        }
-
-        this.eventNumber++;
-        correctTeam.receiveTeamSpecificData(data);
     }
 
     private processScoreCalculation(data: IFormattedScore, eventTimestamp: number) {
@@ -143,20 +165,25 @@ export class Match {
         const team0 = this.teams.find(team => team.ingameTeamId == 0)!;
         const team1 = this.teams.find(team => team.ingameTeamId == 1)!;
 
-        let attackerWon: boolean = false;
         if (team0NewScore > team0.roundsWon) {
-            attackerWon = team0.isAttacking;
+            this.attackersWon = team0.isAttacking;
         } else if (team1NewScore > team1.roundsWon) {
-            attackerWon = team1.isAttacking;
+            this.attackersWon = team1.isAttacking;
+        }
+
+        if (this.roundTimeoutTime && eventTimestamp >= this.roundTimeoutTime) {
+            this.wasTimeout = true;
         }
 
         team0.roundsWon = team0NewScore;
         team1.roundsWon = team1NewScore;
+    }
 
-        const attackingTeam = team0.isAttacking ? team0 : team1;
-        const defendingTeam = team1.isAttacking ? team0 : team1;
+    private processRoundReasons() {
+        const attackingTeam = this.teams.find(team => team.isAttacking == true)!;
+        const defendingTeam = this.teams.find(team => team.isAttacking == false)!;
 
-        if (attackerWon) {
+        if (this.attackersWon) {
             if (this.spikeState.detonated) {
                 attackingTeam.addRoundReason("detonated");
             } else {
@@ -169,15 +196,14 @@ export class Match {
 
             if (this.spikeState.defused) {
                 defendingTeam.addRoundReason("defused");
-            } else if (this.roundTimeoutTime && eventTimestamp >= this.roundTimeoutTime) {
+            } else if (this.wasTimeout) {
                 defendingTeam.addRoundReason("timeout");
             } else {
                 defendingTeam.addRoundReason("kills");
             }
-            
+
             attackingTeam.addRoundReason("lost");
         }
-
     }
 
     private debugLogRoundInfo() {

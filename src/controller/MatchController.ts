@@ -18,19 +18,6 @@ export class MatchController {
         return MatchController.instance;
     }
 
-    removeMatch(data: any) {
-        if (this.matches[data.groupCode]) {
-            delete this.matches[data.groupCode];
-            Log.info(`Removed match ${data.groupCode}!`);
-        }
-    }
-
-    setRanks(data: any) {
-        if (this.matches[data.groupCode] != null) {
-            this.matches[data.groupCode]!.setRanks(data);
-        }
-    }
-
     createMatch(data: IAUthenticationData) {
         try {
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
@@ -41,6 +28,17 @@ export class MatchController {
         } catch (e) {
             Log.info(`Failed to create match with group code ${data.groupCode}`);
             return false;
+        }
+    }
+
+    removeMatch(groupCode: string) {
+        if (this.matches[groupCode] != null) {
+            delete this.matches[groupCode];
+            Log.info(`Deleted match with group code ${groupCode}`);
+            if (Object.keys(this.matches).length == 0 && this.sendInterval != null) {
+                clearInterval(this.sendInterval);
+                Log.info(`Last match concluded, stopping send loop`);
+            }
         }
     }
 

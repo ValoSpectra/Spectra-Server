@@ -50,34 +50,30 @@ export class Team {
         }
     }
 
-    resetRoundSpent(isSideSwitch: boolean) {
+    resetRoundSpecificValues(isSideSwitch: boolean) {
         for (const player of this.players) {
-            player.moneySpent = 0;
-            player.spentMoneyThisRound = false;
-            if (isSideSwitch) {
-                player.money = 800;
-            }
+            player.resetRoundSpecificValues(isSideSwitch);
         }
     }
 
     getSpentThisRound(): number {
         let total = 0;
         for (const player of this.players) {
-            total += player.moneySpent;
+            total += player.getMoneySpent();
         }
         return total;
     }
 
     hasTeamMemberByName(playerName: string): boolean {
-        return this.players.some(player => player.name === playerName);
+        return this.players.some(player => player.getName() === playerName);
     }
 
     hasTeamMemberBySearchName(playerSearchName: string): boolean {
-        return this.players.some(player => player.searchName === playerSearchName);
+        return this.players.some(player => player.getSearchName() === playerSearchName);
     }
 
     hasTeamMemberById(playerId: string): boolean {
-        return this.players.some(player => player.playerId === playerId);
+        return this.players.some(player => player.getPlayerId() === playerId);
     }
 
     getPlayerCount(): number {
@@ -96,7 +92,7 @@ export class Team {
 
     private processRosterData(data: IFormattedRoster) {
         if (data.playerId == "" || data.name == "" || data.tagline == "") return;
-        const correctPlayer = this.players.find(player => player.playerId === data.playerId);
+        const correctPlayer = this.players.find(player => player.getPlayerId() === data.playerId);
 
         if (correctPlayer) {
             correctPlayer.onRosterUpdate(data);
@@ -111,14 +107,14 @@ export class Team {
     }
 
     private processScoreboardData(data: IFormattedScoreboard) {
-        const player = this.players.find(player => player.playerId === data.playerId);
+        const player = this.players.find(player => player.getPlayerId() === data.playerId);
         if (!player) return;
         player.updateFromScoreboard(data);
         this.spentThisRound = this.getSpentThisRound();
     }
 
     private processKillfeedData(data: IFormattedKillfeed) {
-        const player = this.players.find(player => player.name === data.attacker);
+        const player = this.players.find(player => player.getPlayerId() === data.attacker);
         if (!player) return;
         player.extractKillfeedInfo(data);
     }
@@ -126,7 +122,7 @@ export class Team {
     private teamKills(): number {
         let count = 0;
         for (const player of this.players) {
-            count += player.killsThisRound;
+            count += player.getKillsThisRound();
         }
 
         return count;
@@ -134,7 +130,7 @@ export class Team {
 
     private resetTeamKills() {
         for (const player of this.players) {
-            player.killsThisRound = 0;
+            player.resetKillsThisRound();
         }
     }
 
@@ -143,7 +139,7 @@ export class Team {
 
         let count = 0;
         for (const player of this.players) {
-            if (player.isAlive) {
+            if (player.checkIsAlive()) {
                 count++;
             }
         }
@@ -152,9 +148,6 @@ export class Team {
 
     public addRoundReason(reason: RecordType) {
         this.roundRecord.push(reason);
-        // if (reason != "lost") {
-        //     this.roundsWon++;
-        // }
     }
 
 }

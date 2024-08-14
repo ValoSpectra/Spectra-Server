@@ -1,4 +1,4 @@
-import { Agents, WeaponsAndAbilities, ranks } from "../util/valorantInternalTranslator";
+import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
 import { IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
 const Log = logging("Player");
@@ -6,42 +6,40 @@ const Log = logging("Player");
 type ValueOf<T> = T[keyof T];
 
 export class Player {
-    public name: string;
-    public tagline: string;
-    public playerId: string;
-    public searchName: string;
+    private name: string;
+    private tagline: string;
+    private playerId: string;
+    private searchName: string;
     
     private position: number;
     private locked: boolean = false;
     private agentInternal: string = "";
     private agentProper: ValueOf<Agents> = "";
-    private rankName: string;
 
-    public isAlive: boolean = true;
+    private isAlive: boolean = true;
     private hasSpike: boolean = false;
-    public isObserved: boolean = false;
+    private isObserved: boolean = false;
 
     private kills: number = 0;
     private deaths: number = 0;
     private assists: number = 0;
     private kdRatio: number = 0;
-    public killsThisRound: number = 0;
+    private killsThisRound: number = 0;
 
     private currUltPoints: number = 0;
     private maxUltPoints: number = 10;
     private ultReady: boolean = false;
     
-    public money: number = 0;
-    public moneySpent: number = 0;
-    public spentMoneyThisRound: boolean = false;
-    public loadoutValue: number = 0;
+    private money: number = 0;
+    private moneySpent: number = 0;
+    private spentMoneyThisRound: boolean = false;
 
     private initialShield: number = 0;
     private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["knife"];
 
     // Data extrapolated from Killfeed
-    private teamkills: number = 0;
-    private headshotkills: number = 0;
+    private teamKills: number = 0;
+    private headshotKills: number = 0;
     private headshotRatio: number = 0;
 
     private killsByWeaponsAndAbilities: Record<string, number> = {};
@@ -55,7 +53,6 @@ export class Player {
         this.playerId = data.playerId;
         this.searchName = `${data.name} #${data.tagline}`;
         this.position = data.position;
-        this.rankName = ranks[data.rank];
         this.agentInternal = data.agentInternal;
         this.agentProper = Agents[data.agentInternal];
         this.locked = data.locked;
@@ -97,9 +94,6 @@ export class Player {
         this.agentInternal = data.agentInternal;
         this.agentProper = Agents[data.agentInternal];
 
-        if (!data.isAlive) {
-            this.loadoutValue = 0;
-        }
         this.isAlive = data.isAlive;
         this.hasSpike = data.hasSpike;
     }
@@ -116,13 +110,13 @@ export class Player {
 
         // Store headshot data
         if (data.headshotKill == true) {
-            this.headshotkills++;
-            this.headshotRatio = this.headshotkills / this.kills;
+            this.headshotKills++;
+            this.headshotRatio = this.headshotKills / this.kills;
         }
 
         // Store teamkill data
         if (data.isTeamkill == true) {
-            this.teamkills++;
+            this.teamKills++;
             let existing: number = this.killsOnTeammatePlayer[data.victim];
             if (existing) {
                 this.killsOnTeammatePlayer[data.victim] = existing++;
@@ -141,17 +135,18 @@ export class Player {
             }
         }
 
+        // TEMPORARILY COMMENTED OUT, WE ONLY GET THE ASSISTERS AGENT NAME
         // Store how often we got assisted by which teammate
-        if (data.assists.length > 0) {
-            for (const assister of data.assists) {
-                let existing: number = this.assistsFromTeammate[assister];
-                if (existing) {
-                    this.assistsFromTeammate[assister] = existing++;
-                } else {
-                    this.assistsFromTeammate[assister] = 1;
-                }
-            }
-        }
+        // if (data.assists.length > 0) {
+        //     for (const assister of data.assists) {
+        //         let existing: number = this.assistsFromTeammate[assister];
+        //         if (existing) {
+        //             this.assistsFromTeammate[assister] = existing++;
+        //         } else {
+        //             this.assistsFromTeammate[assister] = 1;
+        //         }
+        //     }
+        // }
 
     }
 
@@ -161,5 +156,47 @@ export class Player {
         } else {
             this.isObserved = false;
         }
+    }
+
+    public resetRoundSpecificValues(isSideSwitch: boolean) {
+        this.resetKillsThisRound();
+        this.resetMoneyThisRound();
+
+        if (isSideSwitch) {
+            this.money = 800;
+        }
+    }
+
+    public getName(): string {
+        return this.name;
+    }
+
+    public getSearchName(): string {
+        return this.searchName;
+    }
+
+    public getPlayerId(): string {
+        return this.playerId;
+    }
+
+    public checkIsAlive(): boolean {
+        return this.isAlive;
+    }
+
+    public getMoneySpent(): number {
+        return this.moneySpent;
+    }
+
+    public getKillsThisRound(): number {
+        return this.killsThisRound;
+    }
+
+    public resetKillsThisRound(): void {
+        this.killsThisRound = 0;
+    }
+
+    public resetMoneyThisRound(): void {
+        this.moneySpent = 0;
+        this.spentMoneyThisRound = false;
     }
 }
