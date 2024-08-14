@@ -10,6 +10,7 @@ export class MatchController {
     private sendInterval: NodeJS.Timeout | null = null;
 
     private matches: Record<string, Match> = {};
+    private eventNumbers: Record<string, number> = {};
 
     private constructor() { };
 
@@ -22,6 +23,7 @@ export class MatchController {
         try {
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
             this.matches[data.groupCode] = newMatch;
+            this.eventNumbers[data.groupCode] = 0;
             this.startOutgoingSendLoop();
             Log.info(`New match "${newMatch.groupCode}" registered!`);
             return true;
@@ -34,6 +36,7 @@ export class MatchController {
     removeMatch(groupCode: string) {
         if (this.matches[groupCode] != null) {
             delete this.matches[groupCode];
+            delete this.eventNumbers[groupCode];
             Log.info(`Deleted match with group code ${groupCode}`);
             if (Object.keys(this.matches).length == 0 && this.sendInterval != null) {
                 clearInterval(this.sendInterval);
@@ -61,7 +64,10 @@ export class MatchController {
         if (this.sendInterval != null) return;
         this.sendInterval = setInterval(() => {
             for (const groupCode in this.matches) {
-                this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
+                if (this.matches[groupCode].eventNumber > this.eventNumbers[groupCode]) {
+                    this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
+                    this.eventNumbers[groupCode] = this.matches[groupCode].eventNumber;
+                }
             }
         }, 100);
     }
