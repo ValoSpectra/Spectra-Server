@@ -172,6 +172,8 @@ export class Match {
 
         if (this.roundTimeoutTime && eventTimestamp >= this.roundTimeoutTime) {
             this.wasTimeout = true;
+        } else {
+            this.wasTimeout = false;
         }
 
         team0.roundsWon = team0NewScore;
