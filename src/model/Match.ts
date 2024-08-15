@@ -30,7 +30,7 @@ export class Match {
     private ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
 
     private replayLog: ReplayLogging;
-    public eventNumber: number = 0;
+    public eventNumber: number = 1;
 
     constructor(groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam, isRanked: boolean = false) {
         this.groupCode = groupCode;
