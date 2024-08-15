@@ -59,10 +59,9 @@ export class Match {
                 if (correctTeam == null) {
                     Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
                     Log.debug(`Data: ${JSON.stringify(data)}`);
-                    break;
+                    return;
                 }
 
-                this.eventNumber++;
                 correctTeam.receiveTeamSpecificData(data);
                 break;
 
@@ -72,11 +71,10 @@ export class Match {
                 if (correctTeam == null) {
                     Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
                     Log.debug(`Data: ${JSON.stringify(data)}`);
-                    break;
+                    return;
                 }
 
                 correctTeam.receiveTeamSpecificData(data);
-                this.eventNumber++;
                 break;
 
             case DataTypes.OBSERVING:
@@ -90,18 +88,15 @@ export class Match {
                 this.spikeState.planted = true;
                 this.roundTimeoutTime = undefined;
                 this.spikeDetonationTime = data.timestamp + (45 * 1000); // Add 45 seconds to the current time
-                this.eventNumber++;
                 break;
 
             case DataTypes.SPIKE_DETONATED:
                 this.spikeState.detonated = true;
                 this.spikeDetonationTime = undefined;
-                this.eventNumber++;
                 break;
 
             case DataTypes.SPIKE_DEFUSED:
                 this.spikeState.defused = true;
-                this.eventNumber++;
                 break;
 
             case DataTypes.SCORE:
@@ -145,23 +140,22 @@ export class Match {
                         this.isRunning = false;
                         this.eventNumber++;
                         MatchController.getInstance().removeMatch(this.groupCode);
-                        break;
+                        return;
                 }
 
-                this.eventNumber++;
                 break;
 
             case DataTypes.MATCH_START:
                 this.isRunning = true;
-                this.eventNumber++;
                 break;
 
             case DataTypes.MAP:
                 this.map = Maps[data.data as keyof typeof Maps];
-                this.eventNumber++;
                 break;
 
         }
+
+        this.eventNumber++;
     }
 
     private processScoreCalculation(data: IFormattedScore, eventTimestamp: number) {

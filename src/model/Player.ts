@@ -151,7 +151,7 @@ export class Player {
     }
 
     public processObservedEvent(observedName: string) {
-        if (this.searchName === observedName) {
+        if (this.searchName == observedName) {
             this.isObserved = true;
         } else {
             this.isObserved = false;
