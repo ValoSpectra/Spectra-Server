@@ -1,5 +1,8 @@
+require('dotenv').config()
 import { Server } from "socket.io";
 import logging from "../util/Logging";
+import { readFileSync } from "fs";
+import { createServer } from "https";
 const Log = logging("WebsocketOutgoing");
 
 export class WebsocketOutgoing {
@@ -14,7 +17,18 @@ export class WebsocketOutgoing {
 
     constructor() {
 
-        this.wss = new Server(5200, {
+        const options = {
+            key: readFileSync(process.env.SERVER_KEY!),
+            cert: readFileSync(process.env.SERVER_CERT!),
+            requestCert: true,
+            ca: [
+                readFileSync(process.env.CLIENT_CERT!)
+            ]
+        }
+
+        const httpsServer = createServer(options);
+        
+        this.wss = new Server(httpsServer, {
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -49,6 +63,8 @@ export class WebsocketOutgoing {
         this.wss.engine.on("connection_error", (err) => {
             console.log("Socket.IO error: ", err);
         });
+
+        httpsServer.listen(5200);
 
         Log.info(`InhouseTracker Server outputting on port 5200!`);
     }
