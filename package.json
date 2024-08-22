@@ -20,13 +20,14 @@
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@types/express": "^4.17.21",
-    "@types/node": "^22.3.0",
+    "@types/node": "^22.5.0",
     "nodemon": "^3.1.4",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "dotenv": "^16.4.5",
     "eventsource": "^2.0.2",
     "lodash": "^4.17.21",
     "socket.io": "^4.7.5",

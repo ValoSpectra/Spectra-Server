@@ -1,7 +1,10 @@
+require('dotenv').config()
 import { Server, Socket } from "socket.io";
 import { DataTypes, isAuthedData } from "../model/eventData";
 import { MatchController } from "../controller/MatchController";
 import logging from "../util/Logging";
+import { readFileSync } from "fs";
+import { createServer } from "https";
 const Log = logging("WebsocketIncoming");
 
 export class WebsocketIncoming {
@@ -11,7 +14,14 @@ export class WebsocketIncoming {
 
     constructor() {
 
-        this.wss = new Server(5100, {
+        const options = {
+            key: readFileSync(process.env.SERVER_KEY!),
+            cert: readFileSync(process.env.SERVER_CERT!)
+        }
+
+        const httpsServer = createServer(options);
+
+        this.wss = new Server(httpsServer, {
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -56,6 +66,7 @@ export class WebsocketIncoming {
 
         });
 
+        httpsServer.listen(5100);
         Log.info(`InhouseTracker Server ingesting on port 5100!`);
     }
 
