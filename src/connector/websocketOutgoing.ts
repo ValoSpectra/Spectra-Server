@@ -19,8 +19,7 @@ export class WebsocketOutgoing {
 
         const options = {
             key: readFileSync(process.env.SERVER_KEY!),
-            cert: readFileSync(process.env.SERVER_CERT!),
-            requestCert: true
+            cert: readFileSync(process.env.SERVER_CERT!)
         }
 
         const httpsServer = createServer(options);
