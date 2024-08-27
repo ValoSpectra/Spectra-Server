@@ -63,7 +63,9 @@ export interface IFormattedData {
 }
 
 export interface IAUthenticationData {
+    type: string,
     obsName: string,
+    key: string,
     groupCode: string,
     leftTeam: AuthTeam,
     rightTeam: AuthTeam,

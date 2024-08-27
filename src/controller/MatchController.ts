@@ -21,6 +21,9 @@ export class MatchController {
 
     createMatch(data: IAUthenticationData) {
         try {
+            if (this.matches[data.groupCode] != null) {
+                return false;
+            }
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
             this.matches[data.groupCode] = newMatch;
             this.eventNumbers[data.groupCode] = 0;

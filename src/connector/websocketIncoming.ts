@@ -1,10 +1,11 @@
 require('dotenv').config()
 import { Server, Socket } from "socket.io";
-import { DataTypes, isAuthedData } from "../model/eventData";
+import { DataTypes, IAUthenticationData, isAuthedData } from "../model/eventData";
 import { MatchController } from "../controller/MatchController";
 import logging from "../util/Logging";
 import { readFileSync } from "fs";
 import { createServer } from "https";
+import { ValidKeys } from "../util/ValidKeys";
 const Log = logging("WebsocketIncoming");
 
 export class WebsocketIncoming {
@@ -13,6 +14,10 @@ export class WebsocketIncoming {
     matchController = MatchController.getInstance();
 
     constructor() {
+
+        if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
+            Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
+        }
 
         const options = {
             key: readFileSync(process.env.SERVER_KEY!),
@@ -45,19 +50,31 @@ export class WebsocketIncoming {
 
             ws.once('obs_logon', (msg) => {
                 try {
-                    const json = JSON.parse(msg.toString());
-                    if (json.type === DataTypes.AUTH && this.matchController.createMatch(json)) {
-                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
-                        user.name = json.obsName;
-                        user.groupCode = json.groupCode;
-                        this.authedClients.push(user);
+                    const authenticationData: IAUthenticationData = JSON.parse(msg.toString());
+                    if (authenticationData.type === DataTypes.AUTH) {
 
-                        Log.info(`Received VALID auth request from ${json.obsName}, using Group Code ${json.groupCode} with teams ${json.leftTeam.name} and ${json.rightTeam.name}`);
-                        this.onAuthSuccess(user);
-                    } else {
-                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false }));
-                        ws.disconnect();
-                        Log.info(`Received BAD auth request from ${json.obsName}, using Group Code ${json.groupCode}`);
+                        if (this.validateKey(authenticationData.key)) {
+
+                            if (this.matchController.createMatch(authenticationData)) {
+                                ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
+                                user.name = authenticationData.obsName;
+                                user.groupCode = authenticationData.groupCode;
+                                this.authedClients.push(user);
+
+                                Log.info(`Received VALID auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key} with teams ${authenticationData.leftTeam.name} and ${authenticationData.rightTeam.name}`);
+                                this.onAuthSuccess(user);
+                            } else {
+                                ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Game with Group Code ${authenticationData.groupCode} exists and is still live.` }));
+                                ws.disconnect();
+                                Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
+                            }
+
+                        } else {
+                            ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Invalid key provided.` }));
+                            ws.disconnect();
+                            Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
+                        }
+
                     }
                 } catch (e) {
                     Log.error(`Error parsing incoming auth request: ${e}`);
@@ -80,8 +97,13 @@ export class WebsocketIncoming {
             } catch (e) {
                 Log.error(`Error parsing obs_data: ${e}`);
             }
-            
+
         });
+    }
+
+    private validateKey(key: string) {
+        if (ValidKeys.includes(key)) return true;
+        return false;
     }
 
 }

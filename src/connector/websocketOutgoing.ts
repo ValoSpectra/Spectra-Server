@@ -17,6 +17,10 @@ export class WebsocketOutgoing {
 
     constructor() {
 
+        if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
+            Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
+        }
+
         const options = {
             key: readFileSync(process.env.SERVER_KEY!),
             cert: readFileSync(process.env.SERVER_CERT!)
