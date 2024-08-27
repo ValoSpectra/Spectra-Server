@@ -178,8 +178,8 @@ export enum Agents {
     "Smonk_PC_C" = "Clove",
     "Smonk" = "Clove",
 
-    "Next_PC_C" = "Vyse",
-    "Next" = "Vyse",
+    "Nox_PC_C" = "Vyse",
+    "Nox" = "Vyse",
 }
 
 export enum Maps {
