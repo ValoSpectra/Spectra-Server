@@ -102,6 +102,7 @@ export class WebsocketIncoming {
     }
 
     private validateKey(key: string) {
+        if (process.env.REQUIRE_AUTH_KEY === "false") return true;
         if (ValidKeys.includes(key)) return true;
         return false;
     }
