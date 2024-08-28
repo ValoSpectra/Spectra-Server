@@ -23,7 +23,8 @@ export class Match {
     private spikeDetonationTime?: number = undefined;
 
     private teams: Team[] = [];
-    private map: string = "";
+    private map : string = "";
+    private seletedMap: string[] = [];
     private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
     private attackersWon: boolean = false;
 
@@ -32,7 +33,7 @@ export class Match {
     private replayLog: ReplayLogging;
     public eventNumber: number = 1;
 
-    constructor(groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam, isRanked: boolean = false) {
+    constructor(groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam,isRanked: boolean = false, map : string[]) {
         this.groupCode = groupCode;
 
         this.replayLog = new ReplayLogging(this.groupCode);
@@ -44,6 +45,8 @@ export class Match {
         this.teams.push(secondTeam);
 
         this.isRanked = isRanked;
+
+        this.seletedMap = map;
     }
 
     receiveMatchSpecificData(data: IAuthedData) {

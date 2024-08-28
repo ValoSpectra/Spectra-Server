@@ -24,7 +24,10 @@ export class MatchController {
             if (this.matches[data.groupCode] != null) {
                 return false;
             }
-            const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
+            
+            const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam,false,data.map);
+            Log.info(JSON.stringify(newMatch));
+            
             this.matches[data.groupCode] = newMatch;
             this.eventNumbers[data.groupCode] = 0;
             this.startOutgoingSendLoop();
