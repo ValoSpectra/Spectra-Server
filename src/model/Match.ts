@@ -9,6 +9,7 @@ const Log = logging("Match");
 
 
 export class Match {
+    private matchType: "bomb" | "swift" | string = "bomb";
     private switchRound = 13;
     private firstOtRound = 25;
 
@@ -151,6 +152,24 @@ export class Match {
 
             case DataTypes.MAP:
                 this.map = Maps[data.data as keyof typeof Maps];
+                break;
+
+            case DataTypes.GAME_MODE:
+                this.matchType = data.data as string;
+                switch (this.matchType) {
+
+                    case "swift":
+                        this.switchRound = 5;
+                        this.firstOtRound = 99;
+                        break;
+
+                    case "bomb":
+                    default:
+                        this.switchRound = 13;
+                        this.firstOtRound = 25;
+                        break;
+
+                }
                 break;
 
         }
