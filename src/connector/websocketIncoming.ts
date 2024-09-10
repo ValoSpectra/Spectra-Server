@@ -10,7 +10,7 @@ const Log = logging("WebsocketIncoming");
 
 export class WebsocketIncoming {
     wss: Server;
-    authedClients: ClientUser[] = [];
+    static authedClients: ClientUser[] = [];
     matchController = MatchController.getInstance();
 
     constructor() {
@@ -59,7 +59,7 @@ export class WebsocketIncoming {
                                 ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
                                 user.name = authenticationData.obsName;
                                 user.groupCode = authenticationData.groupCode;
-                                this.authedClients.push(user);
+                                WebsocketIncoming.authedClients.push(user);
 
                                 Log.info(`Received VALID auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key} with teams ${authenticationData.leftTeam.name} and ${authenticationData.rightTeam.name}`);
                                 this.onAuthSuccess(user);
@@ -105,6 +105,14 @@ export class WebsocketIncoming {
         if (process.env.REQUIRE_AUTH_KEY === "false") return true;
         if (ValidKeys.includes(key)) return true;
         return false;
+    }
+
+    public static disconnectGroupCode(groupCode: string) {
+        for (const client of WebsocketIncoming.authedClients) {
+            if (client.groupCode === groupCode) {
+                client.ws.disconnect();
+            }
+        }
     }
 
 }

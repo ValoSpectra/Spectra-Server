@@ -1,3 +1,4 @@
+import { WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
 import { IAuthedData, IAUthenticationData } from "../model/eventData";
@@ -11,6 +12,7 @@ export class MatchController {
 
     private matches: Record<string, Match> = {};
     private eventNumbers: Record<string, number> = {};
+    private eventTimes: Record<string, number> = {};
 
     private constructor() { };
 
@@ -40,6 +42,7 @@ export class MatchController {
         if (this.matches[groupCode] != null) {
             delete this.matches[groupCode];
             delete this.eventNumbers[groupCode];
+            WebsocketIncoming.disconnectGroupCode(groupCode);
             Log.info(`Deleted match with group code ${groupCode}`);
             if (Object.keys(this.matches).length == 0 && this.sendInterval != null) {
                 clearInterval(this.sendInterval);
@@ -64,12 +67,23 @@ export class MatchController {
     }
 
     private startOutgoingSendLoop() {
-        if (this.sendInterval != null) return;
+        if (this.sendInterval != null) {
+            Log.info(`Match registered with active send loop, skipping start`);
+            return;
+        }
+        Log.info(`Match registered without active send loop, starting send loop`);
         this.sendInterval = setInterval(() => {
             for (const groupCode in this.matches) {
                 if (this.matches[groupCode].eventNumber > this.eventNumbers[groupCode]) {
                     this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
                     this.eventNumbers[groupCode] = this.matches[groupCode].eventNumber;
+                    this.eventTimes[groupCode] = Date.now();
+                } else {
+                    // Check if the last event was more than 30 minutes ago
+                    if (Date.now() - this.eventTimes[groupCode] > (1000 * 60 * 30)) {
+                        Log.info(`Match with group code ${groupCode} has been inactive for more than 30 minutes, removing.`);
+                        this.removeMatch(groupCode);
+                    }
                 }
             }
         }, 100);
