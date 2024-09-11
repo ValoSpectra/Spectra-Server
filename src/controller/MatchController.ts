@@ -46,7 +46,8 @@ export class MatchController {
             Log.info(`Deleted match with group code ${groupCode}`);
             if (Object.keys(this.matches).length == 0 && this.sendInterval != null) {
                 clearInterval(this.sendInterval);
-                Log.info(`Last match concluded, stopping send loop`);
+                this.sendInterval = null;
+                Log.info(`Last match concluded, send loop stopped`);
             }
         }
     }
@@ -71,7 +72,7 @@ export class MatchController {
             Log.info(`Match registered with active send loop, skipping start`);
             return;
         }
-        Log.info(`Match registered without active send loop, starting send loop`);
+        Log.info(`Match registered without active send loop, send loop started`);
         this.sendInterval = setInterval(() => {
             for (const groupCode in this.matches) {
                 if (this.matches[groupCode].eventNumber > this.eventNumbers[groupCode]) {
