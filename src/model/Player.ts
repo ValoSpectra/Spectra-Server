@@ -54,7 +54,7 @@ export class Player {
         this.searchName = `${data.name} #${data.tagline}`;
         this.position = data.position;
         this.agentInternal = data.agentInternal;
-        this.agentProper = Agents[data.agentInternal];
+        this.agentProper = Agents[data.agentInternal] || data.agentInternal;
         this.locked = data.locked;
     }
 
@@ -62,7 +62,7 @@ export class Player {
         this.name = data.name;
         this.tagline = data.tagline;
         this.agentInternal = data.agentInternal;
-        this.agentProper = Agents[data.agentInternal];
+        this.agentProper = Agents[data.agentInternal] || data.agentInternal;
         this.locked = data.locked;
     }
 
@@ -92,7 +92,7 @@ export class Player {
         this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal]
 
         this.agentInternal = data.agentInternal;
-        this.agentProper = Agents[data.agentInternal];
+        this.agentProper = Agents[data.agentInternal] || data.agentInternal;
 
         this.isAlive = data.isAlive;
         this.hasSpike = data.hasSpike;
