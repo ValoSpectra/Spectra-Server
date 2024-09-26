@@ -67,6 +67,12 @@ export class MatchController {
         trackedMatch.receiveMatchSpecificData(data)
     }
 
+    sendMatchDataForLogon(groupCode: string) {
+        if (this.matches[groupCode] != null) {
+            this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
+        }
+    }
+
     private startOutgoingSendLoop() {
         if (this.sendInterval != null) {
             Log.info(`Match registered with active send loop, skipping start`);

@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import logging from "../util/Logging";
 import { readFileSync } from "fs";
 import { createServer } from "https";
+import { MatchController } from "../controller/MatchController";
 const Log = logging("WebsocketOutgoing");
 
 export class WebsocketOutgoing {
@@ -54,6 +55,7 @@ export class WebsocketOutgoing {
                     ws.join(json.groupCode);
                     ws.emit("logon_success", JSON.stringify({ groupCode: json.groupCode, msg: `Logon succeeded for group code ${json.groupCode}` }));
                     Log.info(`Received output logon using Group Code ${json.groupCode}`);
+                    MatchController.getInstance().sendMatchDataForLogon(json.groupCode);
                 } catch (e) {
                     Log.error(`Error parsing outgoing logon request: ${e}`);
                 }

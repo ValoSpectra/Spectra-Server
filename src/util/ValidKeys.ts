@@ -1,1 +1,1 @@
-export const ValidKeys = [""]; // Add keys valid for auth here
+export const ValidKeys = ["DEBUG_REMOVE_ME"]; // Add keys valid for auth here

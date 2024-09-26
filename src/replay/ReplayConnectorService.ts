@@ -7,6 +7,7 @@ const Log = logging("ReplayConnectorService");
 export class ReplayConnectorService {
     
     private obsName = "Replayuser#test";
+    private key = "DEBUG_REMOVE_ME";
     private groupCode = "A";
     private leftTeam: AuthTeam = {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7", attackStart: true};
     private rightTeam: AuthTeam = {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE", attackStart: false};
@@ -47,6 +48,7 @@ export class ReplayConnectorService {
                     type: DataTypes.AUTH, 
                     obsName: this.obsName, 
                     groupCode: this.groupCode,
+                    key: this.key,
                     leftTeam: this.leftTeam,
                     rightTeam: this.rightTeam
                 })
