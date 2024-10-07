@@ -20,9 +20,10 @@ export class ReplayConnectorService {
         this.ingestServerUrl = ingestServerUrl;
     }
 
-    public setAuthValues(obsName: string, groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam) {
+    public setAuthValues(obsName: string, groupCode: string, accessKey: string, leftTeam: AuthTeam, rightTeam: AuthTeam) {
         this.obsName = obsName;
         this.groupCode = groupCode;
+        this.key = accessKey;
         this.leftTeam = leftTeam;
         this.rightTeam = rightTeam;
     }
@@ -42,7 +43,7 @@ export class ReplayConnectorService {
 
     private handleAuthProcess() {
         return new Promise<void>((resolve, reject) => {
-
+            
             this.ws = io.connect(this.ingestServerUrl);
             this.ws.emit('obs_logon', JSON.stringify({ 
                     type: DataTypes.AUTH, 
@@ -77,6 +78,11 @@ export class ReplayConnectorService {
             });
 
             this.ws.on('error', (e: any) => {
+                this.onSocketError(e);
+                reject();
+            });
+
+            this.ws.on('connect_error', (e: any) => {
                 this.onSocketError(e);
                 reject();
             });

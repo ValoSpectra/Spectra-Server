@@ -5,6 +5,7 @@ import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/valorantInternalTranslator";
 import { AuthTeam } from "../connector/websocketIncoming";
 import { MatchController } from "../controller/MatchController";
+import { DatabaseConnector } from "../connector/databaseConnector";
 const Log = logging("Match");
 
 
@@ -13,6 +14,7 @@ export class Match {
     private switchRound = 13;
     private firstOtRound = 25;
 
+    public matchId: number = -1;    //-1 being not existing in db
     public groupCode;
     public isRanked: boolean = false;
     public isRunning: boolean = false;
@@ -47,7 +49,7 @@ export class Match {
         this.isRanked = isRanked;
     }
 
-    receiveMatchSpecificData(data: IAuthedData) {
+    async receiveMatchSpecificData(data: IAuthedData) {
         this.replayLog.write(data);
 
         let correctTeam = null;
@@ -126,6 +128,8 @@ export class Match {
                         }
 
                         this.teams.forEach(team => team.resetRoundSpecificValues(isSwitchRound));
+                        
+                        DatabaseConnector.updateMatch(this.matchId, this);
                         break;
 
                     case "combat":
@@ -141,6 +145,8 @@ export class Match {
                         this.isRunning = false;
                         this.eventNumber++;
                         MatchController.getInstance().removeMatch(this.groupCode);
+                        
+                        await DatabaseConnector.endMatch(this.matchId, this);
                         return;
                 }
 
@@ -148,6 +154,7 @@ export class Match {
 
             case DataTypes.MATCH_START:
                 this.isRunning = true;
+                await DatabaseConnector.startMatch(this.matchId);
                 break;
 
             case DataTypes.MAP:

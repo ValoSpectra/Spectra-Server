@@ -5,7 +5,9 @@ import { MatchController } from "../controller/MatchController";
 import logging from "../util/Logging";
 import { readFileSync } from "fs";
 import { createServer } from "https";
+import { createServer as createInsecureServer } from "http";
 import { ValidKeys } from "../util/ValidKeys";
+import { DatabaseConnector } from "./databaseConnector";
 const Log = logging("WebsocketIncoming");
 
 export class WebsocketIncoming {
@@ -15,18 +17,25 @@ export class WebsocketIncoming {
 
     constructor() {
 
-        if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
-            Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
+        let serverInstance;
+
+        if (process.env.INSECURE) {
+            serverInstance = createInsecureServer();
+        }
+        else {
+            if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
+                Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
+            }
+    
+            const options = {
+                key: readFileSync(process.env.SERVER_KEY!),
+                cert: readFileSync(process.env.SERVER_CERT!)
+            }
+    
+            serverInstance = createServer(options);
         }
 
-        const options = {
-            key: readFileSync(process.env.SERVER_KEY!),
-            cert: readFileSync(process.env.SERVER_CERT!)
-        }
-
-        const httpsServer = createServer(options);
-
-        this.wss = new Server(httpsServer, {
+        this.wss = new Server(serverInstance, {
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -48,20 +57,20 @@ export class WebsocketIncoming {
                 Log.error(`${user.name} encountered a Websocket error.`);
             });
 
-            ws.once('obs_logon', (msg) => {
+            ws.once('obs_logon', async (msg) => {
                 try {
                     const authenticationData: IAUthenticationData = JSON.parse(msg.toString());
                     if (authenticationData.type === DataTypes.AUTH) {
 
-                        if (this.validateKey(authenticationData.key)) {
+                        if (await this.validateKey(authenticationData.key)) {
 
-                            if (this.matchController.createMatch(authenticationData)) {
+                            if (await this.matchController.createMatch(authenticationData)) {
                                 ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
                                 user.name = authenticationData.obsName;
                                 user.groupCode = authenticationData.groupCode;
                                 WebsocketIncoming.authedClients.push(user);
 
-                                Log.info(`Received VALID auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key} with teams ${authenticationData.leftTeam.name} and ${authenticationData.rightTeam.name}`);
+                                Log.info(`Received VALID auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and with teams ${authenticationData.leftTeam.name} and ${authenticationData.rightTeam.name}`);
                                 this.onAuthSuccess(user);
                             } else {
                                 ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Game with Group Code ${authenticationData.groupCode} exists and is still live.` }));
@@ -83,16 +92,16 @@ export class WebsocketIncoming {
 
         });
 
-        httpsServer.listen(5100);
+        serverInstance.listen(5100);
         Log.info(`InhouseTracker Server ingesting on port 5100!`);
     }
 
     private onAuthSuccess(user: ClientUser) {
-        user.ws.on("obs_data", (msg: any) => {
+        user.ws.on("obs_data", async (msg: any) => {
             try {
                 const data = JSON.parse(msg.toString());
                 if (isAuthedData(data)) {
-                    this.matchController.receiveMatchData(data);
+                    await this.matchController.receiveMatchData(data);
                 }
             } catch (e) {
                 Log.error(`Error parsing obs_data: ${e}`);
@@ -101,8 +110,9 @@ export class WebsocketIncoming {
         });
     }
 
-    private validateKey(key: string) {
+    private async validateKey(key: string) {
         if (process.env.REQUIRE_AUTH_KEY === "false") return true;
+        if (await DatabaseConnector.verifyAccessKey(key)) return true;
         if (ValidKeys.includes(key)) return true;
         return false;
     }

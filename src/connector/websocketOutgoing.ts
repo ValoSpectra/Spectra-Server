@@ -3,7 +3,9 @@ import { Server } from "socket.io";
 import logging from "../util/Logging";
 import { readFileSync } from "fs";
 import { createServer } from "https";
+import { createServer as createInsecureServer } from "http";
 import { MatchController } from "../controller/MatchController";
+import { DatabaseConnector } from "./databaseConnector";
 const Log = logging("WebsocketOutgoing");
 
 export class WebsocketOutgoing {
@@ -18,18 +20,25 @@ export class WebsocketOutgoing {
 
     constructor() {
 
-        if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
-            Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
-        }
+        let serverInstance;
 
-        const options = {
-            key: readFileSync(process.env.SERVER_KEY!),
-            cert: readFileSync(process.env.SERVER_CERT!)
+        if (process.env.INSECURE) {
+            serverInstance = createInsecureServer();
         }
-
-        const httpsServer = createServer(options);
+        else {
+            if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
+                Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
+            }
+    
+            const options = {
+                key: readFileSync(process.env.SERVER_KEY!),
+                cert: readFileSync(process.env.SERVER_CERT!)
+            }
+    
+            serverInstance = createServer(options);
+        }
         
-        this.wss = new Server(httpsServer, {
+        this.wss = new Server(serverInstance, {
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -66,7 +75,7 @@ export class WebsocketOutgoing {
             console.log("Socket.IO error: ", err);
         });
 
-        httpsServer.listen(5200);
+        serverInstance.listen(5200);
 
         Log.info(`InhouseTracker Server outputting on port 5200!`);
     }

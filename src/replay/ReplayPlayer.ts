@@ -1,5 +1,5 @@
 import { ReplayConnectorService } from "./ReplayConnectorService";
-import { DataTypes, IAuthedData, IFormattedData } from '../model/eventData';
+import { DataTypes, IAuthedData, IFormattedData, IFormattedRoundInfo } from '../model/eventData';
 import { readFileSync } from "fs";
 import logging from "../util/Logging";
 const Log = logging("ReplayPlayer");
@@ -63,6 +63,10 @@ export class ReplayPlayer {
             Log.info(`Current Event: ${this.currentReplayIndex}`);
         }
         this.connector.sendReplayData(this.replayData[this.currentReplayIndex]);
+        if (this.replayData[this.currentReplayIndex].type == "round_info" 
+            && (this.replayData[this.currentReplayIndex].data as IFormattedRoundInfo).roundPhase == "game_end") {
+            return false;
+        }
         this.currentReplayIndex++;
         return this.currentReplayIndex < this.replayData.length;
     }
@@ -115,12 +119,22 @@ export class ReplayPlayer {
                 ready = false;
             }
             else if (s == "go\n") {
-                while(this.sendNextEvent()) {}    //empty while body on purpose
-                ready = false;
+                let interval = setInterval(() => {
+                    if (!this.sendNextEvent()) {
+                        ready = false;
+                        clearInterval(interval);
+                    }
+                }, 1);
             }
             else if (!Number.isNaN(amount)) {
                 Log.info(`Sending the next ${amount} events`);
-                for (let i = 0; i < amount && (ready = this.sendNextEvent()); i++) {} //empty for body on purpose
+                let i = 0;
+                let interval = setInterval(() => {
+                    if (!(i < amount && (ready = this.sendNextEvent()))) {
+                        clearInterval(interval);
+                    }
+                    i++;
+                }, 1);
                 Log.info(`Now on event ${this.currentReplayIndex}`);
             }
 

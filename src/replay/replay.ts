@@ -1,3 +1,4 @@
+require('dotenv').config()
 import { ReplayPlayer, ReplayMode } from "./ReplayPlayer";
 import { ReplayConnectorService } from "./ReplayConnectorService";
 import logging from "../util/Logging";
@@ -53,7 +54,7 @@ const player = new ReplayPlayer(connector, REPLAY_MODE, DELAY_MS);
 
 player.loadReplayFile(REPLAY_FILE);
 // const { obsName, gameCode, leftTeam, rightTeam } = player.getReplayHeader();
-connector.setAuthValues("Dunkel#Licht", "TEST2", {name: "Left Team", tricode: "PELU", url: "https://dnkl.gg/PHtt7", attackStart: true}, {name: "Right Team", tricode: "HANU", url: "https://dnkl.gg/8GKvE", attackStart: false});
+connector.setAuthValues("Dunkel#Licht", "BFZ1", "2b1f1057ed406ddbc3217ea907032b479591023d", {name: "Left Team", tricode: "VANU", url: "https://dnkl.gg/PHtt7", attackStart: true}, {name: "Right Team", tricode: "HANU", url: "https://dnkl.gg/8GKvE", attackStart: false});
 connector.open().then(() => {
     player.play(() => {
         connector.close();

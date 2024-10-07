@@ -1,3 +1,4 @@
+import { DatabaseConnector } from "../connector/databaseConnector";
 import { WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
@@ -21,12 +22,14 @@ export class MatchController {
         return MatchController.instance;
     }
 
-    createMatch(data: IAUthenticationData) {
+    async createMatch(data: IAUthenticationData) {
         try {
             if (this.matches[data.groupCode] != null) {
                 return false;
             }
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
+            const newMatchId = await DatabaseConnector.createMatch(newMatch);
+            newMatch.matchId = newMatchId;
             this.matches[data.groupCode] = newMatch;
             this.eventNumbers[data.groupCode] = 0;
             this.startOutgoingSendLoop();
@@ -52,7 +55,7 @@ export class MatchController {
         }
     }
 
-    receiveMatchData(data: IAuthedData) {
+    async receiveMatchData(data: IAuthedData) {
         if (data.timestamp == null) {
             data.timestamp = Date.now();
         }
@@ -64,7 +67,7 @@ export class MatchController {
             return;
         }
 
-        trackedMatch.receiveMatchSpecificData(data)
+        await trackedMatch.receiveMatchSpecificData(data)
     }
 
     sendMatchDataForLogon(groupCode: string) {
@@ -79,7 +82,7 @@ export class MatchController {
             return;
         }
         Log.info(`Match registered without active send loop, send loop started`);
-        this.sendInterval = setInterval(() => {
+        this.sendInterval = setInterval(async () => {
             for (const groupCode in this.matches) {
                 if (this.matches[groupCode].eventNumber > this.eventNumbers[groupCode]) {
                     this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
@@ -89,6 +92,7 @@ export class MatchController {
                     // Check if the last event was more than 30 minutes ago
                     if (Date.now() - this.eventTimes[groupCode] > (1000 * 60 * 30)) {
                         Log.info(`Match with group code ${groupCode} has been inactive for more than 30 minutes, removing.`);
+                        await DatabaseConnector.endMatch(this.matches[groupCode].matchId, this.matches[groupCode]);
                         this.removeMatch(groupCode);
                     }
                 }
