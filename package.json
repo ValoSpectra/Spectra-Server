@@ -1,6 +1,7 @@
 {
   "name": "inhouse-tracker-server",
   "version": "0.2.0",
+  "author": "Spectra Team",
   "description": "The server that ingests data from inhouse-tracker-client for processing",
   "private": true,
   "main": "dist/index.js",
@@ -14,14 +15,30 @@
     "replay_timestamps": "ts-node ./src/replay/replay.ts -timestamps",
     "replay_manual": "ts-node ./src/replay/replay.ts -manual",
     "replay_file": "npm run replay_instant -- -game customGameTest.replay",
-    "build": "tsc"
+    "build": "tsc",
+    "declarations": "rimraf rawDeclarations spectraTypes && tsc --declaration --emitDeclarationOnly --declarationDir ./rawDeclarations && copy-files-from-to && rimraf rawDeclarations"
   },
-  "author": "DarkView",
+  "copyFiles": [
+    {
+      "from": "rawDeclarations/model/*",
+      "to": "spectraTypes/model/"
+    },
+    {
+      "from": "rawDeclarations/util/valorantInternalTranslator.d.ts",
+      "to": "spectraTypes/util/"
+    },
+    {
+      "from": "rawDeclarations/connector/websocketIncoming.d.ts",
+      "to": "spectraTypes/connector/"
+    }
+  ],
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.5",
+    "copy-files-from-to": "^3.11.0",
     "nodemon": "^3.1.7",
+    "rimraf": "^6.0.1",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
