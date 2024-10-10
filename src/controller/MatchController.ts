@@ -94,7 +94,9 @@ export class MatchController {
                     // Check if the last event was more than 30 minutes ago
                     if (Date.now() - this.eventTimes[groupCode] > (1000 * 60 * 30)) {
                         Log.info(`Match with group code ${groupCode} has been inactive for more than 30 minutes, removing.`);
-                        await DatabaseConnector.endMatch(this.matches[groupCode].matchId, this.matches[groupCode]);
+                        if (process.env.USE_BACKEND === "true") {
+                            await DatabaseConnector.endMatch(this.matches[groupCode].matchId, this.matches[groupCode]);
+                        }
                         this.removeMatch(groupCode);
                     }
                 }
