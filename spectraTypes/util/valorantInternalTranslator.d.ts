@@ -35,6 +35,7 @@ export declare enum WeaponsAndAbilities {
     "TX_Hud_HMG" = "Odin",
     "knife" = "Knife",
     "TX_Hud_Knife_Standard_S" = "Knife",
+    "unknown" = "Unknown",
     "TX_Breach_FusionBlast" = "Aftershock",
     "TX_Sarge_MolotovLauncher" = "Incendiary",
     "TX_Sarge_OrbitalStrike" = "Orbital Strike (ULT)",

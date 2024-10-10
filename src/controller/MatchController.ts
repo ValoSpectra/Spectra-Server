@@ -28,8 +28,10 @@ export class MatchController {
                 return false;
             }
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
-            const newMatchId = await DatabaseConnector.createMatch(newMatch);
-            newMatch.matchId = newMatchId;
+            if (process.env.USE_BACKEND === "true") {
+                const newMatchId = await DatabaseConnector.createMatch(newMatch);
+                newMatch.matchId = newMatchId;
+            }
             this.matches[data.groupCode] = newMatch;
             this.eventNumbers[data.groupCode] = 0;
             this.startOutgoingSendLoop();

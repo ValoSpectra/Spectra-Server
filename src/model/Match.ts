@@ -120,7 +120,9 @@ export class Match {
                         }
 
                         this.teams.forEach(team => team.resetRoundSpecificValues(isSwitchRound));
-                        
+
+                        if (this.matchId == -1) break;
+
                         DatabaseConnector.updateMatch(this.matchId, this);
                         break;
 
@@ -137,7 +139,9 @@ export class Match {
                         this.isRunning = false;
                         this.eventNumber++;
                         MatchController.getInstance().removeMatch(this.groupCode);
-                        
+
+                        if (this.matchId == -1) return;
+
                         await DatabaseConnector.endMatch(this.matchId, this);
                         return;
                 }
@@ -146,6 +150,8 @@ export class Match {
 
             case DataTypes.MATCH_START:
                 this.isRunning = true;
+                if (this.matchId == -1) break;
+                
                 await DatabaseConnector.startMatch(this.matchId);
                 break;
 
