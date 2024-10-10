@@ -69,15 +69,7 @@ export class Match {
                 break;
 
             case DataTypes.KILLFEED:
-                correctTeam = this.teams.find(team => team.hasTeamMemberByName((data.data as IFormattedKillfeed).attacker));
-
-                if (correctTeam == null) {
-                    Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
-                    Log.debug(`Data: ${JSON.stringify(data)}`);
-                    return;
-                }
-
-                correctTeam.receiveTeamSpecificData(data);
+                this.teams.forEach(team => team.receiveTeamSpecificData(data));
                 break;
 
             case DataTypes.OBSERVING:

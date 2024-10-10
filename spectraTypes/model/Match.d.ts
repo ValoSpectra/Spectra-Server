@@ -4,6 +4,7 @@ export declare class Match {
     private matchType;
     private switchRound;
     private firstOtRound;
+    matchId: number;
     groupCode: string;
     isRanked: boolean;
     isRunning: boolean;
@@ -20,7 +21,7 @@ export declare class Match {
     private replayLog;
     eventNumber: number;
     constructor(groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam, isRanked?: boolean);
-    receiveMatchSpecificData(data: IAuthedData): void;
+    receiveMatchSpecificData(data: IAuthedData): Promise<void>;
     private processScoreCalculation;
     private processRoundReasons;
     private debugLogRoundInfo;

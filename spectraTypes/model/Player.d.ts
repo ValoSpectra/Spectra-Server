@@ -31,10 +31,12 @@ export declare class Player {
     private killsOnEnemyPlayer;
     private killsOnTeammatePlayer;
     private assistsFromTeammate;
+    private scoreboardAvailable;
     constructor(data: IFormattedRoster);
     onRosterUpdate(data: IFormattedRoster): void;
     updateFromScoreboard(data: IFormattedScoreboard): void;
     extractKillfeedInfo(data: IFormattedKillfeed): void;
+    fallbackKillfeedExtraction(data: IFormattedKillfeed, victim?: boolean): void;
     processObservedEvent(observedName: string): void;
     resetRoundSpecificValues(isSideSwitch: boolean): void;
     getName(): string;

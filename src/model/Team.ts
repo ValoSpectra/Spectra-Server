@@ -44,7 +44,7 @@ export class Team {
             case DataTypes.KILLFEED:
                 this.processKillfeedData(data.data as IFormattedKillfeed);
                 break;
-                
+
             default:
                 break;
         }
@@ -114,9 +114,15 @@ export class Team {
     }
 
     private processKillfeedData(data: IFormattedKillfeed) {
-        const player = this.players.find(player => player.getPlayerId() === data.attacker);
-        if (!player) return;
-        player.extractKillfeedInfo(data);
+        const attacker = this.players.find(player => player.getName() === data.attacker);
+        if (attacker) {
+            attacker.extractKillfeedInfo(data);
+            attacker.fallbackKillfeedExtraction(data);
+        }
+
+        const victim = this.players.find(player => player.getName() === data.victim);
+        if (!victim) return;
+        victim.fallbackKillfeedExtraction(data, true);
     }
 
     private teamKills(): number {

@@ -10,7 +10,7 @@ export class Player {
     private tagline: string;
     private playerId: string;
     private searchName: string;
-    
+
     private position: number;
     private locked: boolean = false;
     private agentInternal: string = "";
@@ -27,15 +27,15 @@ export class Player {
     private killsThisRound: number = 0;
 
     private currUltPoints: number = 0;
-    private maxUltPoints: number = 10;
+    private maxUltPoints: number = 0;
     private ultReady: boolean = false;
-    
+
     private money: number = 0;
     private moneySpent: number = 0;
     private spentMoneyThisRound: boolean = false;
 
     private initialShield: number = 0;
-    private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["knife"];
+    private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["unknown"];
 
     // Data extrapolated from Killfeed
     private teamKills: number = 0;
@@ -47,7 +47,9 @@ export class Player {
     private killsOnTeammatePlayer: Record<string, number> = {};
     private assistsFromTeammate: Record<string, number> = {};
 
-    constructor (data: IFormattedRoster) {
+    private scoreboardAvailable: boolean = false;
+
+    constructor(data: IFormattedRoster) {
         this.name = data.name;
         this.tagline = data.tagline;
         this.playerId = data.playerId;
@@ -96,6 +98,8 @@ export class Player {
 
         this.isAlive = data.isAlive;
         this.hasSpike = data.hasSpike;
+
+        this.scoreboardAvailable = true;
     }
 
     public extractKillfeedInfo(data: IFormattedKillfeed) {
@@ -150,6 +154,20 @@ export class Player {
 
     }
 
+    public fallbackKillfeedExtraction(data: IFormattedKillfeed, victim: boolean = false) {
+        if (this.scoreboardAvailable) return;
+
+        if (victim) {
+            this.isAlive = false;
+            this.deaths++;
+        } else {
+            // The teamkill field is unreliable at the moment, so we're not using it for fallbacks
+            this.kills++;
+            this.killsThisRound++;
+        }
+
+    }
+
     public processObservedEvent(observedName: string) {
         if (this.searchName == observedName) {
             this.isObserved = true;
@@ -164,6 +182,10 @@ export class Player {
 
         if (isSideSwitch) {
             this.money = 800;
+        }
+
+        if (!this.scoreboardAvailable) {
+            this.isAlive = true;
         }
     }
 

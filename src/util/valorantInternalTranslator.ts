@@ -54,6 +54,8 @@ export enum WeaponsAndAbilities {
     "knife" = "Knife",
     "TX_Hud_Knife_Standard_S" = "Knife",
 
+    "unknown" = "Unknown",
+
     // Abilities
     "TX_Breach_FusionBlast" = "Aftershock",
     "TX_Sarge_MolotovLauncher" = "Incendiary",
