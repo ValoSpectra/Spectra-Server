@@ -19,7 +19,7 @@ export class WebsocketIncoming {
 
         let serverInstance;
 
-        if (process.env.INSECURE) {
+        if (process.env.INSECURE == "true") {
             serverInstance = createInsecureServer();
         }
         else {
