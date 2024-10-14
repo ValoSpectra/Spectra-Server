@@ -30,7 +30,7 @@ export class MatchController {
             const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
             if (process.env.USE_BACKEND === "true") {
                 const newMatchId = await DatabaseConnector.createMatch(newMatch);
-                newMatch.matchId = newMatchId;
+                newMatch.backendId = newMatchId;
             }
             this.matches[data.groupCode] = newMatch;
             this.eventNumbers[data.groupCode] = 0;
@@ -95,7 +95,7 @@ export class MatchController {
                     if (Date.now() - this.eventTimes[groupCode] > (1000 * 60 * 30)) {
                         Log.info(`Match with group code ${groupCode} has been inactive for more than 30 minutes, removing.`);
                         if (process.env.USE_BACKEND === "true") {
-                            await DatabaseConnector.endMatch(this.matches[groupCode].matchId, this.matches[groupCode]);
+                            await DatabaseConnector.endMatch(this.matches[groupCode].backendId, this.matches[groupCode]);
                         }
                         this.removeMatch(groupCode);
                     }

@@ -10,11 +10,12 @@ const Log = logging("Match");
 
 
 export class Match {
+    private matchId: string = "";
     private matchType: "bomb" | "swift" | string = "bomb";
     private switchRound = 13;
     private firstOtRound = 25;
 
-    public matchId: number = -1;    //-1 being not existing in db
+    public backendId: number = -1;    //-1 being not existing in db
     public groupCode;
     public isRanked: boolean = false;
     public isRunning: boolean = false;
@@ -121,9 +122,9 @@ export class Match {
 
                         this.teams.forEach(team => team.resetRoundSpecificValues(isSwitchRound));
 
-                        if (this.matchId == -1) break;
+                        if (this.backendId == -1) break;
 
-                        DatabaseConnector.updateMatch(this.matchId, this);
+                        DatabaseConnector.updateMatch(this.backendId, this);
                         break;
 
                     case "combat":
@@ -140,19 +141,21 @@ export class Match {
                         this.eventNumber++;
                         MatchController.getInstance().removeMatch(this.groupCode);
 
-                        if (this.matchId == -1) return;
+                        if (this.backendId == -1) return;
 
-                        await DatabaseConnector.endMatch(this.matchId, this);
+                        await DatabaseConnector.endMatch(this.backendId, this);
                         return;
                 }
 
                 break;
 
             case DataTypes.MATCH_START:
+                this.matchId = data.data as string;
                 this.isRunning = true;
-                if (this.matchId == -1) break;
-                
-                await DatabaseConnector.startMatch(this.matchId);
+
+                if (this.backendId == -1) break;
+
+                await DatabaseConnector.startMatch(this.backendId);
                 break;
 
             case DataTypes.MAP:
