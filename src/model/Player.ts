@@ -184,9 +184,8 @@ export class Player {
             this.money = 800;
         }
 
-        if (!this.scoreboardAvailable) {
-            this.isAlive = true;
-        }
+        this.scoreboardAvailable = false;
+        this.isAlive = true;
     }
 
     public getName(): string {
