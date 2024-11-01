@@ -13,5 +13,5 @@ app.get('/status', (req, res) => {
 });
 
 app.listen(port, () => {
-    Log.info(`Making status available on port ${port}`);
+    Log.info(`Status available on port ${port}`);
 });

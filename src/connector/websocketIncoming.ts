@@ -8,7 +8,9 @@ import { createServer } from "https";
 import { createServer as createInsecureServer } from "http";
 import { ValidKeys } from "../util/ValidKeys";
 import { DatabaseConnector } from "./databaseConnector";
+import { isCompatibleVersion } from "../util/CompatibleClients";
 const Log = logging("WebsocketIncoming");
+var pkginfo = require('pkginfo')(module, 'version');
 
 export class WebsocketIncoming {
     wss: Server;
@@ -26,12 +28,12 @@ export class WebsocketIncoming {
             if (!process.env.SERVER_KEY || !process.env.SERVER_CERT) {
                 Log.error(`Missing TLS key or certificate! Please provide the paths to the key and certificate in the .env file. (SERVER_KEY and SERVER_CERT)`);
             }
-    
+
             const options = {
                 key: readFileSync(process.env.SERVER_KEY!),
                 cert: readFileSync(process.env.SERVER_CERT!)
             }
-    
+
             serverInstance = createServer(options);
         }
 
@@ -60,31 +62,48 @@ export class WebsocketIncoming {
             ws.once('obs_logon', async (msg) => {
                 try {
                     const authenticationData: IAUthenticationData = JSON.parse(msg.toString());
-                    if (authenticationData.type === DataTypes.AUTH) {
 
-                        if (await this.validateKey(authenticationData.key)) {
-
-                            if (await this.matchController.createMatch(authenticationData)) {
-                                ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
-                                user.name = authenticationData.obsName;
-                                user.groupCode = authenticationData.groupCode;
-                                WebsocketIncoming.authedClients.push(user);
-
-                                Log.info(`Received VALID auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and with teams ${authenticationData.leftTeam.name} and ${authenticationData.rightTeam.name}`);
-                                this.onAuthSuccess(user);
-                            } else {
-                                ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Game with Group Code ${authenticationData.groupCode} exists and is still live.` }));
-                                ws.disconnect();
-                                Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
-                            }
-
-                        } else {
-                            ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Invalid key provided.` }));
-                            ws.disconnect();
-                            Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
-                        }
-
+                    // Check if the packet is valid
+                    if (authenticationData.type !== DataTypes.AUTH) {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Invalid packet.` }));
+                        ws.disconnect();
+                        Log.info(`Received BAD auth request, invalid packet.`);
+                        return;
                     }
+
+                    // Check if the client version is compatible with the server version
+                    if (!isCompatibleVersion(authenticationData.clientVersion)) {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Client version ${authenticationData.clientVersion} is not compatible with server version ${module.exports.version}.` }));
+                        ws.disconnect();
+                        Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}, incompatible client version ${authenticationData.clientVersion}.`);
+                        return;
+                    }
+
+                    // Check if the key is valid
+                    if (!(await this.isValidKey(authenticationData.key))) {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Invalid key provided.` }));
+                        ws.disconnect();
+                        Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
+                        return;
+                    }
+
+                    // Check if the match can be created successfully
+                    if (!(await this.matchController.createMatch(authenticationData))) {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Game with Group Code ${authenticationData.groupCode} exists and is still live.` }));
+                        ws.disconnect();
+                        Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
+                        return;
+                    }
+
+                    // All checks passed, send logon acknolwedgement
+                    ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
+                    user.name = authenticationData.obsName;
+                    user.groupCode = authenticationData.groupCode;
+                    WebsocketIncoming.authedClients.push(user);
+
+                    Log.info(`Received VALID auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and with teams ${authenticationData.leftTeam.name} and ${authenticationData.rightTeam.name}`);
+                    this.onAuthSuccess(user);
+
                 } catch (e) {
                     Log.error(`Error parsing incoming auth request: ${e}`);
                 }
@@ -110,7 +129,7 @@ export class WebsocketIncoming {
         });
     }
 
-    private async validateKey(key: string) {
+    private async isValidKey(key: string) {
         if (process.env.REQUIRE_AUTH_KEY === "false") return true;
         if (process.env.USE_BACKEND === "true" && await DatabaseConnector.verifyAccessKey(key)) return true;
         if (ValidKeys.includes(key)) return true;

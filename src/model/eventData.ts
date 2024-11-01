@@ -63,7 +63,8 @@ export interface IFormattedData {
 }
 
 export interface IAUthenticationData {
-    type: string,
+    type: DataTypes.AUTH,
+    clientVersion: string,
     obsName: string,
     key: string,
     groupCode: string,
