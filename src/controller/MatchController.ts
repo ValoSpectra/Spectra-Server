@@ -27,7 +27,7 @@ export class MatchController {
             if (this.matches[data.groupCode] != null) {
                 return false;
             }
-            const newMatch = new Match(data.groupCode, data.leftTeam, data.rightTeam);
+            const newMatch = new Match(data);
             if (process.env.USE_BACKEND === "true") {
                 const newMatchId = await DatabaseConnector.createMatch(newMatch);
                 newMatch.backendId = newMatchId;

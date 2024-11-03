@@ -1,14 +1,14 @@
 import fs from "fs";
-import { IAuthedData } from "../model/eventData";
+import { IAuthedData, IAUthenticationData } from "../model/eventData";
 import log from "./Logging";
 const Log = log("ReplayLogging").level(1);
+var pkginfo = require('pkginfo')(module, 'version');
 
 export class ReplayLogging {
 
-    protected static versionInfo = {version: "v0.0.0"};
     protected static writeLog = true;
 
-    protected groupCode: string;
+    protected matchData: Partial<IAUthenticationData>;
     protected logStartTime: number;
 
     protected fileName: string;
@@ -19,11 +19,13 @@ export class ReplayLogging {
     protected isWriting: boolean = false;
     protected writeBuffer: string[] = [];
 
-    public constructor(groupCode: string) {
-        this.groupCode = groupCode;
+    public constructor(data: IAUthenticationData) {
+        this.matchData = data;
+        delete this.matchData.key;
+        delete this.matchData.type;
         this.logStartTime = Date.now();
 
-        this.fileName = `Match_${this.groupCode}_${this.logStartTime}.replay`;
+        this.fileName = `Match_${this.matchData.groupCode}_${this.logStartTime}.replay`;
 
         if (ReplayLogging.writeLog) {
             this.openFileStream();
@@ -70,7 +72,8 @@ export class ReplayLogging {
     }
 
     protected writeFileStart(): number {
-        const dataString = JSON.stringify(ReplayLogging.versionInfo);
+        const headerData = {serverVersion: module.exports.version, ...this.matchData, logStartTime: this.logStartTime};
+        const dataString = JSON.stringify(headerData);
         this.fileWriteStream.write(dataString);
         return dataString.length;
     }

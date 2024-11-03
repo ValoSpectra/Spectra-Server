@@ -1,5 +1,5 @@
 import { Team } from "./Team";
-import { DataTypes, IAuthedData, IFormattedKillfeed, IFormattedRoster, IFormattedRoundInfo, IFormattedScore, IFormattedScoreboard } from "./eventData";
+import { DataTypes, IAuthedData, IAUthenticationData, IFormattedKillfeed, IFormattedRoster, IFormattedRoundInfo, IFormattedScore, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
 import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/valorantInternalTranslator";
@@ -17,7 +17,6 @@ export class Match {
 
     public backendId: number = -1;    //-1 being not existing in db
     public groupCode;
-    public isRanked: boolean = false;
     public isRunning: boolean = false;
 
     public roundNumber: number = 0;
@@ -36,18 +35,16 @@ export class Match {
     private replayLog: ReplayLogging;
     public eventNumber: number = 1;
 
-    constructor(groupCode: string, leftTeam: AuthTeam, rightTeam: AuthTeam, isRanked: boolean = false) {
-        this.groupCode = groupCode;
+    constructor(data: IAUthenticationData) {
+        this.groupCode = data.groupCode;
 
-        this.replayLog = new ReplayLogging(this.groupCode);
+        this.replayLog = new ReplayLogging(data);
 
-        const firstTeam = new Team(leftTeam);
-        const secondTeam = new Team(rightTeam);
+        const firstTeam = new Team(data.leftTeam);
+        const secondTeam = new Team(data.rightTeam);
 
         this.teams.push(firstTeam);
         this.teams.push(secondTeam);
-
-        this.isRanked = isRanked;
     }
 
     async receiveMatchSpecificData(data: IAuthedData) {

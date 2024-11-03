@@ -1,36 +1,38 @@
-import { DataTypes, IAuthedData, IFormattedData } from "../model/eventData";
+import { DataTypes, IAuthedData, IAUthenticationData, IFormattedData } from "../model/eventData";
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
 import * as io from "socket.io-client";
 const Log = logging("ReplayConnectorService");
 
 export class ReplayConnectorService {
-    
+
     private obsName = "Replayuser#test";
     private key = "DEBUG_REMOVE_ME";
     private groupCode = "A";
-    private leftTeam: AuthTeam = {name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7", attackStart: true};
-    private rightTeam: AuthTeam = {name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE", attackStart: false};
+    private leftTeam: AuthTeam = { name: "Left Team", tricode: "LEFT", url: "https://dnkl.gg/PHtt7", attackStart: true };
+    private rightTeam: AuthTeam = { name: "Right Team", tricode: "RIGHT", url: "https://dnkl.gg/8GKvE", attackStart: false };
+    private clientVersion: string = "";
     private ingestServerUrl: string;
     private enabled = false;
     private unreachable = false;
     private ws!: io.Socket;
 
-    public constructor(ingestServerUrl: string) { 
+    public constructor(ingestServerUrl: string) {
         this.ingestServerUrl = ingestServerUrl;
     }
 
-    public setAuthValues(obsName: string, groupCode: string, accessKey: string, leftTeam: AuthTeam, rightTeam: AuthTeam) {
+    public setAuthValues(obsName: string, groupCode: string, accessKey: string, leftTeam: AuthTeam, rightTeam: AuthTeam, clientVersion: string) {
         this.obsName = obsName;
         this.groupCode = groupCode;
         this.key = accessKey;
         this.leftTeam = leftTeam;
         this.rightTeam = rightTeam;
+        this.clientVersion = clientVersion;
     }
 
     public open(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.handleAuthProcess().then(() => {resolve()});
+            this.handleAuthProcess().then(() => { resolve() });
         });
     }
 
@@ -43,17 +45,20 @@ export class ReplayConnectorService {
 
     private handleAuthProcess() {
         return new Promise<void>((resolve, reject) => {
-            
+
             this.ws = io.connect(this.ingestServerUrl);
-            this.ws.emit('obs_logon', JSON.stringify({ 
-                    type: DataTypes.AUTH, 
-                    obsName: this.obsName, 
-                    groupCode: this.groupCode,
-                    key: this.key,
-                    leftTeam: this.leftTeam,
-                    rightTeam: this.rightTeam
-                })
-            );
+
+            const authData: IAUthenticationData = {
+                type: DataTypes.AUTH,
+                clientVersion: this.clientVersion,
+                obsName: this.obsName,
+                groupCode: this.groupCode,
+                key: this.key,
+                leftTeam: this.leftTeam,
+                rightTeam: this.rightTeam
+            }
+            this.ws.emit('obs_logon', JSON.stringify(authData));
+
             this.ws.once('obs_logon_ack', (msg) => {
                 const json = JSON.parse(msg.toString());
 

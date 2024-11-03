@@ -1,6 +1,6 @@
 {
   "name": "inhouse-tracker-server",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": "Spectra Team",
   "description": "The server that ingests data from inhouse-tracker-client for processing",
   "private": true,
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "npm run dev",
     "start_single": "ts-node ./src/index.ts",
-    "dev": "nodemon ./src/index.ts",
+    "dev": "nodemon ./src/index.ts --ignore replay/",
     "replay": "ts-node ./src/replay/replay.ts",
     "replay_instant": "ts-node ./src/replay/replay.ts -instant",
     "replay_delay": "ts-node ./src/replay/replay.ts -delay",
