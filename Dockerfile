@@ -17,13 +17,12 @@ EXPOSE 5100
 EXPOSE 5101
 EXPOSE 5102
 
-RUN openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 \
-      -nodes -keyout /app/keys/server.key -out /app/keys/server.crt -subj "/CN=spectra"
-
 ENV INSECURE=false
 ENV SERVER_KEY=/app/keys/server.key
 ENV SERVER_CERT=/app/keys/server.crt
 
+RUN mkdir -p /app/keys
+
 RUN yarn install
 
-CMD ["yarn", "start_single", "--host", "0.0.0.0"]
+ENTRYPOINT [ "/app/entrypoint.sh" ]
