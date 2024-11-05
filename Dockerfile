@@ -24,4 +24,6 @@ ENV INSECURE=false
 ENV SERVER_KEY=/app/keys/server.key
 ENV SERVER_CERT=/app/keys/server.crt
 
-CMD ["yarn", "start", "--host", "0.0.0.0"]
+RUN yarn install
+
+CMD ["yarn", "start_single", "--host", "0.0.0.0"]
