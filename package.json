@@ -1,8 +1,11 @@
 {
-  "name": "inhouse-tracker-server",
-  "version": "0.2.4",
-  "author": "Spectra Team",
-  "description": "The server that ingests data from inhouse-tracker-client for processing",
+  "name": "spectra-server",
+  "version": "0.2.5",
+  "author": {
+    "name": "Spectra Team",
+    "url": "https://valospectra.com"
+  },
+  "description": "Server that ingests data from the Spectra Client for processing",
   "private": true,
   "main": "dist/index.js",
   "scripts": {

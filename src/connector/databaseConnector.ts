@@ -3,24 +3,44 @@ import { Match } from "../model/Match";
 import logging from "../util/Logging";
 const Log = logging("DatabaseConnector");
 
+
+export interface KeyValidity {
+    valid: boolean;
+    reason: ValidityReasons;
+}
+
+export enum ValidityReasons {
+    VALID = "",
+    INVALID = "Invalid Key",
+    EXPIRED = "Expired Key",
+    UNKNOWN = "Unknown Error"
+}
+
 export class DatabaseConnector {
-    
-    public static async verifyAccessKey(key: string): Promise<boolean> {
+
+    public static async verifyAccessKey(key: string): Promise<KeyValidity> {
         const res = await fetch(`http://localhost:6100/organizations/accessKey/validate/${key}`);
 
+        // Key is valid
         if (res.status == 200) {
             const data = await res.json();
             Log.info(`Access key for organization ${data.id}:${data.name} verified`);
-            return true;
+            return {valid: true, reason: ValidityReasons.VALID};
         }
-        else if (res.status == 404) {
+        // Key does not exist
+        else if (res.status == 401) {
             Log.info("An access key verification has failed");
             Log.debug("Access key was: " + key);
-            return false;
+            return {valid: false, reason: ValidityReasons.INVALID};
+            // Key expired
+        } else if (res.status == 403) {
+            Log.info(`Access key checked but was expired`);
+            Log.debug("Access key was: " + key);
+            return {valid: false, reason: ValidityReasons.EXPIRED};
         }
         else {
             Log.error(`An unknown error occured during an access key verification. HTTP Code: ${res.status}`);
-            return false;
+            return {valid: false, reason: ValidityReasons.UNKNOWN};
         }
     }
 

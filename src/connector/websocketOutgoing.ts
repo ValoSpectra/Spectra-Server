@@ -5,7 +5,6 @@ import { readFileSync } from "fs";
 import { createServer } from "https";
 import { createServer as createInsecureServer } from "http";
 import { MatchController } from "../controller/MatchController";
-import { DatabaseConnector } from "./databaseConnector";
 const Log = logging("WebsocketOutgoing");
 
 export class WebsocketOutgoing {

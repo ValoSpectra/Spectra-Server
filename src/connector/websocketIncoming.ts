@@ -7,8 +7,9 @@ import { readFileSync } from "fs";
 import { createServer } from "https";
 import { createServer as createInsecureServer } from "http";
 import { ValidKeys } from "../util/ValidKeys";
-import { DatabaseConnector } from "./databaseConnector";
+import { DatabaseConnector, KeyValidity, ValidityReasons } from "./databaseConnector";
 import { isCompatibleVersion } from "../util/CompatibleClients";
+import { valid } from "semver";
 const Log = logging("WebsocketIncoming");
 var pkginfo = require('pkginfo')(module, 'version');
 
@@ -80,8 +81,9 @@ export class WebsocketIncoming {
                     }
 
                     // Check if the key is valid
-                    if (!(await this.isValidKey(authenticationData.key))) {
-                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Invalid key provided.` }));
+                    const validity = await this.isValidKey(authenticationData.key);
+                    if (validity.valid === false) {
+                        ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: false, reason: validity.reason }));
                         ws.disconnect();
                         Log.info(`Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`);
                         return;
@@ -129,11 +131,17 @@ export class WebsocketIncoming {
         });
     }
 
-    private async isValidKey(key: string) {
-        if (process.env.REQUIRE_AUTH_KEY === "false") return true;
-        if (process.env.USE_BACKEND === "true" && await DatabaseConnector.verifyAccessKey(key)) return true;
-        if (ValidKeys.includes(key)) return true;
-        return false;
+    private async isValidKey(key: string) : Promise<KeyValidity> {
+        if (process.env.REQUIRE_AUTH_KEY === "false") return { valid: true, reason: ValidityReasons.VALID };
+
+        if (process.env.USE_BACKEND === "true") {
+            const validity: KeyValidity = await DatabaseConnector.verifyAccessKey(key);
+            if (validity.valid === true) return validity;
+        }
+
+        if (ValidKeys.includes(key)) return { valid: true, reason: ValidityReasons.VALID };
+        
+        return { valid: false, reason: ValidityReasons.INVALID };
     }
 
     public static disconnectGroupCode(groupCode: string) {
