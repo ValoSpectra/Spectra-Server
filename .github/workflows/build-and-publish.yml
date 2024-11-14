@@ -33,5 +33,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/valospectra/valo-spectra-server:latest
-            ghcr.io/valospectra/valo-spectra-server:${{ env.RELEASE_TAG }}
+            ghcr.io/valospectra/server:latest
+            ghcr.io/valospectra/server:${{ env.RELEASE_TAG }}
