@@ -1,7 +1,7 @@
 ---
 services:
   valo-spectra-server:
-    image: valo-spectra-server
+    image: valospectra/server
     build:
       context: .
       dockerfile: Dockerfile
