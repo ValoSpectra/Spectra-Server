@@ -1,0 +1,13 @@
+---
+services:
+  valo-spectra-server:
+    image: valo-spectra-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5100:5100"
+      - "5101:5101"
+      - "5102:5102"
+    volumes:
+      - ./keys:/app/keys
