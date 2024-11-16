@@ -9,7 +9,6 @@ import { createServer as createInsecureServer } from "http";
 import { ValidKeys } from "../util/ValidKeys";
 import { DatabaseConnector, KeyValidity, ValidityReasons } from "./databaseConnector";
 import { isCompatibleVersion } from "../util/CompatibleClients";
-import { valid } from "semver";
 const Log = logging("WebsocketIncoming");
 var pkginfo = require('pkginfo')(module, 'version');
 
@@ -22,7 +21,7 @@ export class WebsocketIncoming {
 
         let serverInstance;
 
-        if (process.env.INSECURE == "true") {
+        if (process.env.INSECURE == "true") {            
             serverInstance = createInsecureServer();
         }
         else {
@@ -108,6 +107,7 @@ export class WebsocketIncoming {
 
                 } catch (e) {
                     Log.error(`Error parsing incoming auth request: ${e}`);
+                    Log.error(e);
                 }
             });
 
@@ -134,14 +134,14 @@ export class WebsocketIncoming {
     private async isValidKey(key: string) : Promise<KeyValidity> {
         if (process.env.REQUIRE_AUTH_KEY === "false") return { valid: true, reason: ValidityReasons.VALID };
 
-        if (process.env.USE_BACKEND === "true") {
-            const validity: KeyValidity = await DatabaseConnector.verifyAccessKey(key);
-            if (validity.valid === true) return validity;
-        }
-
         if (ValidKeys.includes(key)) return { valid: true, reason: ValidityReasons.VALID };
+
+        let validity: KeyValidity = { valid: false, reason: ValidityReasons.INVALID };
+        if (process.env.USE_BACKEND === "true") {
+            validity = await DatabaseConnector.verifyAccessKey(key);
+        }
         
-        return { valid: false, reason: ValidityReasons.INVALID };
+        return validity;
     }
 
     public static disconnectGroupCode(groupCode: string) {

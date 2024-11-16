@@ -1,6 +1,6 @@
 {
   "name": "spectra-server",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "author": {
     "name": "Spectra Team",
     "url": "https://valospectra.com"
@@ -44,7 +44,8 @@
     "rimraf": "^6.0.1",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "webpack": "^5.96.1"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

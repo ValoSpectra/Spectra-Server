@@ -71,7 +71,7 @@ export class WebsocketOutgoing {
         });
 
         this.wss.engine.on("connection_error", (err) => {
-            console.log("Socket.IO error: ", err);
+            Log.error("Socket.IO error: " + err);
         });
 
         serverInstance.listen(5200);

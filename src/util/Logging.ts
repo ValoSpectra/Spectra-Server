@@ -1,4 +1,3 @@
-import { DebugLogger } from "util";
 import fs from "fs";
 
 class Logging {
