@@ -5,7 +5,13 @@ import { AuthTeam } from "../connector/websocketIncoming";
 import { SpikeStates } from "./Match";
 const Log = logging("Team").level(1);
 
-type RecordType = "detonated" | "defused" | "kills" | "timeout" | "lost";
+type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost";
+
+interface RecordEntry {
+    type: RecordType;
+    wasAttack: boolean;
+    round: number;
+}
 
 export class Team {
     public teamName: string;
@@ -16,7 +22,7 @@ export class Team {
     private hasHandledTeam: boolean = false;
     public roundsWon: number = 0;
     private spentThisRound: number = 0;
-    private roundRecord: RecordType[] = [];
+    private roundRecord: RecordEntry[] = [];
 
     private players: Player[] = [];
     private playerCount = 0;
@@ -153,7 +159,11 @@ export class Team {
     }
 
     public addRoundReason(reason: RecordType) {
-        this.roundRecord.push(reason);
+        this.roundRecord.push({
+            type: reason,
+            wasAttack: this.isAttacking,
+            round: this.roundRecord.length + 1
+        });
     }
 
 }

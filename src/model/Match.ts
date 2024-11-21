@@ -30,7 +30,7 @@ export class Match {
     private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
     private attackersWon: boolean = false;
 
-    private ranks: { team1: string[], team2: string[] } = { team1: [], team2: [] };
+    private ranks: { team1: string[], team2: string[]; } = { team1: [], team2: [] };
 
     private replayLog: ReplayLogging;
     public eventNumber: number = 1;
@@ -103,7 +103,9 @@ export class Match {
 
                 switch (this.roundPhase) {
                     case "shopping":
-                        this.processRoundReasons();
+                        if (this.roundNumber !== 1) {
+                            this.processRoundReasons();
+                        }
 
                         this.spikeState.planted = false;
                         this.spikeState.detonated = false;
