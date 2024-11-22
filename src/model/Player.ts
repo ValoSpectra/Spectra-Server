@@ -1,4 +1,4 @@
-import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
+import { Agents, Armor, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
 import { IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
 const Log = logging("Player");
@@ -34,7 +34,7 @@ export class Player {
     private moneySpent: number = 0;
     private spentMoneyThisRound: boolean = false;
 
-    private initialShield: number = 0;
+    private armorName: typeof Armor[number] = Armor[0];
     private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["unknown"];
 
     // Data extrapolated from Killfeed
@@ -90,7 +90,8 @@ export class Player {
         }
         this.money = data.money;
 
-        this.initialShield = Math.min(Math.max(data.initialShield * 25, 0), 50);
+        // TODO: Rename initialShield to initialArmor in client later
+        this.armorName = Armor[data.initialShield];
         this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal]
 
         this.agentInternal = data.agentInternal;

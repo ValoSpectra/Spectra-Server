@@ -203,6 +203,13 @@ export enum Maps {
     "HURM_Helix" = "Drift",
 }
 
+export const Armor: string[] = [
+    "None",
+    "Light",
+    "Heavy",
+    "Regen"
+] as const;
+
 export const ranks: string[] = [
     "Unranked",
     "",
