@@ -90,8 +90,7 @@ export class Player {
         }
         this.money = data.money;
 
-        // TODO: Rename initialShield to initialArmor in client later
-        this.armorName = Armor[data.initialShield];
+        this.armorName = Armor[data.initialArmor];
         this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal]
 
         this.agentInternal = data.agentInternal;

@@ -8,7 +8,7 @@ export interface IFormattedScoreboard {
     startTeam: number,
     agentInternal: keyof typeof Agents,
     isAlive: boolean,
-    initialShield: number,
+    initialArmor: number,
     scoreboardWeaponInternal: keyof typeof WeaponsAndAbilities,
     currUltPoints: number,
     maxUltPoints: number,
