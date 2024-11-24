@@ -8,6 +8,6 @@ services:
     ports:
       - "5100:5100"
       - "5101:5101"
-      - "5102:5102"
+      - "5200:5200"
     volumes:
       - ./keys:/app/keys
