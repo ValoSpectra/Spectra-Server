@@ -13,4 +13,30 @@ It is comprised of three parts:
 
 Further updates for new features, as well as a detailed setup guide and an easy to host docker container are in the pipeline!
 
+# Docker Compose tutorial:
+First, create a seperate folder in your working directory:
+```
+$ mkdir -p spectra-server/keys
+$ cd spectra-server
+```
+
+Create a file named docker-compose.yml as follow:
+```
+---
+services:
+  valo-spectra-frontend:
+    image: "ghcr.io/valospectra/server"
+    ports:
+      - "5100:5100"
+      - "5101:5101"
+      - "5200:5200"
+    volumes:
+      - ./keys:/app/keys
+    environment:
+      - INSECURE=true
+```
+Inside ```keys``` folder, add your SSL certificate and key. If your SSL is trusted, you can set ```INSECURE=false```. If you don't provide any, a self-signed one will be generated for you.
+
+After that you can start the server by running: ```docker compose up -d```
+# DISCLAIMER
 Spectra-Client isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
