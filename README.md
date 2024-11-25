@@ -24,7 +24,7 @@ Create a file named docker-compose.yml as follow:
 ```
 ---
 services:
-  valo-spectra-frontend:
+  valo-spectra-server:
     image: "ghcr.io/valospectra/server"
     ports:
       - "5100:5100"
