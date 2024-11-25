@@ -12,4 +12,4 @@ services:
     volumes:
       - ./keys:/app/keys
     environment:
-      - INSECURE=false
+      - INSECURE=true
