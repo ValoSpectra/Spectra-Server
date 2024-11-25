@@ -6,7 +6,6 @@ import logging from "../util/Logging";
 import { readFileSync } from "fs";
 import { createServer } from "https";
 import { createServer as createInsecureServer } from "http";
-import { ValidKeys } from "../util/ValidKeys";
 import { DatabaseConnector, KeyValidity, ValidityReasons } from "./databaseConnector";
 import { isCompatibleVersion } from "../util/CompatibleClients";
 const Log = logging("WebsocketIncoming");
@@ -134,7 +133,7 @@ export class WebsocketIncoming {
     private async isValidKey(key: string) : Promise<KeyValidity> {
         if (process.env.REQUIRE_AUTH_KEY === "false") return { valid: true, reason: ValidityReasons.VALID };
 
-        if (ValidKeys.includes(key)) return { valid: true, reason: ValidityReasons.VALID };
+        if (process.env.AUTH_KEY === key) return { valid: true, reason: ValidityReasons.VALID };
 
         let validity: KeyValidity = { valid: false, reason: ValidityReasons.INVALID };
         if (process.env.USE_BACKEND === "true") {
