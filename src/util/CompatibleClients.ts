@@ -1,6 +1,5 @@
-import semver from 'semver';
-var pkginfo = require('pkginfo')(module, 'version');
+import semver from "semver";
 
 export function isCompatibleVersion(version: string): boolean {
-    return semver.satisfies(version, `>=0.2.6 <0.3.0`);
-};
+  return semver.satisfies(version, `>=0.2.6 <0.3.0`);
+}

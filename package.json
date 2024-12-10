@@ -12,39 +12,33 @@
     "start": "npm run dev",
     "start_single": "ts-node ./src/index.ts",
     "dev": "nodemon ./src/index.ts --ignore replay/",
+    "build": "tsc",
+    "lint": "eslint src/",
+    "lint-fix": "eslint --fix src/",
+    "format": "prettier --write src/",
     "replay": "ts-node ./src/replay/replay.ts",
     "replay_instant": "ts-node ./src/replay/replay.ts -instant",
     "replay_delay": "ts-node ./src/replay/replay.ts -delay",
     "replay_timestamps": "ts-node ./src/replay/replay.ts -timestamps",
     "replay_manual": "ts-node ./src/replay/replay.ts -manual",
-    "replay_file": "npm run replay_instant -- -game customGameTest.replay",
-    "build": "tsc"
+    "replay_file": "npm run replay_instant -- -game customGameTest.replay"
   },
-  "copyFiles": [
-    {
-      "from": "rawDeclarations/model/*",
-      "to": "spectraTypes/model/"
-    },
-    {
-      "from": "rawDeclarations/util/valorantInternalTranslator.d.ts",
-      "to": "spectraTypes/util/"
-    },
-    {
-      "from": "rawDeclarations/connector/websocketIncoming.d.ts",
-      "to": "spectraTypes/connector/"
-    }
-  ],
   "license": "GPL-3.0-only",
   "devDependencies": {
+    "@eslint/js": "^9.16.0",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.5",
     "@types/semver": "^7.5.8",
-    "copy-files-from-to": "^3.11.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.13.0",
     "nodemon": "^3.1.7",
+    "prettier": "3.4.2",
     "rimraf": "^6.0.1",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
+    "typescript-eslint": "^8.18.0",
     "webpack": "^5.96.1"
   },
   "dependencies": {
