@@ -28,14 +28,10 @@ export class MatchController {
       }
       const newMatch = new Match(data);
 
-      if (process.env.USE_BACKEND === "true") {
-        newMatch.organizationId = data.organizationId || "";
-      }
-
       this.matches[data.groupCode] = newMatch;
       this.eventNumbers[data.groupCode] = 0;
-      this.startOutgoingSendLoop();
       Log.info(`New match "${newMatch.groupCode}" registered!`);
+      this.startOutgoingSendLoop();
       return true;
     } catch (e) {
       Log.info(`Failed to create match with group code ${data.groupCode}, ${e}`);

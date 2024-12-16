@@ -51,6 +51,11 @@ export class Match {
 
     this.teams.push(firstTeam);
     this.teams.push(secondTeam);
+
+    if (process.env.USE_BACKEND === "true") {
+      this.organizationId = data.organizationId || "";
+      Log.info(`Match ${this.groupCode} created with organization ${this.organizationId}`);
+    }
   }
 
   async receiveMatchSpecificData(data: IAuthedData) {
