@@ -1,5 +1,4 @@
 require("dotenv").config();
-import { match } from "assert";
 import { Match } from "../model/Match";
 import logging from "../util/Logging";
 const Log = logging("DatabaseConnector");
