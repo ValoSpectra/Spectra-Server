@@ -101,6 +101,10 @@ export class WebsocketIncoming {
               `Received BAD auth request from ${authenticationData.obsName}, using Group Code ${authenticationData.groupCode} and key ${authenticationData.key}`,
             );
             return;
+          } else {
+            if (validity.organizationId) {
+              authenticationData.organizationId = validity.organizationId;
+            }
           }
 
           // Check if the match can be created successfully

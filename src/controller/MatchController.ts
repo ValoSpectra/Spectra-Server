@@ -27,10 +27,11 @@ export class MatchController {
         return false;
       }
       const newMatch = new Match(data);
-      // if (process.env.USE_BACKEND === "true") {
-      //     const newMatchId = await DatabaseConnector.createMatch(newMatch);
-      //     newMatch.backendId = newMatchId;
-      // }
+
+      if (process.env.USE_BACKEND === "true") {
+        newMatch.organizationId = data.organizationId || "";
+      }
+
       this.matches[data.groupCode] = newMatch;
       this.eventNumbers[data.groupCode] = 0;
       this.startOutgoingSendLoop();

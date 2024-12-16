@@ -15,7 +15,7 @@ import { DatabaseConnector } from "../connector/databaseConnector";
 const Log = logging("Match");
 
 export class Match {
-  private matchId: string = "";
+  public matchId: string = "";
   private matchType: "bomb" | "swift" | string = "bomb";
   private switchRound = 13;
   private firstOtRound = 25;
@@ -36,6 +36,7 @@ export class Match {
   private attackersWon: boolean = false;
 
   private ranks: { team1: string[]; team2: string[] } = { team1: [], team2: [] };
+  public organizationId: string = "";
 
   private replayLog: ReplayLogging;
   public eventNumber: number = 1;
@@ -159,9 +160,13 @@ export class Match {
         this.matchId = data.data as string;
         this.isRunning = true;
 
-        if (this.backendId == -1) break;
+        if (process.env.USE_BACKEND === "true") {
+          await DatabaseConnector.registerMatch(this);
+        }
 
-        await DatabaseConnector.startMatch(this.backendId);
+        // if (this.backendId == -1) break;
+        // await DatabaseConnector.startMatch(this.backendId);
+
         break;
 
       case DataTypes.MAP:

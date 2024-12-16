@@ -83,6 +83,7 @@ export interface IAUthenticationData {
   groupCode: string;
   leftTeam: AuthTeam;
   rightTeam: AuthTeam;
+  organizationId?: string;
 }
 
 export enum DataTypes {

@@ -1,4 +1,5 @@
 require("dotenv").config();
+import { match } from "assert";
 import { Match } from "../model/Match";
 import logging from "../util/Logging";
 const Log = logging("DatabaseConnector");
@@ -6,6 +7,7 @@ const Log = logging("DatabaseConnector");
 export interface KeyValidity {
   valid: boolean;
   reason: ValidityReasons;
+  organizationId?: string;
 }
 
 export enum ValidityReasons {
@@ -23,7 +25,7 @@ export class DatabaseConnector {
     if (res.status == 200) {
       const data = await res.json();
       Log.info(`Access key for organization ${data.id}:${data.name} verified`);
-      return { valid: true, reason: ValidityReasons.VALID };
+      return { valid: true, reason: ValidityReasons.VALID, organizationId: data.id };
     }
     // Key does not exist
     else if (res.status == 401) {
@@ -40,6 +42,19 @@ export class DatabaseConnector {
         `An unknown error occured during an access key verification. HTTP Code: ${res.status}`,
       );
       return { valid: false, reason: ValidityReasons.UNKNOWN };
+    }
+  }
+
+  public static async registerMatch(match: Match) {
+    const res = await this.apiRequest(`system/match/${match.matchId}/register`, "post", {
+      match: match,
+    });
+
+    if (res.status == 200) {
+      return;
+    } else {
+      Log.error(`Register match encountered an error. HTTP Code: ${res.status}`);
+      return;
     }
   }
 
