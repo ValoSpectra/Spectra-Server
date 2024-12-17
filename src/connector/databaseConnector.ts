@@ -57,31 +57,10 @@ export class DatabaseConnector {
     }
   }
 
-  public static async createMatch(data: Match): Promise<number> {
-    const res = await this.apiRequest("matches/create", "post", data);
-
-    if (res.status == 200) {
-      const data = await res.json();
-      return data.id;
-    } else {
-      Log.error(`Create match encountered an error. HTTP Code: ${res.status}`);
-      return -1;
-    }
-  }
-
-  public static async startMatch(matchId: number): Promise<void> {
-    const res = await this.apiRequest(`matches/start/${matchId}`, "put");
-
-    if (res.status == 200) {
-      return;
-    } else {
-      Log.error(`Start match encountered an error. HTTP Code: ${res.status}`);
-      return;
-    }
-  }
-
-  public static async updateMatch(matchId: number, data: Match): Promise<void> {
-    const res = await this.apiRequest(`matches/update/${matchId}`, "put", data);
+  public static async updateMatch(match: Match): Promise<void> {
+    const res = await this.apiRequest(`system/match/${match.matchId}/update`, "put", {
+      match: match,
+    });
 
     if (res.status == 200) {
       return;
@@ -91,13 +70,15 @@ export class DatabaseConnector {
     }
   }
 
-  public static async endMatch(matchId: number, data: Match): Promise<void> {
-    const res = await this.apiRequest(`matches/stop/${matchId}`, "put", data);
+  public static async completeMatch(match: Match): Promise<void> {
+    const res = await this.apiRequest(`system/match/${match.matchId}/complete`, "put", {
+      match: match,
+    });
 
     if (res.status == 200) {
       return;
     } else {
-      Log.error(`End match encountered an error. HTTP Code: ${res.status}`);
+      Log.error(`Complete match encountered an error. HTTP Code: ${res.status}`);
       return;
     }
   }

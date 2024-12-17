@@ -20,7 +20,6 @@ export class Match {
   private switchRound = 13;
   private firstOtRound = 25;
 
-  public backendId: number = -1; //-1 being not existing in db
   public groupCode;
   public isRunning: boolean = false;
 
@@ -35,11 +34,12 @@ export class Match {
   private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
   private attackersWon: boolean = false;
 
-  private ranks: { team1: string[]; team2: string[] } = { team1: [], team2: [] };
-  public organizationId: string = "";
+  // private ranks: { team1: string[]; team2: string[] } = { team1: [], team2: [] };
 
   private replayLog: ReplayLogging;
   public eventNumber: number = 1;
+  public organizationId: string = "";
+  private isRegistered: boolean = false;
 
   constructor(data: IAUthenticationData) {
     this.groupCode = data.groupCode;
@@ -54,7 +54,6 @@ export class Match {
 
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";
-      Log.info(`Match ${this.groupCode} created with organization ${this.organizationId}`);
     }
   }
 
@@ -134,13 +133,14 @@ export class Match {
 
             this.teams.forEach((team) => team.resetRoundSpecificValues(isSwitchRound));
 
-            if (this.backendId == -1) break;
+            if (this.isRegistered && this.roundNumber !== 1) {
+              DatabaseConnector.updateMatch(this);
+            }
 
-            DatabaseConnector.updateMatch(this.backendId, this);
             break;
 
           case "combat":
-            this.roundTimeoutTime = data.timestamp + 100 * 1000; // Add 100 seconds to the current time
+            this.roundTimeoutTime = data.timestamp + 99 * 1000; // Add 99 seconds to the current time
             break;
 
           case "end":
@@ -153,9 +153,10 @@ export class Match {
             this.eventNumber++;
             MatchController.getInstance().removeMatch(this.groupCode);
 
-            if (this.backendId == -1) return;
+            if (this.isRegistered) {
+              DatabaseConnector.completeMatch(this);
+            }
 
-            await DatabaseConnector.endMatch(this.backendId, this);
             return;
         }
 
@@ -167,10 +168,8 @@ export class Match {
 
         if (process.env.USE_BACKEND === "true") {
           await DatabaseConnector.registerMatch(this);
+          this.isRegistered = true;
         }
-
-        // if (this.backendId == -1) break;
-        // await DatabaseConnector.startMatch(this.backendId);
 
         break;
 

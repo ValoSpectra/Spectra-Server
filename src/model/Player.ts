@@ -6,7 +6,7 @@ type ValueOf<T> = T[keyof T];
 export class Player {
   private name: string;
   private tagline: string;
-  private playerId: string;
+  private riotId: string;
   private searchName: string;
 
   private position: number;
@@ -50,7 +50,7 @@ export class Player {
   constructor(data: IFormattedRoster) {
     this.name = data.name;
     this.tagline = data.tagline;
-    this.playerId = data.playerId;
+    this.riotId = data.playerId;
     this.searchName = `${data.name} #${data.tagline}`;
     this.position = data.position;
     this.agentInternal = data.agentInternal;
@@ -192,7 +192,7 @@ export class Player {
   }
 
   public getPlayerId(): string {
-    return this.playerId;
+    return this.riotId;
   }
 
   public checkIsAlive(): boolean {
