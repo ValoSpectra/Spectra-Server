@@ -1,3 +1,4 @@
+import { DatabaseConnector } from "../connector/databaseConnector";
 import { WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
@@ -92,10 +93,12 @@ export class MatchController {
             Log.info(
               `Match with group code ${groupCode} has been inactive for more than 30 minutes, removing.`,
             );
-            // if (this.matches[groupCode].backendId !== -1) {
-            //     await DatabaseConnector.endMatch(this.matches[groupCode].backendId, this.matches[groupCode]);
-            // }
+
             this.removeMatch(groupCode);
+
+            if (this.matches[groupCode].isRegistered) {
+              await DatabaseConnector.completeMatch(this.matches[groupCode]);
+            }
           }
         }
       }

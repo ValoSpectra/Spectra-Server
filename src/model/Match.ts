@@ -39,7 +39,7 @@ export class Match {
   private replayLog: ReplayLogging;
   public eventNumber: number = 1;
   public organizationId: string = "";
-  private isRegistered: boolean = false;
+  public isRegistered: boolean = false;
 
   constructor(data: IAUthenticationData) {
     this.groupCode = data.groupCode;
