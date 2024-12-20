@@ -94,11 +94,15 @@ export class MatchController {
               `Match with group code ${groupCode} has been inactive for more than 30 minutes, removing.`,
             );
 
-            this.removeMatch(groupCode);
-
-            if (this.matches[groupCode].isRegistered) {
-              await DatabaseConnector.completeMatch(this.matches[groupCode]);
+            try {
+              if (this.matches[groupCode].isRegistered) {
+                await DatabaseConnector.completeMatch(this.matches[groupCode]);
+              }
+            } catch (e) {
+              Log.error(`Failed to complete match in backend with group code ${groupCode}, ${e}`);
             }
+
+            this.removeMatch(groupCode);
           }
         }
       }
