@@ -54,6 +54,10 @@ export class MatchController {
     }
   }
 
+  getMatchCount() {
+    return Object.keys(this.matches).length;
+  }
+
   async receiveMatchData(data: IAuthedData) {
     if (data.timestamp == null) {
       data.timestamp = Date.now();
