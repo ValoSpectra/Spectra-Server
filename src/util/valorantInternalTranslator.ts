@@ -182,6 +182,9 @@ export enum Agents {
 
   "Nox_PC_C" = "Vyse",
   "Nox" = "Vyse",
+
+  "Cashew_PC_C" = "Tejo",
+  "Cashew" = "Tejo",
 }
 
 export enum Maps {
