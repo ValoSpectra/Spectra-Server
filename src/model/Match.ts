@@ -34,6 +34,10 @@ export class Match {
   private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
   private attackersWon: boolean = false;
 
+  private mapsNeeded: number = 1;
+  private mapsWonLeft: number = 0;
+  private mapsWonRight: number = 0;
+
   // private ranks: { team1: string[]; team2: string[] } = { team1: [], team2: [] };
 
   private replayLog: ReplayLogging;
@@ -51,6 +55,13 @@ export class Match {
 
     this.teams.push(firstTeam);
     this.teams.push(secondTeam);
+
+    this.mapsNeeded =
+      typeof data.mapWinInfo.mapsNeeded == "number" ? data.mapWinInfo.mapsNeeded : 1;
+    this.mapsWonLeft =
+      typeof data.mapWinInfo.mapsWonLeft == "number" ? data.mapWinInfo.mapsWonLeft : 0;
+    this.mapsWonRight =
+      typeof data.mapWinInfo.mapsWonRight == "number" ? data.mapWinInfo.mapsWonRight : 0;
 
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";

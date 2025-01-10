@@ -83,6 +83,7 @@ export interface IAUthenticationData {
   groupCode: string;
   leftTeam: AuthTeam;
   rightTeam: AuthTeam;
+  mapWinInfo: IMapWinInfo;
   organizationId?: string;
 }
 
@@ -108,4 +109,10 @@ export function isAuthedData(data: object): data is IAuthedData {
     return true;
   }
   return false;
+}
+
+export interface IMapWinInfo {
+  mapsNeeded: number;
+  mapsWonLeft: number;
+  mapsWonRight: number;
 }

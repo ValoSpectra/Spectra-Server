@@ -73,6 +73,7 @@ export class ReplayConnectorService {
         key: this.key,
         leftTeam: this.leftTeam,
         rightTeam: this.rightTeam,
+        mapWinInfo: { mapsNeeded: 1, mapsWonLeft: 0, mapsWonRight: 0 },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));
 
