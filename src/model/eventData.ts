@@ -1,5 +1,6 @@
 import { AuthTeam } from "../connector/websocketIncoming";
 import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
+import { ToolsData } from "./ToolsData";
 
 export interface IFormattedScoreboard {
   name: string;
@@ -83,7 +84,7 @@ export interface IAUthenticationData {
   groupCode: string;
   leftTeam: AuthTeam;
   rightTeam: AuthTeam;
-  mapWinInfo: IMapWinInfo;
+  toolsData: ToolsData;
   organizationId?: string;
 }
 
@@ -109,10 +110,4 @@ export function isAuthedData(data: object): data is IAuthedData {
     return true;
   }
   return false;
-}
-
-export interface IMapWinInfo {
-  mapsNeeded: number;
-  mapsWonLeft: number;
-  mapsWonRight: number;
 }

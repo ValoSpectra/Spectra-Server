@@ -12,6 +12,7 @@ import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/valorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
+import { ToolsData } from "./ToolsData";
 const Log = logging("Match");
 
 export class Match {
@@ -30,13 +31,11 @@ export class Match {
   private spikeDetonationTime?: number = undefined;
 
   private teams: Team[] = [];
-  private map: string = "";
+  private map: string = "Loading";
   private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
   private attackersWon: boolean = false;
 
-  private mapsNeeded: number = 1;
-  private mapsWonLeft: number = 0;
-  private mapsWonRight: number = 0;
+  private tools: ToolsData;
 
   // private ranks: { team1: string[]; team2: string[] } = { team1: [], team2: [] };
 
@@ -56,12 +55,7 @@ export class Match {
     this.teams.push(firstTeam);
     this.teams.push(secondTeam);
 
-    this.mapsNeeded =
-      typeof data.mapWinInfo.mapsNeeded == "number" ? data.mapWinInfo.mapsNeeded : 1;
-    this.mapsWonLeft =
-      typeof data.mapWinInfo.mapsWonLeft == "number" ? data.mapWinInfo.mapsWonLeft : 0;
-    this.mapsWonRight =
-      typeof data.mapWinInfo.mapsWonRight == "number" ? data.mapWinInfo.mapsWonRight : 0;
+    this.tools = new ToolsData(data.toolsData);
 
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";
