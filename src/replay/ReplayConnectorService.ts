@@ -73,7 +73,36 @@ export class ReplayConnectorService {
         key: this.key,
         leftTeam: this.leftTeam,
         rightTeam: this.rightTeam,
-        mapWinInfo: { mapsNeeded: 1, mapsWonLeft: 0, mapsWonRight: 0 },
+        toolsData: {
+          seriesInfo: {
+            needed: 0,
+            wonLeft: 0,
+            wonRight: 0,
+            mapInfo: [
+              {
+                type: "past",
+                map: "Ascent",
+                left: {
+                  logo: "https://dnkl.gg/PHtt7",
+                  score: 13,
+                },
+                right: {
+                  logo: "https://dnkl.gg/8GKvE",
+                  score: 6,
+                },
+              },
+              {
+                type: "present",
+                logo: "https://dnkl.gg/8GKvE",
+              },
+              {
+                type: "future",
+                map: "Bind",
+                logo: "https://dnkl.gg/PHtt7",
+              },
+            ],
+          },
+        },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));
 

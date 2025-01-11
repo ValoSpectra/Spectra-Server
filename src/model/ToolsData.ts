@@ -1,5 +1,5 @@
 export class ToolsData {
-  private seriesInfo?: ISeriesInfo;
+  public seriesInfo?: ISeriesInfo;
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
