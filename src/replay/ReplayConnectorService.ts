@@ -102,6 +102,10 @@ export class ReplayConnectorService {
               },
             ],
           },
+          seedingInfo: {
+            left: "Group 1",
+            right: "Group 2",
+          },
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));
