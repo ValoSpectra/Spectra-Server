@@ -85,6 +85,7 @@ export interface IAUthenticationData {
   leftTeam: AuthTeam;
   rightTeam: AuthTeam;
   toolsData: ToolsData;
+  // organizationId added later, not in client
   organizationId?: string;
 }
 

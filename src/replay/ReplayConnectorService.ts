@@ -75,9 +75,9 @@ export class ReplayConnectorService {
         rightTeam: this.rightTeam,
         toolsData: {
           seriesInfo: {
-            needed: 0,
-            wonLeft: 0,
-            wonRight: 0,
+            needed: 3,
+            wonLeft: 1,
+            wonRight: 2,
             mapInfo: [
               {
                 type: "past",

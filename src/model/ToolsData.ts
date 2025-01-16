@@ -1,5 +1,14 @@
 export class ToolsData {
-  public seriesInfo?: ISeriesInfo;
+  public seriesInfo: ISeriesInfo = {
+    needed: 1,
+    wonLeft: 0,
+    wonRight: 0,
+    mapInfo: [],
+  };
+  public seedingInfo: ISeedingInfo = {
+    left: "",
+    right: "",
+  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
@@ -11,6 +20,11 @@ export type ISeriesInfo = {
   wonLeft: number;
   wonRight: number;
   mapInfo: MapPoolInfo[];
+};
+
+export type ISeedingInfo = {
+  left: string;
+  right: string;
 };
 
 type BaseMapPoolInfo = {
