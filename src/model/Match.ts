@@ -230,22 +230,22 @@ export class Match {
 
     if (this.attackersWon) {
       if (this.spikeState.detonated) {
-        attackingTeam.addRoundReason("detonated");
+        attackingTeam.addRoundReason("detonated", this.roundNumber - 1);
       } else {
-        attackingTeam.addRoundReason("kills");
+        attackingTeam.addRoundReason("kills", this.roundNumber - 1);
       }
 
-      defendingTeam.addRoundReason("lost");
+      defendingTeam.addRoundReason("lost", this.roundNumber - 1);
     } else {
       if (this.spikeState.defused) {
-        defendingTeam.addRoundReason("defused");
+        defendingTeam.addRoundReason("defused", this.roundNumber - 1);
       } else if (this.wasTimeout) {
-        defendingTeam.addRoundReason("timeout");
+        defendingTeam.addRoundReason("timeout", this.roundNumber - 1);
       } else {
-        defendingTeam.addRoundReason("kills");
+        defendingTeam.addRoundReason("kills", this.roundNumber - 1);
       }
 
-      attackingTeam.addRoundReason("lost");
+      attackingTeam.addRoundReason("lost", this.roundNumber - 1);
     }
   }
 

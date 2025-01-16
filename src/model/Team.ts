@@ -10,7 +10,7 @@ import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
 const Log = logging("Team").level(1);
 
-type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost";
+type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost" | "upcoming";
 
 interface RecordEntry {
   type: RecordType;
@@ -39,6 +39,14 @@ export class Team {
 
     this.isAttacking = team.attackStart;
     this.ingameTeamId = team.attackStart ? 0 : 1;
+
+    this.initRoundRecord();
+  }
+
+  initRoundRecord() {
+    for (let i = 1; i < 11; i++) {
+      this.roundRecord.push({ type: "upcoming", wasAttack: this.isAttacking, round: i });
+    }
   }
 
   receiveTeamSpecificData(data: IAuthedData) {
@@ -163,11 +171,18 @@ export class Team {
     return count;
   }
 
-  public addRoundReason(reason: RecordType) {
-    this.roundRecord.push({
+  public addRoundReason(reason: RecordType, roundNumber: number) {
+    const arrayPos = roundNumber - 1;
+    this.roundRecord[arrayPos] = {
       type: reason,
       wasAttack: this.isAttacking,
-      round: this.roundRecord.length + 1,
-    });
+      round: roundNumber,
+    };
+
+    this.roundRecord[arrayPos + 1] = {
+      type: "upcoming",
+      wasAttack: this.isAttacking,
+      round: roundNumber + 1,
+    };
   }
 }
