@@ -106,6 +106,11 @@ export class ReplayConnectorService {
             left: "Group 1",
             right: "Group 2",
           },
+          tournamentInfo: {
+            name: "Tournament Name",
+            logoUrl: "",
+            backdropUrl: "",
+          },
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));

@@ -9,6 +9,11 @@ export class ToolsData {
     left: "",
     right: "",
   };
+  public tournamentInfo: ITournamentInfo = {
+    name: "",
+    logoUrl: "",
+    backdropUrl: "",
+  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
@@ -25,6 +30,12 @@ export type ISeriesInfo = {
 export type ISeedingInfo = {
   left: string;
   right: string;
+};
+
+export type ITournamentInfo = {
+  name: string;
+  logoUrl: string;
+  backdropUrl: string;
 };
 
 type BaseMapPoolInfo = {
