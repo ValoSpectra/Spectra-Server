@@ -13,10 +13,18 @@ export class ToolsData {
     name: "",
     logoUrl: "",
     backdropUrl: "",
+    enabled: false,
   };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
+    if (
+      this.tournamentInfo.backdropUrl != "" ||
+      this.tournamentInfo.logoUrl != "" ||
+      this.tournamentInfo.name != ""
+    ) {
+      this.tournamentInfo.enabled = true;
+    }
   }
 }
 
@@ -36,6 +44,7 @@ export type ITournamentInfo = {
   name: string;
   logoUrl: string;
   backdropUrl: string;
+  enabled: boolean;
 };
 
 type BaseMapPoolInfo = {
