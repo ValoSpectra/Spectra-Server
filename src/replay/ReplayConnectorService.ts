@@ -110,6 +110,7 @@ export class ReplayConnectorService {
             name: "Tournament Name",
             logoUrl: "",
             backdropUrl: "",
+            enabled: true,
           },
         },
       };
