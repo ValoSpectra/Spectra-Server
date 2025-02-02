@@ -1,5 +1,5 @@
 import semver from "semver";
 
 export function isCompatibleVersion(version: string): boolean {
-  return semver.satisfies(version, `>=0.2.12 <0.3.0`);
+  return semver.satisfies(version, `>=0.2.15 <0.3.0`);
 }
