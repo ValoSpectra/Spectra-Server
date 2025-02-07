@@ -50,6 +50,13 @@ export interface IFormattedScore {
   team_1: number;
 }
 
+export interface IFormattedAuxiliary {
+  type: DataTypes.AUX_SCOREBOARD | DataTypes.AUX_ABILITIES | DataTypes.AUX_HEALTH;
+  playerId: string;
+  groupCode: string;
+  data: IFormattedScoreboard | IFormattedAbilities | number;
+}
+
 export interface IAuthedData {
   obsName: string;
   groupCode: string;
@@ -61,8 +68,24 @@ export interface IAuthedData {
     | IFormattedRoster
     | IFormattedRoundInfo
     | IFormattedScore
+    | IFormattedAuxiliary
     | boolean
-    | string;
+    | string
+    | number;
+}
+
+export interface IAuthedAuxData {
+  playerId: string;
+  groupCode: string;
+  type: string;
+  timestamp: number;
+  data: IFormattedAuxiliary | number;
+}
+
+export interface IFormattedAbilities {
+  grenade: number;
+  ability_1: number;
+  ability_2: number;
 }
 
 export interface IFormattedData {
@@ -73,10 +96,11 @@ export interface IFormattedData {
     | IFormattedRoster
     | IFormattedRoundInfo
     | IFormattedScore
+    | IFormattedAbilities
     | boolean;
 }
 
-export interface IAUthenticationData {
+export interface IAuthenticationData {
   type: DataTypes.AUTH;
   clientVersion: string;
   obsName: string;
@@ -87,6 +111,14 @@ export interface IAUthenticationData {
   toolsData: ToolsData;
   // organizationId added later, not in client
   organizationId?: string;
+}
+
+export interface IAuxAuthenticationData {
+  type: DataTypes.AUX_AUTH;
+  clientVersion: string;
+  name: string;
+  matchId: string;
+  playerId: string;
 }
 
 export enum DataTypes {
@@ -104,10 +136,21 @@ export enum DataTypes {
   SPIKE_DETONATED = "spike_detonated",
   SPIKE_DEFUSED = "spike_defused",
   AUTH = "authenticate",
+  AUX_AUTH = "aux_authenticate",
+  AUX_ABILITIES = "aux_abilities",
+  AUX_HEALTH = "aux_health",
+  AUX_SCOREBOARD = "aux_scoreboard",
 }
 
 export function isAuthedData(data: object): data is IAuthedData {
   if ("obsName" in data && "groupCode" in data && "type" in data && "data" in data) {
+    return true;
+  }
+  return false;
+}
+
+export function isAuthedAuxData(data: object): data is IAuthedAuxData {
+  if ("playerId" in data && "groupCode" in data && "type" in data && "data" in data) {
     return true;
   }
   return false;

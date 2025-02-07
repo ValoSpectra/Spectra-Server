@@ -2,7 +2,7 @@ import { DatabaseConnector } from "../connector/databaseConnector";
 import { WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
-import { IAuthedData, IAUthenticationData } from "../model/eventData";
+import { IAuthedAuxData, IAuthedData, IAuthenticationData } from "../model/eventData";
 import logging from "../util/Logging";
 const Log = logging("MatchController");
 
@@ -22,7 +22,7 @@ export class MatchController {
     return MatchController.instance;
   }
 
-  async createMatch(data: IAUthenticationData) {
+  async createMatch(data: IAuthenticationData) {
     try {
       if (this.matches[data.groupCode] != null) {
         return false;
@@ -38,6 +38,10 @@ export class MatchController {
       Log.info(`Failed to create match with group code ${data.groupCode}, ${e}`);
       return false;
     }
+  }
+
+  findMatch(matchId: string) {
+    return Object.values(this.matches).find((match) => match.matchId == matchId)?.groupCode ?? null;
   }
 
   removeMatch(groupCode: string) {
@@ -58,10 +62,7 @@ export class MatchController {
     return Object.keys(this.matches).length;
   }
 
-  async receiveMatchData(data: IAuthedData) {
-    if (data.timestamp == null) {
-      data.timestamp = Date.now();
-    }
+  async receiveMatchData(data: IAuthedData | IAuthedAuxData) {
     data.timestamp = Date.now();
     const trackedMatch = this.matches[data.groupCode];
     if (trackedMatch == null) {
@@ -71,6 +72,12 @@ export class MatchController {
     }
 
     await trackedMatch.receiveMatchSpecificData(data);
+  }
+
+  setAuxDisconnected(groupCode: string, playerId: string) {
+    if (this.matches[groupCode] != null) {
+      this.matches[groupCode].setAuxDisconnected(playerId);
+    }
   }
 
   sendMatchDataForLogon(groupCode: string) {

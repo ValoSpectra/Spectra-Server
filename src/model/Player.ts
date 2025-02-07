@@ -1,7 +1,22 @@
 import { Agents, Armor, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
 import { IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
+import logging from "../util/Logging";
+
+const Log = logging("Player").level(1);
 
 type ValueOf<T> = T[keyof T];
+
+export class AvailableAbilities {
+  grenade: number = 0;
+  ability1: number = 0;
+  ability2: number = 0;
+}
+
+class AvailableAuxiliary {
+  health: boolean = false;
+  abilities: boolean = false;
+  scoreboard: boolean = false;
+}
 
 export class Player {
   private name: string;
@@ -17,6 +32,9 @@ export class Player {
   private isAlive: boolean = true;
   private hasSpike: boolean = false;
   private isObserved: boolean = false;
+
+  private health: number = 100;
+  private abilities: AvailableAbilities = new AvailableAbilities();
 
   private kills: number = 0;
   private deaths: number = 0;
@@ -46,6 +64,7 @@ export class Player {
   private assistsFromTeammate: Record<string, number> = {};
 
   private scoreboardAvailable: boolean = false;
+  private auxiliaryAvailable: AvailableAuxiliary = new AvailableAuxiliary();
 
   constructor(data: IFormattedRoster) {
     this.name = data.name;
@@ -94,6 +113,14 @@ export class Player {
     this.agentInternal = data.agentInternal;
     this.agentProper = Agents[data.agentInternal] || data.agentInternal;
 
+    // Player dies
+    if (!data.isAlive && this.isAlive) {
+      this.health = 0;
+    }
+    // Player revives
+    if (data.isAlive && !this.isAlive) {
+      this.health = 100;
+    }
     this.isAlive = data.isAlive;
     this.hasSpike = data.hasSpike;
 
@@ -155,6 +182,7 @@ export class Player {
 
     if (victim) {
       this.isAlive = false;
+      this.health = 0;
       this.deaths++;
     } else {
       // The teamkill field is unreliable at the moment, so we're not using it for fallbacks
@@ -171,6 +199,30 @@ export class Player {
     }
   }
 
+  // Only take partial data from aux scoreboard, still get rest from observer
+  public updateFromAuxiliaryScoreboard(data: IFormattedScoreboard) {
+    if (this.scoreboardAvailable) return;
+    this.hasSpike = data.hasSpike;
+    this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal];
+    this.maxUltPoints = data.maxUltPoints;
+    this.currUltPoints = data.currUltPoints;
+    this.armorName = Armor[data.initialArmor];
+    this.assists = data.assists;
+    this.money = data.money;
+
+    this.auxiliaryAvailable.scoreboard = true;
+  }
+
+  public updateAbilities(data: AvailableAbilities) {
+    this.abilities = data;
+    this.auxiliaryAvailable.abilities = true;
+  }
+
+  public setHeatlh(health: number) {
+    this.health = health;
+    this.auxiliaryAvailable.health = true;
+  }
+
   public resetRoundSpecificValues(isSideSwitch: boolean) {
     this.resetKillsThisRound();
     this.resetMoneyThisRound();
@@ -180,7 +232,9 @@ export class Player {
     }
 
     this.scoreboardAvailable = false;
+    this.auxiliaryAvailable.scoreboard = false;
     this.isAlive = true;
+    this.health = 100;
   }
 
   public getName(): string {
@@ -214,5 +268,10 @@ export class Player {
   public resetMoneyThisRound(): void {
     this.moneySpent = 0;
     this.spentMoneyThisRound = false;
+  }
+
+  public setAuxDisconnected() {
+    this.auxiliaryAvailable = new AvailableAuxiliary();
+    Log.info(`Auxiliary data for ${this.name} has been disconnected`);
   }
 }

@@ -1,6 +1,12 @@
 require("dotenv").config();
 import { Server, Socket } from "socket.io";
-import { DataTypes, IAUthenticationData, isAuthedData } from "../model/eventData";
+import {
+  DataTypes,
+  IAuthenticationData,
+  IAuxAuthenticationData,
+  isAuthedAuxData,
+  isAuthedData,
+} from "../model/eventData";
 import { MatchController } from "../controller/MatchController";
 import logging from "../util/Logging";
 import { readFileSync } from "fs";
@@ -59,7 +65,10 @@ export class WebsocketIncoming {
 
       ws.once("obs_logon", async (msg) => {
         try {
-          const authenticationData: IAUthenticationData = JSON.parse(msg.toString());
+          const authenticationData: IAuthenticationData = JSON.parse(msg.toString());
+
+          if (WebsocketIncoming.authedClients.find((client) => client.ws.id === ws.id) != undefined)
+            return;
 
           // Check if the packet is valid
           if (authenticationData.type !== DataTypes.AUTH) {
@@ -139,6 +148,94 @@ export class WebsocketIncoming {
           Log.error(e);
         }
       });
+
+      ws.once("aux_logon", async (msg) => {
+        try {
+          const authenticationData: IAuxAuthenticationData = JSON.parse(msg.toString());
+
+          if (WebsocketIncoming.authedClients.find((client) => client.ws.id === ws.id) != undefined)
+            return;
+
+          // Check if the packet is valid
+          if (authenticationData.type !== DataTypes.AUX_AUTH) {
+            ws.emit(
+              "aux_logon_ack",
+              JSON.stringify({ type: DataTypes.AUTH, value: false, reason: `Invalid packet.` }),
+            );
+            ws.disconnect();
+            Log.info(`Received BAD aux auth request, invalid packet.`);
+            return;
+          }
+
+          // Check if the client version is compatible with the server version
+          if (!isCompatibleVersion(authenticationData.clientVersion)) {
+            ws.emit(
+              "aux_logon_ack",
+              JSON.stringify({
+                type: DataTypes.AUTH,
+                value: false,
+                reason: `Client version ${authenticationData.clientVersion} is not compatible with server version ${module.exports.version}.`,
+              }),
+            );
+            ws.disconnect();
+            Log.info(
+              `Received BAD aux auth request from ${authenticationData.playerId} for match ${authenticationData.matchId}, incompatible client version ${authenticationData.clientVersion}.`,
+            );
+            return;
+          }
+
+          const groupCode = this.matchController.findMatch(authenticationData.matchId);
+          // Check if the match exists
+          if (groupCode == null) {
+            ws.emit(
+              "aux_logon_ack",
+              JSON.stringify({
+                type: DataTypes.AUTH,
+                value: false,
+                reason: `Game with Match ID ${authenticationData.matchId} not found.`,
+              }),
+            );
+            ws.disconnect();
+            Log.info(
+              `Received BAD aux auth request from ${authenticationData.playerId} for match ${authenticationData.matchId}, match not found.`,
+            );
+            return;
+          }
+
+          // All checks passed, send logon acknolwedgement
+          ws.emit(
+            "aux_logon_ack",
+            JSON.stringify({ type: DataTypes.AUX_AUTH, value: true, reason: groupCode }),
+          );
+          user.name = authenticationData.name;
+          user.groupCode = groupCode;
+          user.isAuxiliary = true;
+          user.playerId = authenticationData.playerId;
+          WebsocketIncoming.authedClients.push(user);
+
+          Log.info(
+            `Received VALID aux auth request from ${authenticationData.playerId} for Group Code ${groupCode}`,
+          );
+          this.onAuthSuccess(user);
+        } catch (e) {
+          Log.error(`Error parsing incoming auth request: ${e}`);
+          Log.error(e);
+        }
+      });
+
+      ws.on("disconnect", () => {
+        const index = WebsocketIncoming.authedClients.findIndex((client) => client.ws.id === ws.id);
+        if (index != -1) {
+          const client = WebsocketIncoming.authedClients[index];
+          if (client.playerId !== "") {
+            Log.info(`Auxiliary player ${client.playerId} disconnected.`);
+            this.matchController.setAuxDisconnected(client.groupCode, client.playerId);
+          }
+          if (client.isAuxiliary) {
+            WebsocketIncoming.authedClients.splice(index, 1);
+          }
+        }
+      });
     });
 
     serverInstance.listen(5100);
@@ -154,6 +251,20 @@ export class WebsocketIncoming {
         }
       } catch (e) {
         Log.error(`Error parsing obs_data: ${e}`);
+      }
+    });
+
+    user.ws.on("aux_data", async (msg: any) => {
+      try {
+        const data = JSON.parse(msg.toString());
+        if (isAuthedAuxData(data)) {
+          await this.matchController.receiveMatchData(data);
+          if (data.type === DataTypes.AUX_SCOREBOARD && user.playerId === "") {
+            user.playerId = data.playerId;
+          }
+        }
+      } catch (e) {
+        Log.error(`Error parsing aux_data: ${e}`);
       }
     });
   }
@@ -184,6 +295,8 @@ export class WebsocketIncoming {
 class ClientUser {
   name: string;
   groupCode: string;
+  isAuxiliary: boolean = false;
+  playerId: string = "";
   ws: Socket;
 
   constructor(name: string, groupCode: string, ws: Socket) {

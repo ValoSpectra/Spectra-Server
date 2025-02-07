@@ -1,12 +1,12 @@
 import fs from "fs";
-import { IAuthedData, IAUthenticationData } from "../model/eventData";
+import { IAuthedAuxData, IAuthedData, IAuthenticationData } from "../model/eventData";
 import log from "./Logging";
 const Log = log("ReplayLogging").level(1);
 
 export class ReplayLogging {
   protected static writeLog = true;
 
-  protected matchData: Partial<IAUthenticationData>;
+  protected matchData: Partial<IAuthenticationData>;
   protected logStartTime: number;
 
   protected fileName: string;
@@ -17,7 +17,7 @@ export class ReplayLogging {
   protected isWriting: boolean = false;
   protected writeBuffer: string[] = [];
 
-  public constructor(data: IAUthenticationData) {
+  public constructor(data: IAuthenticationData) {
     this.matchData = data;
     delete this.matchData.key;
     delete this.matchData.type;
@@ -30,13 +30,13 @@ export class ReplayLogging {
     }
   }
 
-  public writeData(data: IAuthedData) {
+  public writeData(data: IAuthedData | IAuthedAuxData) {
     if (!ReplayLogging.writeLog) return;
     this.writeBuffer.push(JSON.stringify(data));
     this.writeBufferToFile();
   }
 
-  public write(data: IAuthedData) {
+  public write(data: IAuthedData | IAuthedAuxData) {
     this.writeData(data);
   }
 

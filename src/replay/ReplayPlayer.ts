@@ -1,5 +1,5 @@
 import { ReplayConnectorService } from "./ReplayConnectorService";
-import { IAuthedData, IAUthenticationData, IFormattedRoundInfo } from "../model/eventData";
+import { IAuthedData, IAuthenticationData, IFormattedRoundInfo } from "../model/eventData";
 import { readFileSync } from "fs";
 import logging from "../util/Logging";
 const Log = logging("ReplayPlayer");
@@ -37,7 +37,7 @@ export class ReplayPlayer {
     Log.info(this.replayHeaderData);
   }
 
-  public getReplayHeader(): Partial<IAUthenticationData> {
+  public getReplayHeader(): Partial<IAuthenticationData> {
     return this.replayHeaderData;
   }
 

@@ -1,4 +1,4 @@
-import { DataTypes, IAuthedData, IAUthenticationData } from "../model/eventData";
+import { DataTypes, IAuthedData, IAuthenticationData } from "../model/eventData";
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
 import * as io from "socket.io-client";
@@ -65,7 +65,7 @@ export class ReplayConnectorService {
     return new Promise<void>((resolve, reject) => {
       this.ws = io.connect(this.ingestServerUrl);
 
-      const authData: IAUthenticationData = {
+      const authData: IAuthenticationData = {
         type: DataTypes.AUTH,
         clientVersion: this.clientVersion,
         obsName: this.obsName,

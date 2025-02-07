@@ -1,7 +1,10 @@
 import { Player } from "./Player";
 import {
   DataTypes,
+  IAuthedAuxData,
   IAuthedData,
+  IFormattedAbilities,
+  IFormattedAuxiliary,
   IFormattedKillfeed,
   IFormattedRoster,
   IFormattedScoreboard,
@@ -49,7 +52,7 @@ export class Team {
     }
   }
 
-  receiveTeamSpecificData(data: IAuthedData) {
+  receiveTeamSpecificData(data: IAuthedData | IAuthedAuxData | IFormattedAuxiliary) {
     // Route data
     switch (data.type) {
       case DataTypes.ROSTER:
@@ -62,6 +65,18 @@ export class Team {
 
       case DataTypes.KILLFEED:
         this.processKillfeedData(data.data as IFormattedKillfeed);
+        break;
+
+      case DataTypes.AUX_SCOREBOARD:
+        this.processAuxScoreboardData(data.data as IFormattedScoreboard);
+        break;
+
+      case DataTypes.AUX_ABILITIES:
+        this.processAuxAbilityData(data as IFormattedAuxiliary);
+        break;
+
+      case DataTypes.AUX_HEALTH:
+        this.processAuxHealthData(data as IFormattedAuxiliary);
         break;
 
       default:
@@ -144,6 +159,30 @@ export class Team {
     victim.fallbackKillfeedExtraction(data, true);
   }
 
+  private processAuxScoreboardData(data: IFormattedScoreboard) {
+    const player = this.players.find((player) => player.getPlayerId() === data.playerId);
+    if (!player) return;
+    player.updateFromAuxiliaryScoreboard(data);
+  }
+
+  private processAuxAbilityData(data: IFormattedAuxiliary) {
+    const player = this.players.find((player) => player.getPlayerId() === data.playerId);
+    if (!player) return;
+    const incoming = data.data as IFormattedAbilities;
+    player.updateAbilities({
+      grenade: incoming.grenade,
+      ability1: incoming.ability_1,
+      ability2: incoming.ability_2,
+    });
+  }
+
+  private processAuxHealthData(data: IFormattedAuxiliary) {
+    const player = this.players.find((player) => player.getPlayerId() === data.playerId);
+    if (!player) return;
+    if (typeof data.data != "number") return;
+    player.setHeatlh(data.data);
+  }
+
   private teamKills(): number {
     let count = 0;
     for (const player of this.players) {
@@ -184,5 +223,12 @@ export class Team {
       wasAttack: this.isAttacking,
       round: roundNumber + 1,
     };
+  }
+
+  public setAuxDisconnected(playerId: string): void {
+    const player = this.players.find((player) => player.getPlayerId() === playerId);
+    if (player) {
+      player.setAuxDisconnected();
+    }
   }
 }

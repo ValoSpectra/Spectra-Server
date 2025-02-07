@@ -1,8 +1,9 @@
 import { Team } from "./Team";
 import {
   DataTypes,
+  IAuthedAuxData,
   IAuthedData,
-  IAUthenticationData,
+  IAuthenticationData,
   IFormattedRoundInfo,
   IFormattedScore,
   IFormattedScoreboard,
@@ -44,7 +45,7 @@ export class Match {
   public organizationId: string = "";
   public isRegistered: boolean = false;
 
-  constructor(data: IAUthenticationData) {
+  constructor(data: IAuthenticationData) {
     this.groupCode = data.groupCode;
 
     this.replayLog = new ReplayLogging(data);
@@ -62,7 +63,7 @@ export class Match {
     }
   }
 
-  async receiveMatchSpecificData(data: IAuthedData) {
+  async receiveMatchSpecificData(data: IAuthedData | IAuthedAuxData) {
     this.replayLog.write(data);
 
     let correctTeam = null;
@@ -90,6 +91,18 @@ export class Match {
         for (const team of this.teams) {
           team.setObservedPlayer(data.data as string);
         }
+        break;
+
+      case DataTypes.AUX_SCOREBOARD:
+        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
+        break;
+
+      case DataTypes.AUX_ABILITIES:
+        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
+        break;
+
+      case DataTypes.AUX_HEALTH:
+        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
         break;
 
       case DataTypes.SPIKE_PLANTED:
@@ -247,6 +260,10 @@ export class Match {
 
       attackingTeam.addRoundReason("lost", this.roundNumber - 1);
     }
+  }
+
+  public setAuxDisconnected(playerId: string) {
+    this.teams.forEach((team) => team.setAuxDisconnected(playerId));
   }
 
   private debugLogRoundInfo() {
