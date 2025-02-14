@@ -110,81 +110,107 @@ export enum Agents {
 
   "Clay_PC_C" = "Raze",
   "Clay" = "Raze",
+  "TX_Killfeed_Raze" = "Clay",
 
   "Pandemic_PC_C" = "Viper",
   "Pandemic" = "Viper",
+  "TX_Killfeed_Viper" = "Pandemic",
 
   "Wraith_PC_C" = "Omen",
   "Wraith" = "Omen",
+  "TX_Killfeed_Omen" = "Wraith",
 
   "Hunter_PC_C" = "Sova",
   "Hunter" = "Sova",
+  "TX_Killfeed_Sova" = "Hunter",
 
   "Thorne_PC_C" = "Sage",
   "Thorne" = "Sage",
+  "TX_Killfeed_Sage" = "Thorne",
 
   "Phoenix_PC_C" = "Phoenix",
   "Phoenix" = "Phoenix",
+  "TX_Killfeed_Phoenix" = "Phoenix",
 
   "Wushu_PC_C" = "Jett",
   "Wushu" = "Jett",
+  "TX_Killfeed_Jett" = "Wushu",
 
   "Gumshoe_PC_C" = "Cypher",
   "Gumshoe" = "Cypher",
+  "TX_Killfeed_Cypher" = "Gumshoe",
 
   "Sarge_PC_C" = "Brimstone",
   "Sarge" = "Brimstone",
+  "TX_Killfeed_Brimstone" = "Sarge",
 
   "Breach_PC_C" = "Breach",
   "Breach" = "Breach",
+  "TX_Killfeed_Breach" = "Breach",
 
   "Vampire_PC_C" = "Reyna",
   "Vampire" = "Reyna",
+  "TX_Killfeed_Reyna" = "Vampire",
 
   "Killjoy_PC_C" = "Killjoy",
   "Killjoy" = "Killjoy",
+  "TX_Killfeed_Killjoy" = "Killjoy",
 
   "Guide_PC_C" = "Skye",
   "Guide" = "Skye",
+  "TX_Killfeed_Skye" = "Guide",
 
   "Stealth_PC_C" = "Yoru",
   "Stealth" = "Yoru",
+  "TX_Killfeed_Yoru" = "Stealth",
 
   "Rift_PC_C" = "Astra",
   "Rift" = "Astra",
+  "TX_Killfeed_Astra" = "Rift",
 
   "Grenadier_PC_C" = "KAYO", // No / for overlay image reasons
   "Grenadier" = "KAYO",
+  "TX_Killfeed_KAYO" = "Grenadier",
 
   "Deadeye_PC_C" = "Chamber",
   "Deadeye" = "Chamber",
+  "TX_Killfeed_Chamber" = "Deadeye",
 
   "Sprinter_PC_C" = "Neon",
   "Sprinter" = "Neon",
+  "TX_Killfeed_Neon" = "Sprinter",
 
   "BountyHunter_PC_C" = "Fade",
   "BountyHunter" = "Fade",
+  "TX_Killfeed_Fade" = "BountyHunter",
 
   "Mage_PC_C" = "Harbor",
   "Mage" = "Harbor",
+  "TX_Killfeed_Harbor" = "Mage",
 
   "Aggrobot_PC_C" = "Gekko",
   "Aggrobot" = "Gekko",
+  "TX_Killfeed_Gekko" = "Aggrobot",
 
   "Cable_PC_C" = "Deadlock",
   "Cable" = "Deadlock",
+  "TX_Killfeed_Deadlock" = "Cable",
 
   "Sequoia_PC_C" = "Iso",
   "Sequoia" = "Iso",
+  "TX_Killfeed_Iso" = "Sequoia",
 
   "Smonk_PC_C" = "Clove",
   "Smonk" = "Clove",
+  "TX_Killfeed_Clove" = "Smonk",
 
   "Nox_PC_C" = "Vyse",
   "Nox" = "Vyse",
+  "TX_Killfeed_Vyse" = "Nox",
 
   "Cashew_PC_C" = "Tejo",
   "Cashew" = "Tejo",
+  "TX_Killfeed_Tejo" = "Cashew",
 }
 
 export enum Maps {

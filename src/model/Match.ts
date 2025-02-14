@@ -158,6 +158,7 @@ export class Match {
             break;
 
           case "combat":
+            this.teams.forEach((team) => team.findDuplicateAgents());
             this.roundTimeoutTime = data.timestamp + 99 * 1000; // Add 99 seconds to the current time
             break;
 

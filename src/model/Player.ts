@@ -86,6 +86,7 @@ export class Player {
   }
 
   public updateFromScoreboard(data: IFormattedScoreboard) {
+    return;
     if (data.kills > this.kills) {
       this.killsThisRound++;
     }
@@ -178,7 +179,7 @@ export class Player {
   }
 
   public fallbackKillfeedExtraction(data: IFormattedKillfeed, victim: boolean = false) {
-    if (this.scoreboardAvailable) return;
+    if (this.scoreboardAvailable || this.auxiliaryAvailable.scoreboard) return;
 
     if (victim) {
       this.isAlive = false;
@@ -189,6 +190,11 @@ export class Player {
       this.kills++;
       this.killsThisRound++;
     }
+  }
+
+  public fallbackAssistIncrement() {
+    if (this.scoreboardAvailable || this.auxiliaryAvailable.scoreboard) return;
+    this.assists++;
   }
 
   public processObservedEvent(observedName: string) {
@@ -247,6 +253,10 @@ export class Player {
 
   public getPlayerId(): string {
     return this.riotId;
+  }
+
+  public getAgentInternal(): string {
+    return this.agentInternal;
   }
 
   public checkIsAlive(): boolean {

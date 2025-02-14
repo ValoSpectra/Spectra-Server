@@ -11,6 +11,7 @@ import {
 } from "./eventData";
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
+import { Agents } from "../util/valorantInternalTranslator";
 const Log = logging("Team").level(1);
 
 type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost" | "upcoming";
@@ -34,6 +35,7 @@ export class Team {
 
   private players: Player[] = [];
   private playerCount = 0;
+  private hasDuplicateAgents = false;
 
   constructor(team: AuthTeam) {
     this.teamName = team.name;
@@ -114,6 +116,17 @@ export class Team {
     return this.playerCount;
   }
 
+  findDuplicateAgents() {
+    const seen: string[] = [];
+    for (const player of this.players) {
+      if (seen.includes(player.getAgentInternal())) {
+        this.hasDuplicateAgents = true;
+        break;
+      }
+      seen.push(player.getAgentInternal());
+    }
+  }
+
   switchSides() {
     this.isAttacking = !this.isAttacking;
   }
@@ -152,6 +165,17 @@ export class Team {
     if (attacker) {
       attacker.extractKillfeedInfo(data);
       attacker.fallbackKillfeedExtraction(data);
+
+      //cant map agent to player correctly if we have duplicate agents
+      if (!this.hasDuplicateAgents) {
+        for (const assistData of data.assists) {
+          const assister = this.players.find(
+            (player) => player.getAgentInternal() === Agents[assistData as keyof typeof Agents],
+          );
+          if (!assister) continue;
+          assister.fallbackAssistIncrement();
+        }
+      }
     }
 
     const victim = this.players.find((player) => player.getName() === data.victim);
