@@ -64,14 +64,34 @@ export class MatchController {
 
   async receiveMatchData(data: IAuthedData | IAuthedAuxData) {
     data.timestamp = Date.now();
-    const trackedMatch = this.matches[data.groupCode];
-    if (trackedMatch == null) {
-      // How did we even get here?
-      Log.info(`Received match data with invalid game "${data.groupCode}"`);
-      return;
-    }
 
-    await trackedMatch.receiveMatchSpecificData(data);
+    if ("groupCode" in data) {
+      const trackedMatch = this.matches[data.groupCode];
+      if (trackedMatch == null) {
+        // How did we even get here?
+        Log.info(`Received match data with invalid game "${data.groupCode}"`);
+        return;
+      }
+
+      await trackedMatch.receiveMatchSpecificData(data);
+
+      // Aux data handling, as it can be sent to multiple matches
+    } else if ("matchId" in data) {
+      for (const match of Object.values(this.matches)) {
+        if (match.matchId == data.matchId) {
+          await match.receiveMatchSpecificData(data);
+        }
+      }
+    }
+  }
+
+  async receiveAuxMatchData(data: IAuthedAuxData) {
+    data.timestamp = Date.now();
+    for (const match of Object.values(this.matches)) {
+      if (match.matchId == data.matchId) {
+        await match.receiveMatchSpecificData(data);
+      }
+    }
   }
 
   setAuxDisconnected(groupCode: string, playerId: string) {

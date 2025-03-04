@@ -80,10 +80,10 @@ export interface IAuthedData {
 
 export interface IAuthedAuxData {
   playerId: string;
-  groupCode: string;
+  matchId: string;
   type: string;
   timestamp: number;
-  data: IFormattedAuxiliary | number;
+  data: IFormattedAuxiliary | number | boolean;
 }
 
 export interface IFormattedAbilities {
@@ -150,7 +150,7 @@ export enum DataTypes {
 export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData {
   if (
     ("obsName" in data || "playerId" in data) &&
-    "groupCode" in data &&
+    ("groupCode" in data || "matchId" in data) &&
     "type" in data &&
     "data" in data
   ) {

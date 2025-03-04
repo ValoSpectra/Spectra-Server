@@ -75,7 +75,9 @@ export class Match {
         );
 
         if (correctTeam == null) {
-          Log.error(`Received match data with invalid team for group code "${data.groupCode}"`);
+          Log.error(
+            `Received match data with invalid team for group code "${(data as IAuthedData).groupCode}"`,
+          );
           Log.debug(`Data: ${JSON.stringify(data)}`);
           return;
         }

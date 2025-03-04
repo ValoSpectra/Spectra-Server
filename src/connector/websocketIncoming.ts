@@ -203,10 +203,7 @@ export class WebsocketIncoming {
           }
 
           // All checks passed, send logon acknolwedgement
-          ws.emit(
-            "aux_logon_ack",
-            JSON.stringify({ type: DataTypes.AUX_AUTH, value: true, reason: groupCode }),
-          );
+          ws.emit("aux_logon_ack", JSON.stringify({ type: DataTypes.AUX_AUTH, value: true }));
           user.name = authenticationData.name;
           user.groupCode = groupCode;
           user.isAuxiliary = true;
