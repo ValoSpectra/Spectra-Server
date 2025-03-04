@@ -65,6 +65,7 @@ export class Player {
 
   private scoreboardAvailable: boolean = false;
   private auxiliaryAvailable: AvailableAuxiliary = new AvailableAuxiliary();
+  private iconNameSuffix: string = "";
 
   constructor(data: IFormattedRoster) {
     this.name = data.name;
@@ -226,6 +227,12 @@ export class Player {
   public setHeatlh(health: number) {
     this.health = health;
     this.auxiliaryAvailable.health = true;
+  }
+
+  public setAstraTargeting(data: boolean) {
+    if (this.agentProper === Agents.Rift) {
+      this.iconNameSuffix = data ? "Targeting" : "";
+    }
   }
 
   public resetRoundSpecificValues(isSideSwitch: boolean) {

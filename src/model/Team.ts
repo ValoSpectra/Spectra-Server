@@ -81,6 +81,10 @@ export class Team {
         this.processAuxHealthData(data as IFormattedAuxiliary);
         break;
 
+      case DataTypes.AUX_ASTRA_TARGETING:
+        this.processAuxAstraTargeting(data as IFormattedAuxiliary);
+        break;
+
       default:
         break;
     }
@@ -205,6 +209,13 @@ export class Team {
     if (!player) return;
     if (typeof data.data != "number") return;
     player.setHeatlh(data.data);
+  }
+
+  private processAuxAstraTargeting(data: IFormattedAuxiliary) {
+    const player = this.players.find((player) => player.getPlayerId() === data.playerId);
+    if (!player) return;
+    if (typeof data.data != "boolean") return;
+    player.setAstraTargeting(data.data);
   }
 
   private teamKills(): number {

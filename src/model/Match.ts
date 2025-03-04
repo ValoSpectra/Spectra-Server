@@ -105,6 +105,10 @@ export class Match {
         this.teams.forEach((team) => team.receiveTeamSpecificData(data));
         break;
 
+      case DataTypes.AUX_ASTRA_TARGETING:
+        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
+        break;
+
       case DataTypes.SPIKE_PLANTED:
         if (this.roundPhase !== "combat") break;
         this.spikeState.planted = true;

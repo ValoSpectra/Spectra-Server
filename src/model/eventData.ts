@@ -51,10 +51,14 @@ export interface IFormattedScore {
 }
 
 export interface IFormattedAuxiliary {
-  type: DataTypes.AUX_SCOREBOARD | DataTypes.AUX_ABILITIES | DataTypes.AUX_HEALTH;
+  type:
+    | DataTypes.AUX_SCOREBOARD
+    | DataTypes.AUX_ABILITIES
+    | DataTypes.AUX_HEALTH
+    | DataTypes.AUX_ASTRA_TARGETING;
   playerId: string;
   groupCode: string;
-  data: IFormattedScoreboard | IFormattedAbilities | number;
+  data: IFormattedScoreboard | IFormattedAbilities | number | boolean;
 }
 
 export interface IAuthedData {
@@ -140,6 +144,7 @@ export enum DataTypes {
   AUX_ABILITIES = "aux_abilities",
   AUX_HEALTH = "aux_health",
   AUX_SCOREBOARD = "aux_scoreboard",
+  AUX_ASTRA_TARGETING = "aux_astra_targeting",
 }
 
 export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData {
