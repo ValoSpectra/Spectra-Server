@@ -86,7 +86,6 @@ export class Player {
   }
 
   public updateFromScoreboard(data: IFormattedScoreboard) {
-    return;
     if (data.kills > this.kills) {
       this.killsThisRound++;
     }

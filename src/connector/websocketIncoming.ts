@@ -2,9 +2,9 @@ require("dotenv").config();
 import { Server, Socket } from "socket.io";
 import {
   DataTypes,
+  IAuthedAuxData,
   IAuthenticationData,
   IAuxAuthenticationData,
-  isAuthedAuxData,
   isAuthedData,
 } from "../model/eventData";
 import { MatchController } from "../controller/MatchController";
@@ -257,10 +257,10 @@ export class WebsocketIncoming {
     user.ws.on("aux_data", async (msg: any) => {
       try {
         const data = JSON.parse(msg.toString());
-        if (isAuthedAuxData(data)) {
+        if (isAuthedData(data)) {
           await this.matchController.receiveMatchData(data);
           if (data.type === DataTypes.AUX_SCOREBOARD && user.playerId === "") {
-            user.playerId = data.playerId;
+            user.playerId = (data as IAuthedAuxData).playerId;
           }
         }
       } catch (e) {

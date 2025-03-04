@@ -142,15 +142,13 @@ export enum DataTypes {
   AUX_SCOREBOARD = "aux_scoreboard",
 }
 
-export function isAuthedData(data: object): data is IAuthedData {
-  if ("obsName" in data && "groupCode" in data && "type" in data && "data" in data) {
-    return true;
-  }
-  return false;
-}
-
-export function isAuthedAuxData(data: object): data is IAuthedAuxData {
-  if ("playerId" in data && "groupCode" in data && "type" in data && "data" in data) {
+export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData {
+  if (
+    ("obsName" in data || "playerId" in data) &&
+    "groupCode" in data &&
+    "type" in data &&
+    "data" in data
+  ) {
     return true;
   }
   return false;
