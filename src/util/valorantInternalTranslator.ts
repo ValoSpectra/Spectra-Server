@@ -211,6 +211,10 @@ export enum Agents {
   "Cashew_PC_C" = "Tejo",
   "Cashew" = "Tejo",
   "TX_Killfeed_Tejo" = "Cashew",
+
+  "Terra_PC_C" = "Waylay",
+  "Terra" = "Waylay",
+  "TX_Killfeed_Waylay" = "Terra",
 }
 
 export enum Maps {
