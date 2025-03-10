@@ -102,7 +102,10 @@ export class MatchController {
 
   sendMatchDataForLogon(groupCode: string) {
     if (this.matches[groupCode] != null) {
-      this.outgoingWebsocketServer.sendMatchData(groupCode, this.matches[groupCode]);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...formattedData } =
+        this.matches[groupCode] as any;
+      this.outgoingWebsocketServer.sendMatchData(groupCode, formattedData);
     }
   }
 

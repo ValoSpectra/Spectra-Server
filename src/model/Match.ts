@@ -39,10 +39,11 @@ export class Match {
   private timeoutState: TimeoutStates = {
     techPause: false,
     leftTeam: false,
-    leftTeamStartTime: 0,
     rightTeam: false,
-    rightTeamStartTime: 0,
+    timeRemaining: 0,
   };
+  private timeoutEndTimeout: any = undefined;
+  private timeoutRemainingLoop: any = undefined;
 
   private tools: ToolsData;
 
@@ -227,29 +228,66 @@ export class Match {
         break;
 
       case DataTypes.TECH_PAUSE:
-        this.timeoutState.techPause = data.data as boolean;
+        this.timeoutState.techPause = !this.timeoutState.techPause;
+        if (this.timeoutState.techPause) {
+          this.timeoutState.leftTeam = false;
+          this.timeoutState.rightTeam = false;
+          clearTimeout(this.timeoutEndTimeout);
+          clearInterval(this.timeoutRemainingLoop);
+          this.timeoutEndTimeout = null;
+        }
         break;
 
       case DataTypes.LEFT_TIMEOUT:
-        this.timeoutState.leftTeam = data.data as boolean;
-        Log.info(`Left team timeout: ${this.timeoutState.leftTeam}`);
+        this.timeoutState.leftTeam = !this.timeoutState.leftTeam;
         if (this.timeoutState.leftTeam) {
           this.timeoutState.rightTeam = false;
-          this.timeoutState.leftTeamStartTime = data.timestamp;
+          this.timeoutState.techPause = false;
+          this.timeoutState.timeRemaining = this.tools.timeoutDuration;
+          this.startTimeoutEndTimeout();
+        } else {
+          clearTimeout(this.timeoutEndTimeout);
         }
         break;
 
       case DataTypes.RIGHT_TIMEOUT:
-        this.timeoutState.rightTeam = data.data as boolean;
-        Log.info(`Right team timeout: ${this.timeoutState.rightTeam}`);
+        this.timeoutState.rightTeam = !this.timeoutState.rightTeam;
         if (this.timeoutState.rightTeam) {
           this.timeoutState.leftTeam = false;
-          this.timeoutState.rightTeamStartTime = data.timestamp;
+          this.timeoutState.techPause = false;
+          this.timeoutState.timeRemaining = this.tools.timeoutDuration;
+          this.startTimeoutEndTimeout();
+        } else {
+          clearTimeout(this.timeoutEndTimeout);
         }
         break;
     }
 
     this.eventNumber++;
+  }
+
+  private startTimeoutEndTimeout() {
+    clearTimeout(this.timeoutEndTimeout);
+    this.timeoutEndTimeout = null;
+
+    clearInterval(this.timeoutRemainingLoop);
+    this.timeoutRemainingLoop = null;
+
+    this.timeoutEndTimeout = setTimeout(() => {
+      this.timeoutState.leftTeam = false;
+      this.timeoutState.rightTeam = false;
+      clearInterval(this.timeoutRemainingLoop);
+      this.eventNumber++;
+    }, this.tools.timeoutDuration * 1000);
+
+    this.timeoutRemainingLoop = setInterval(() => {
+      if (this.timeoutState.timeRemaining > 0) {
+        this.timeoutState.timeRemaining--;
+        this.eventNumber++;
+      } else {
+        clearInterval(this.timeoutRemainingLoop);
+      }
+    }, 1000);
   }
 
   private processScoreCalculation(data: IFormattedScore, eventTimestamp: number) {
@@ -324,7 +362,6 @@ export interface SpikeStates {
 export interface TimeoutStates {
   techPause: boolean;
   leftTeam: boolean;
-  leftTeamStartTime: number;
   rightTeam: boolean;
-  rightTeamStartTime: number;
+  timeRemaining: number;
 }

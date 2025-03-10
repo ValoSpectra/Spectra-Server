@@ -85,6 +85,9 @@ export class WebsocketOutgoing {
   }
 
   sendMatchData(groupCode: string, data: any) {
-    this.wss.to(groupCode).emit("match_data", JSON.stringify(data));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...formattedData } =
+      data;
+    this.wss.to(groupCode).emit("match_data", JSON.stringify(formattedData));
   }
 }

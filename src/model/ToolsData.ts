@@ -15,6 +15,7 @@ export class ToolsData {
     backdropUrl: "",
     enabled: false,
   };
+  public timeoutDuration: number = 60;
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
