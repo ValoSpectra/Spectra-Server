@@ -36,6 +36,14 @@ export class Match {
   private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
   private attackersWon: boolean = false;
 
+  private timeoutState: TimeoutStates = {
+    techPause: false,
+    leftTeam: false,
+    leftTeamStartTime: 0,
+    rightTeam: false,
+    rightTeamStartTime: 0,
+  };
+
   private tools: ToolsData;
 
   // private ranks: { team1: string[]; team2: string[] } = { team1: [], team2: [] };
@@ -217,6 +225,28 @@ export class Match {
             break;
         }
         break;
+
+      case DataTypes.TECH_PAUSE:
+        this.timeoutState.techPause = data.data as boolean;
+        break;
+
+      case DataTypes.LEFT_TIMEOUT:
+        this.timeoutState.leftTeam = data.data as boolean;
+        Log.info(`Left team timeout: ${this.timeoutState.leftTeam}`);
+        if (this.timeoutState.leftTeam) {
+          this.timeoutState.rightTeam = false;
+          this.timeoutState.leftTeamStartTime = data.timestamp;
+        }
+        break;
+
+      case DataTypes.RIGHT_TIMEOUT:
+        this.timeoutState.rightTeam = data.data as boolean;
+        Log.info(`Right team timeout: ${this.timeoutState.rightTeam}`);
+        if (this.timeoutState.rightTeam) {
+          this.timeoutState.leftTeam = false;
+          this.timeoutState.rightTeamStartTime = data.timestamp;
+        }
+        break;
     }
 
     this.eventNumber++;
@@ -289,4 +319,12 @@ export interface SpikeStates {
   planted: boolean;
   detonated: boolean;
   defused: boolean;
+}
+
+export interface TimeoutStates {
+  techPause: boolean;
+  leftTeam: boolean;
+  leftTeamStartTime: number;
+  rightTeam: boolean;
+  rightTeamStartTime: number;
 }
