@@ -112,6 +112,7 @@ export class ReplayConnectorService {
             backdropUrl: "",
             enabled: true,
           },
+          timeoutDuration: 60,
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));
