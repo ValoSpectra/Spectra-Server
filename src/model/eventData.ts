@@ -1,5 +1,5 @@
 import { AuthTeam } from "../connector/websocketIncoming";
-import { Agents, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
+import { Agents, WeaponsAndAbilities } from "../util/ValorantInternalTranslator";
 import { ToolsData } from "./ToolsData";
 
 export interface IFormattedScoreboard {

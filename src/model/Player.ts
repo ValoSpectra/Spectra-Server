@@ -1,6 +1,7 @@
-import { Agents, Armor, WeaponsAndAbilities } from "../util/valorantInternalTranslator";
+import { Agents, Armor, WeaponsAndAbilities } from "../util/ValorantInternalTranslator";
 import { IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
 import logging from "../util/Logging";
+import { IconNameSuffixes } from "../util/AgentProperties";
 
 const Log = logging("Player").level(1);
 
@@ -90,6 +91,7 @@ export class Player {
     if (data.kills > this.kills) {
       this.killsThisRound++;
     }
+    this.runAgentSpecificScoreboardChecks(data);
     this.kills = data.kills;
 
     this.deaths = data.deaths;
@@ -116,6 +118,7 @@ export class Player {
 
     // Player dies
     if (!data.isAlive && this.isAlive) {
+      this.runAgentSpecificDeathChecks();
       this.health = 0;
     }
     // Player revives
@@ -163,19 +166,6 @@ export class Player {
         this.killsOnEnemyPlayer[data.victim] = 1;
       }
     }
-
-    // TEMPORARILY COMMENTED OUT, WE ONLY GET THE ASSISTERS AGENT NAME
-    // Store how often we got assisted by which teammate
-    // if (data.assists.length > 0) {
-    //     for (const assister of data.assists) {
-    //         let existing: number = this.assistsFromTeammate[assister];
-    //         if (existing) {
-    //             this.assistsFromTeammate[assister] = existing++;
-    //         } else {
-    //             this.assistsFromTeammate[assister] = 1;
-    //         }
-    //     }
-    // }
   }
 
   public fallbackKillfeedExtraction(data: IFormattedKillfeed, victim: boolean = false) {
@@ -187,6 +177,7 @@ export class Player {
       this.deaths++;
     } else {
       // The teamkill field is unreliable at the moment, so we're not using it for fallbacks
+      this.runAgentSpecificScoreboardChecks({ kills: this.kills + 1 });
       this.kills++;
       this.killsThisRound++;
     }
@@ -194,6 +185,7 @@ export class Player {
 
   public fallbackAssistIncrement() {
     if (this.scoreboardAvailable || this.auxiliaryAvailable.scoreboard) return;
+    this.runAgentSpecificScoreboardChecks({ assists: this.assists + 1 });
     this.assists++;
   }
 
@@ -208,6 +200,8 @@ export class Player {
   // Only take partial data from aux scoreboard, still get rest from observer
   public updateFromAuxiliaryScoreboard(data: IFormattedScoreboard) {
     if (this.scoreboardAvailable) return;
+    this.runAgentSpecificScoreboardChecks(data);
+
     this.hasSpike = data.hasSpike;
     this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal];
     this.maxUltPoints = data.maxUltPoints;
@@ -227,12 +221,6 @@ export class Player {
   public setHeatlh(health: number) {
     this.health = health;
     this.auxiliaryAvailable.health = true;
-  }
-
-  public setAstraTargeting(data: boolean) {
-    if (this.agentProper === Agents.Rift) {
-      this.iconNameSuffix = data ? "Targeting" : "";
-    }
   }
 
   public resetRoundSpecificValues(isSideSwitch: boolean) {
@@ -290,4 +278,63 @@ export class Player {
     this.auxiliaryAvailable = new AvailableAuxiliary();
     Log.info(`Auxiliary data for ${this.name} has been disconnected`);
   }
+
+  //#region Agent Specific Code
+  private setIconNameSuffix(suffix: string) {
+    this.iconNameSuffix = suffix;
+  }
+
+  private resetIconNameSuffix() {
+    this.iconNameSuffix = "";
+  }
+
+  private runAgentSpecificScoreboardChecks(data: Partial<IFormattedScoreboard>) {
+    switch (this.agentProper) {
+      case Agents.Smonk:
+        this.cloveSpecificChecks(data);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private runAgentSpecificDeathChecks() {
+    switch (this.agentProper) {
+      case Agents.Rift:
+      case Agents.Smonk:
+        this.resetIconNameSuffix();
+        break;
+      default:
+        break;
+    }
+  }
+
+  private cloveSpecificChecks(data: Partial<IFormattedScoreboard>) {
+    // Clove using up all their ult points revives them with a timer on kills, set suffix for representative icon
+    if (data.currUltPoints == 0 && this.currUltPoints == this.maxUltPoints) {
+      this.setIconNameSuffix(IconNameSuffixes.CLOVE_ULTIMATE);
+    }
+
+    // If Clove gets a kill, reset the icon name suffix (since they might be in Ult)
+    if (data.kills && data.kills > this.kills) {
+      this.resetIconNameSuffix();
+    }
+
+    // If Clove gets a damaging assist, reset the icon name suffix
+    // Yes we don't know if the assist was damaging, but we're assuming it is since it's very very likely
+    if (data.assists && data.assists > this.assists) {
+      this.resetIconNameSuffix();
+    }
+  }
+
+  public setAstraTargeting(data: boolean) {
+    if (this.agentProper === Agents.Rift) {
+      if (data) {
+        this.setIconNameSuffix(IconNameSuffixes.ASTRA_TARGETING);
+      } else {
+        this.resetIconNameSuffix();
+      }
+    }
+  }
+  //#endregion
 }

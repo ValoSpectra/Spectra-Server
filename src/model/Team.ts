@@ -11,7 +11,7 @@ import {
 } from "./eventData";
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
-import { Agents } from "../util/valorantInternalTranslator";
+import { Agents } from "../util/ValorantInternalTranslator";
 const Log = logging("Team").level(1);
 
 type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost" | "upcoming";

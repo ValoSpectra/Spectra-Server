@@ -10,7 +10,7 @@ import {
 } from "./eventData";
 import logging from "../util/Logging";
 import { ReplayLogging } from "../util/ReplayLogging";
-import { Maps } from "../util/valorantInternalTranslator";
+import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
 import { ToolsData } from "./ToolsData";
