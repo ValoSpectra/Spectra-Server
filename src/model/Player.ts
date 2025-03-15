@@ -93,10 +93,29 @@ export class Player {
   }
 
   public updateFromScoreboard(data: IFormattedScoreboard) {
+    this._updateSharedScoreboardData(data);
+
+    this.scoreboardAvailable = true;
+  }
+
+  // Only take partial data from aux scoreboard, still get rest from observer
+  public updateFromAuxiliaryScoreboard(data: IFormattedScoreboard | IFormattedAuxScoreboardTeam) {
+    if (this.scoreboardAvailable) return;
+
+    this._updateSharedScoreboardData(data);
+
+    this.auxiliaryAvailable.scoreboard = true;
+  }
+
+  private _updateSharedScoreboardData(data: IFormattedScoreboard | IFormattedAuxScoreboardTeam) {
     if (data.kills > this.kills) {
       this.killsThisRound++;
     }
+    this.agentInternal = data.agentInternal;
+    this.agentProper = Agents[data.agentInternal] || data.agentInternal;
+
     this.runAgentSpecificScoreboardChecks(data);
+
     this.kills = data.kills;
 
     this.deaths = data.deaths;
@@ -118,9 +137,6 @@ export class Player {
     this.armorName = Armor[data.initialArmor];
     this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal];
 
-    this.agentInternal = data.agentInternal;
-    this.agentProper = Agents[data.agentInternal] || data.agentInternal;
-
     // Player dies
     if (!data.isAlive && this.isAlive) {
       this.runAgentSpecificDeathChecks();
@@ -132,8 +148,6 @@ export class Player {
     }
     this.isAlive = data.isAlive;
     this.hasSpike = data.hasSpike;
-
-    this.scoreboardAvailable = true;
   }
 
   public extractKillfeedInfo(data: IFormattedKillfeed) {
@@ -200,30 +214,6 @@ export class Player {
     } else {
       this.isObserved = false;
     }
-  }
-
-  // Only take partial data from aux scoreboard, still get rest from observer
-  public updateFromAuxiliaryScoreboard(data: IFormattedScoreboard | IFormattedAuxScoreboardTeam) {
-    if (this.scoreboardAvailable) return;
-    this.agentInternal = data.agentInternal;
-
-    this.runAgentSpecificScoreboardChecks(data);
-
-    this.isAlive = data.isAlive;
-    this.armorName = Armor[data.initialArmor];
-    this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal];
-    this.currUltPoints = data.currUltPoints;
-    this.maxUltPoints = data.maxUltPoints;
-    this.hasSpike = data.hasSpike;
-    this.money = data.money;
-    this.kills = data.kills;
-    this.deaths = data.deaths;
-    this.assists = data.assists;
-    if (!data.isAlive) {
-      this.health = 0;
-    }
-
-    this.auxiliaryAvailable.scoreboard = true;
   }
 
   public updateAbilities(data: AvailableAbilities) {
@@ -326,7 +316,7 @@ export class Player {
 
   private cloveSpecificChecks(data: Partial<IFormattedScoreboard | IFormattedAuxScoreboardTeam>) {
     // Clove using up all their ult points revives them with a timer on kills, set suffix for representative icon
-    if (data.currUltPoints == 0 && this.currUltPoints == this.maxUltPoints) {
+    if (data.currUltPoints == 0 && this.ultReady) {
       this.setIconNameSuffix(IconNameSuffixes.CLOVE_ULTIMATE);
     }
 

@@ -95,10 +95,10 @@ export class Team {
     }
   }
 
-  receiveAuxScoreboardTeamData(data: IAuthedAuxData) {
+  receiveAuxScoreboardTeamData(data: IFormattedAuxiliary) {
     // Check if data is for this team since we have to check that by player ID
     if (this.players.find((player) => player.getPlayerId() === data.playerId)) {
-      const scoreboards = (data.data as IFormattedAuxiliary).data as IFormattedAuxScoreboardTeam[];
+      const scoreboards = JSON.parse(data.data as string) as IFormattedAuxScoreboardTeam[];
       for (const playerScoreboard of scoreboards) {
         this.players
           .find((player) => player.getPlayerId() === playerScoreboard.playerId)

@@ -110,12 +110,13 @@ export interface IFormattedAuxiliary {
     | DataTypes.AUX_ASTRA_TARGETING
     | DataTypes.AUX_CYPHER_CAM;
   playerId: string;
-  groupCode: string;
+  matchId: string;
   data:
     | IFormattedScoreboard
     | IFormattedAuxScoreboardTeam[]
     | IFormattedAbilities
     | number
+    | string
     | boolean;
 }
 
