@@ -108,6 +108,7 @@ export class Match {
       case DataTypes.AUX_ABILITIES:
       case DataTypes.AUX_HEALTH:
       case DataTypes.AUX_ASTRA_TARGETING:
+      case DataTypes.AUX_CYPHER_CAM:
         this.teams.forEach((team) => team.receiveTeamSpecificData(data));
         break;
 

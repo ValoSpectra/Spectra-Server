@@ -351,5 +351,15 @@ export class Player {
       }
     }
   }
+
+  public setCypherCam(data: boolean) {
+    if (this.agentProper === Agents.Gumshoe) {
+      if (data) {
+        this.setIconNameSuffix(IconNameSuffixes.CYPHER_CAM);
+      } else {
+        this.resetIconNameSuffix();
+      }
+    }
+  }
   //#endregion
 }

@@ -86,6 +86,10 @@ export class Team {
         this.processAuxAstraTargeting(data as IFormattedAuxiliary);
         break;
 
+      case DataTypes.AUX_CYPHER_CAM:
+        this.processAuxCypherCam(data as IFormattedAuxiliary);
+        break;
+
       default:
         break;
     }
@@ -229,6 +233,13 @@ export class Team {
     if (!player) return;
     if (typeof data.data != "boolean") return;
     player.setAstraTargeting(data.data);
+  }
+
+  private processAuxCypherCam(data: IFormattedAuxiliary) {
+    const player = this.players.find((player) => player.getPlayerId() === data.playerId);
+    if (!player) return;
+    if (typeof data.data != "boolean") return;
+    player.setCypherCam(data.data);
   }
 
   private teamKills(): number {
