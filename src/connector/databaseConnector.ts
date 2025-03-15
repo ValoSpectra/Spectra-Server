@@ -44,9 +44,11 @@ export class DatabaseConnector {
     }
   }
 
-  public static async registerMatch(match: Match) {
+  public static async registerMatch(match: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...toSend } = match;
     const res = await this.apiRequest(`system/match/${match.matchId}/register`, "post", {
-      match: match,
+      match: toSend,
     });
 
     if (res.status == 200) {
@@ -57,9 +59,11 @@ export class DatabaseConnector {
     }
   }
 
-  public static async updateMatch(match: Match): Promise<void> {
+  public static async updateMatch(match: any): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...toSend } = match;
     const res = await this.apiRequest(`system/match/${match.matchId}/update`, "put", {
-      match: match,
+      match: toSend,
     });
 
     if (res.status == 200) {
@@ -70,9 +74,11 @@ export class DatabaseConnector {
     }
   }
 
-  public static async completeMatch(match: Match): Promise<void> {
+  public static async completeMatch(match: any): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...toSend } = match;
     const res = await this.apiRequest(`system/match/${match.matchId}/complete`, "put", {
-      match: match,
+      match: toSend,
     });
 
     if (res.status == 200) {
