@@ -50,17 +50,6 @@ export interface IFormattedScore {
   team_1: number;
 }
 
-export interface IFormattedAuxiliary {
-  type:
-    | DataTypes.AUX_SCOREBOARD
-    | DataTypes.AUX_ABILITIES
-    | DataTypes.AUX_HEALTH
-    | DataTypes.AUX_ASTRA_TARGETING;
-  playerId: string;
-  groupCode: string;
-  data: IFormattedScoreboard | IFormattedAbilities | number | boolean;
-}
-
 export interface IAuthedData {
   obsName: string;
   groupCode: string;
@@ -76,20 +65,6 @@ export interface IAuthedData {
     | boolean
     | string
     | number;
-}
-
-export interface IAuthedAuxData {
-  playerId: string;
-  matchId: string;
-  type: string;
-  timestamp: number;
-  data: IFormattedAuxiliary | number | boolean;
-}
-
-export interface IFormattedAbilities {
-  grenade: number;
-  ability_1: number;
-  ability_2: number;
 }
 
 export interface IFormattedData {
@@ -117,6 +92,7 @@ export interface IAuthenticationData {
   organizationId?: string;
 }
 
+//#region Auxiliary data
 export interface IAuxAuthenticationData {
   type: DataTypes.AUX_AUTH;
   clientVersion: string;
@@ -124,6 +100,54 @@ export interface IAuxAuthenticationData {
   matchId: string;
   playerId: string;
 }
+
+export interface IFormattedAuxiliary {
+  type:
+    | DataTypes.AUX_SCOREBOARD
+    | DataTypes.AUX_SCOREBOARD_TEAM
+    | DataTypes.AUX_ABILITIES
+    | DataTypes.AUX_HEALTH
+    | DataTypes.AUX_ASTRA_TARGETING
+    | DataTypes.AUX_CYPHER_CAM;
+  playerId: string;
+  groupCode: string;
+  data:
+    | IFormattedScoreboard
+    | IFormattedAuxScoreboardTeam[]
+    | IFormattedAbilities
+    | number
+    | boolean;
+}
+
+export interface IAuthedAuxData {
+  playerId: string;
+  matchId: string;
+  type: string;
+  timestamp: number;
+  data: IFormattedAuxiliary | number | boolean;
+}
+
+export interface IFormattedAbilities {
+  grenade: number;
+  ability_1: number;
+  ability_2: number;
+}
+
+export interface IFormattedAuxScoreboardTeam {
+  playerId: string;
+  agentInternal: keyof typeof Agents;
+  isAlive: boolean;
+  initialArmor: number;
+  scoreboardWeaponInternal: keyof typeof WeaponsAndAbilities;
+  currUltPoints: number;
+  maxUltPoints: number;
+  hasSpike: boolean;
+  money: number;
+  kills: number;
+  deaths: number;
+  assists: number;
+}
+//#endregion
 
 export enum DataTypes {
   SCOREBOARD = "scoreboard",
@@ -144,6 +168,7 @@ export enum DataTypes {
   AUX_ABILITIES = "aux_abilities",
   AUX_HEALTH = "aux_health",
   AUX_SCOREBOARD = "aux_scoreboard",
+  AUX_SCOREBOARD_TEAM = "aux_scoreboard_team",
   AUX_ASTRA_TARGETING = "aux_astra_targeting",
   // Hotkey data types
   SPIKE_PLANTED = "spike_planted",

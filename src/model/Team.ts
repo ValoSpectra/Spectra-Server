@@ -5,6 +5,7 @@ import {
   IAuthedData,
   IFormattedAbilities,
   IFormattedAuxiliary,
+  IFormattedAuxScoreboardTeam,
   IFormattedKillfeed,
   IFormattedRoster,
   IFormattedScoreboard,
@@ -87,6 +88,18 @@ export class Team {
 
       default:
         break;
+    }
+  }
+
+  receiveAuxScoreboardTeamData(data: IAuthedAuxData) {
+    // Check if data is for this team since we have to check that by player ID
+    if (this.players.find((player) => player.getPlayerId() === data.playerId)) {
+      const scoreboards = (data.data as IFormattedAuxiliary).data as IFormattedAuxScoreboardTeam[];
+      for (const playerScoreboard of scoreboards) {
+        this.players
+          .find((player) => player.getPlayerId() === playerScoreboard.playerId)
+          ?.updateFromAuxiliaryScoreboard(playerScoreboard);
+      }
     }
   }
 

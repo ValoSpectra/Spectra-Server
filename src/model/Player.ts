@@ -1,5 +1,10 @@
 import { Agents, Armor, WeaponsAndAbilities } from "../util/ValorantInternalTranslator";
-import { IFormattedKillfeed, IFormattedRoster, IFormattedScoreboard } from "./eventData";
+import {
+  IFormattedAuxScoreboardTeam,
+  IFormattedKillfeed,
+  IFormattedRoster,
+  IFormattedScoreboard,
+} from "./eventData";
 import logging from "../util/Logging";
 import { IconNameSuffixes } from "../util/AgentProperties";
 
@@ -198,17 +203,25 @@ export class Player {
   }
 
   // Only take partial data from aux scoreboard, still get rest from observer
-  public updateFromAuxiliaryScoreboard(data: IFormattedScoreboard) {
+  public updateFromAuxiliaryScoreboard(data: IFormattedScoreboard | IFormattedAuxScoreboardTeam) {
     if (this.scoreboardAvailable) return;
+    this.agentInternal = data.agentInternal;
+
     this.runAgentSpecificScoreboardChecks(data);
 
-    this.hasSpike = data.hasSpike;
-    this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal];
-    this.maxUltPoints = data.maxUltPoints;
-    this.currUltPoints = data.currUltPoints;
+    this.isAlive = data.isAlive;
     this.armorName = Armor[data.initialArmor];
-    this.assists = data.assists;
+    this.highestWeapon = WeaponsAndAbilities[data.scoreboardWeaponInternal];
+    this.currUltPoints = data.currUltPoints;
+    this.maxUltPoints = data.maxUltPoints;
+    this.hasSpike = data.hasSpike;
     this.money = data.money;
+    this.kills = data.kills;
+    this.deaths = data.deaths;
+    this.assists = data.assists;
+    if (!data.isAlive) {
+      this.health = 0;
+    }
 
     this.auxiliaryAvailable.scoreboard = true;
   }
@@ -288,7 +301,9 @@ export class Player {
     this.iconNameSuffix = "";
   }
 
-  private runAgentSpecificScoreboardChecks(data: Partial<IFormattedScoreboard>) {
+  private runAgentSpecificScoreboardChecks(
+    data: Partial<IFormattedScoreboard | IFormattedAuxScoreboardTeam>,
+  ) {
     switch (this.agentProper) {
       case Agents.Smonk:
         this.cloveSpecificChecks(data);
@@ -309,7 +324,7 @@ export class Player {
     }
   }
 
-  private cloveSpecificChecks(data: Partial<IFormattedScoreboard>) {
+  private cloveSpecificChecks(data: Partial<IFormattedScoreboard | IFormattedAuxScoreboardTeam>) {
     // Clove using up all their ult points revives them with a timer on kills, set suffix for representative icon
     if (data.currUltPoints == 0 && this.currUltPoints == this.maxUltPoints) {
       this.setIconNameSuffix(IconNameSuffixes.CLOVE_ULTIMATE);

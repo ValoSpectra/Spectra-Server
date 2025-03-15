@@ -105,19 +105,14 @@ export class Match {
         break;
 
       case DataTypes.AUX_SCOREBOARD:
-        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
-        break;
-
       case DataTypes.AUX_ABILITIES:
-        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
-        break;
-
       case DataTypes.AUX_HEALTH:
-        this.teams.forEach((team) => team.receiveTeamSpecificData(data));
-        break;
-
       case DataTypes.AUX_ASTRA_TARGETING:
         this.teams.forEach((team) => team.receiveTeamSpecificData(data));
+        break;
+
+      case DataTypes.AUX_SCOREBOARD_TEAM:
+        this.teams.forEach((team) => team.receiveAuxScoreboardTeamData(data as IAuthedAuxData));
         break;
 
       case DataTypes.SPIKE_PLANTED:

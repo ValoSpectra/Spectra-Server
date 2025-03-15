@@ -20,11 +20,7 @@ export class ToolsData {
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
 
-    if (
-      this.tournamentInfo.backdropUrl != "" ||
-      this.tournamentInfo.logoUrl != "" ||
-      this.tournamentInfo.name != ""
-    ) {
+    if (this.tournamentInfo.logoUrl != "" || this.tournamentInfo.name != "") {
       this.tournamentInfo.enabled = true;
     } else {
       this.tournamentInfo.enabled = false;
