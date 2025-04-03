@@ -1,5 +1,4 @@
 require("dotenv").config();
-import { Match } from "../model/Match";
 import logging from "../util/Logging";
 const Log = logging("DatabaseConnector");
 

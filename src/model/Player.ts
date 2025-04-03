@@ -315,6 +315,11 @@ export class Player {
   }
 
   private cloveSpecificChecks(data: Partial<IFormattedScoreboard | IFormattedAuxScoreboardTeam>) {
+    // If clove has no stats (i.e. round "0"), don't do anything
+    if (data.kills == 0 && data.deaths == 0 && data.assists == 0) {
+      return;
+    }
+
     // Clove using up all their ult points revives them with a timer on kills, set suffix for representative icon
     if (data.currUltPoints == 0 && this.ultReady) {
       this.setIconNameSuffix(IconNameSuffixes.CLOVE_ULTIMATE);
