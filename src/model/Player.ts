@@ -260,6 +260,10 @@ export class Player {
     return this.isAlive;
   }
 
+  public getMoney(): number {
+    return this.money;
+  }
+
   public getMoneySpent(): number {
     return this.moneySpent;
   }

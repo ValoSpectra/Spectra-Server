@@ -95,15 +95,11 @@ export class Team {
     }
   }
 
-  receiveAuxScoreboardTeamData(data: IFormattedAuxiliary) {
-    // Check if data is for this team since we have to check that by player ID
-    if (this.players.find((player) => player.getPlayerId() === data.playerId)) {
-      const scoreboards = JSON.parse(data.data as string) as IFormattedAuxScoreboardTeam[];
-      for (const playerScoreboard of scoreboards) {
-        this.players
-          .find((player) => player.getPlayerId() === playerScoreboard.playerId)
-          ?.updateFromAuxiliaryScoreboard(playerScoreboard);
-      }
+  receiveAuxScoreboardTeamData(scoreboards: IFormattedAuxScoreboardTeam[]) {
+    for (const playerScoreboard of scoreboards) {
+      this.players
+        .find((player) => player.getPlayerId() === playerScoreboard.playerId)
+        ?.updateFromAuxiliaryScoreboard(playerScoreboard);
     }
   }
 
@@ -267,6 +263,12 @@ export class Team {
       }
     }
     return count;
+  }
+
+  public getMoneyFor(playerId: string) {
+    const player = this.players.find((player) => player.getPlayerId() === playerId);
+    if (!player) return 9999;
+    return player.getMoney();
   }
 
   public addRoundReason(reason: RecordType, roundNumber: number) {

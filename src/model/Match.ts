@@ -5,6 +5,8 @@ import {
   IAuthedData,
   IAuthenticationData,
   IFormattedAuxiliary,
+  IFormattedAuxScoreboardTeam,
+  IFormattedRoster,
   IFormattedRoundInfo,
   IFormattedScore,
   IFormattedScoreboard,
@@ -79,9 +81,25 @@ export class Match {
     let correctTeam = null;
     switch (data.type) {
       case DataTypes.SCOREBOARD:
-      case DataTypes.ROSTER:
         correctTeam = this.teams.find(
           (team) => team.ingameTeamId == (data.data as IFormattedScoreboard).startTeam,
+        );
+
+        if (correctTeam == null) {
+          Log.error(
+            `Received match data with invalid team for group code "${(data as IAuthedData).groupCode}"`,
+          );
+          Log.debug(`Data: ${JSON.stringify(data)}`);
+          return;
+        }
+
+        this.processSpikePlantDetection(data, correctTeam);
+        correctTeam.receiveTeamSpecificData(data);
+        break;
+
+      case DataTypes.ROSTER:
+        correctTeam = this.teams.find(
+          (team) => team.ingameTeamId == (data.data as IFormattedRoster).startTeam,
         );
 
         if (correctTeam == null) {
@@ -106,6 +124,15 @@ export class Match {
         break;
 
       case DataTypes.AUX_SCOREBOARD:
+        correctTeam = this.teams.find(
+          (team) => team.ingameTeamId == (data.data as IFormattedScoreboard).startTeam,
+        );
+        if (correctTeam) {
+          this.processSpikePlantDetection(data, correctTeam);
+          correctTeam.receiveTeamSpecificData(data);
+        }
+        break;
+
       case DataTypes.AUX_ABILITIES:
       case DataTypes.AUX_HEALTH:
       case DataTypes.AUX_ASTRA_TARGETING:
@@ -114,16 +141,21 @@ export class Match {
         break;
 
       case DataTypes.AUX_SCOREBOARD_TEAM:
-        this.teams.forEach((team) =>
-          team.receiveAuxScoreboardTeamData(data as IFormattedAuxiliary),
-        );
+        correctTeam = this.teams[0].hasTeamMemberById((data.data as IFormattedAuxiliary).playerId)
+          ? this.teams[0]
+          : this.teams[1];
+
+        if (correctTeam) {
+          const scoreboards = JSON.parse(data.data as string) as IFormattedAuxScoreboardTeam[];
+          for (const scoreboardData of scoreboards) {
+            this.processSpikePlantDetectionTeam(scoreboardData, correctTeam, data.timestamp);
+          }
+          correctTeam.receiveAuxScoreboardTeamData(scoreboards);
+        }
         break;
 
       case DataTypes.SPIKE_PLANTED:
-        if (this.roundPhase !== "combat") break;
-        this.spikeState.planted = true;
-        this.roundTimeoutTime = undefined;
-        this.spikeDetonationTime = data.timestamp + 45 * 1000; // Add 45 seconds to the current time
+        this._setSpikePlanted(data.timestamp);
         break;
 
       case DataTypes.SPIKE_DETONATED:
@@ -338,6 +370,41 @@ export class Match {
 
   public setAuxDisconnected(playerId: string) {
     this.teams.forEach((team) => team.setAuxDisconnected(playerId));
+  }
+
+  private processSpikePlantDetection(data: IAuthedData | IAuthedAuxData, team: Team) {
+    if (this.roundPhase !== "combat") return;
+    const scoreboardData = data.data as IFormattedScoreboard;
+    const newMoney = scoreboardData.money;
+    const oldMoney = team.getMoneyFor(scoreboardData.playerId);
+
+    // Received money during round, spike must have been planted
+    if (newMoney > oldMoney) {
+      this._setSpikePlanted(data.timestamp);
+    }
+  }
+
+  private processSpikePlantDetectionTeam(
+    data: IFormattedAuxScoreboardTeam,
+    team: Team,
+    timestamp: number,
+  ) {
+    if (this.roundPhase !== "combat") return;
+    const scoreboardData = data as IFormattedScoreboard;
+    const newMoney = scoreboardData.money;
+    const oldMoney = team.getMoneyFor(scoreboardData.playerId);
+
+    // Received money during round, spike must have been planted
+    if (newMoney > oldMoney) {
+      this._setSpikePlanted(timestamp);
+    }
+  }
+
+  private _setSpikePlanted(timestamp: number) {
+    if (this.roundPhase !== "combat") return;
+    this.spikeState.planted = true;
+    this.roundTimeoutTime = undefined;
+    this.spikeDetonationTime = timestamp + 45 * 1000; // Add 45 seconds to the current time
   }
 
   private debugLogRoundInfo() {
