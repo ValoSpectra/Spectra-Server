@@ -401,6 +401,7 @@ export class Match {
   }
 
   private _setSpikePlanted(timestamp: number) {
+    if (this.spikeState.planted) return;
     if (this.roundPhase !== "combat") return;
     this.spikeState.planted = true;
     this.roundTimeoutTime = undefined;
