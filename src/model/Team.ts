@@ -50,7 +50,7 @@ export class Team {
   }
 
   initRoundRecord() {
-    for (let i = 1; i < 11; i++) {
+    for (let i = 1; i < 26; i++) {
       this.roundRecord.push({ type: "upcoming", wasAttack: this.isAttacking, round: i });
     }
   }
