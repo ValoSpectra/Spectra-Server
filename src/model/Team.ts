@@ -279,11 +279,14 @@ export class Team {
       round: roundNumber,
     };
 
-    this.roundRecord[arrayPos + 1] = {
-      type: "upcoming",
-      wasAttack: this.isAttacking,
-      round: roundNumber + 1,
-    };
+    // Add 5 future rounds since the reason window can include more than one future round now
+    for (let future = 1; future <= 5; future++) {
+      this.roundRecord[arrayPos + future] = {
+        type: "upcoming",
+        wasAttack: this.isAttacking,
+        round: roundNumber + future,
+      };
+    }
   }
 
   public setAuxDisconnected(playerId: string): void {
