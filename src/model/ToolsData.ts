@@ -16,6 +16,11 @@ export class ToolsData {
     enabled: false,
   };
   public timeoutDuration: number = 60;
+  public sponsorInfo: ISponsorInfo = {
+    enabled: false,
+    duration: 5,
+    sponsors: [],
+  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
@@ -45,6 +50,12 @@ export type ITournamentInfo = {
   logoUrl: string;
   backdropUrl: string;
   enabled: boolean;
+};
+
+export type ISponsorInfo = {
+  enabled: boolean;
+  duration: number;
+  sponsors: string[];
 };
 
 type BaseMapPoolInfo = {
