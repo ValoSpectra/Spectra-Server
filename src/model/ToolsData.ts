@@ -30,6 +30,11 @@ export class ToolsData {
     } else {
       this.tournamentInfo.enabled = false;
     }
+
+    // Add Spectra logo to sponsors if enabled (will move somewhere else in future)
+    if (this.sponsorInfo.enabled) {
+      this.sponsorInfo.sponsors.push("https://auto.valospectra.com/assets/misc/logo.webp");
+    }
   }
 }
 
