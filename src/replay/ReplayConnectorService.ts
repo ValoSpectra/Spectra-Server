@@ -113,6 +113,11 @@ export class ReplayConnectorService {
             enabled: true,
           },
           timeoutDuration: 60,
+          sponsorInfo: {
+            enabled: false,
+            duration: 5000,
+            sponsors: [],
+          },
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));
