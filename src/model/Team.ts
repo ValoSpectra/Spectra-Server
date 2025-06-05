@@ -17,7 +17,7 @@ const Log = logging("Team").level(1);
 
 type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost" | "upcoming";
 
-interface RecordEntry {
+export interface RecordEntry {
   type: RecordType;
   wasAttack: boolean;
   round: number;

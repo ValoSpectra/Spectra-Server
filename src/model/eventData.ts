@@ -177,6 +177,8 @@ export enum DataTypes {
   TECH_PAUSE = "tech_pause",
   LEFT_TIMEOUT = "left_timeout",
   RIGHT_TIMEOUT = "right_timeout",
+  // Preview data types
+  PREVIEW = "preview",
 }
 
 export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData {
@@ -190,3 +192,17 @@ export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData
   }
   return false;
 }
+
+//#region Preview
+export interface IPreviewData {
+  type: DataTypes.PREVIEW;
+  clientVersion: string;
+  key: string;
+  previewCode: string;
+  leftTeam: AuthTeam;
+  rightTeam: AuthTeam;
+  toolsData: ToolsData;
+  // organizationId added later, not in client
+  organizationId?: string;
+}
+//#endregion

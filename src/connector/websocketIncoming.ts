@@ -266,7 +266,7 @@ export class WebsocketIncoming {
     });
   }
 
-  private async isValidKey(key: string): Promise<KeyValidity> {
+  public async isValidKey(key: string): Promise<KeyValidity> {
     if (process.env.REQUIRE_AUTH_KEY === "false")
       return { valid: true, reason: ValidityReasons.VALID };
 
