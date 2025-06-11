@@ -83,7 +83,7 @@ export class PreviewPlayer {
   private deaths: number = getRandomInt(0, 20);
   private assists: number = getRandomInt(0, 20);
 
-  private currUltPoints: number = getRandomInt(0, 8);
+  private currUltPoints: number = getRandomInt(2, 8);
   private maxUltPoints: number = 8;
   private ultReady: boolean = this.currUltPoints >= this.maxUltPoints;
 
