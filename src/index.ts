@@ -5,7 +5,10 @@ import { WebsocketIncoming } from "./connector/websocketIncoming";
 import { MatchController } from "./controller/MatchController";
 import logging from "./util/Logging";
 import { PreviewHandler } from "./util/previews/PreviewHandler";
+import { readFileSync } from "fs";
+import { createServer as createSecureServer } from "https";
 const Log = logging("Status");
+require("dotenv").config();
 
 const websocketIncoming = new WebsocketIncoming();
 const previewHandler = PreviewHandler.getInstance(websocketIncoming);
@@ -36,6 +39,16 @@ app.get("/preview/:previewCode", async (req: Request, res: Response) => {
   res.status(200).json(previewMatch);
 });
 
-app.listen(port, () => {
-  Log.info(`Extras available on port ${port}`);
-});
+if (process.env.INSECURE == "true") {
+  app.listen(port, () => {
+    Log.info(`Extras available on port ${port}`);
+  });
+} else {
+  const key = readFileSync(process.env.SERVER_KEY!);
+  const cert = readFileSync(process.env.SERVER_CERT!);
+  const creds = { key, cert };
+  const server = createSecureServer(creds, app);
+  server.listen(port, () => {
+    Log.info(`Extras available on port ${port} (TLS)`);
+  });
+}
