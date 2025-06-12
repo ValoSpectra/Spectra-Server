@@ -18,7 +18,7 @@ export class AvailableAbilities {
   ability2: number = 0;
 }
 
-class AvailableAuxiliary {
+export class AvailableAuxiliary {
   health: boolean = false;
   abilities: boolean = false;
   scoreboard: boolean = false;
