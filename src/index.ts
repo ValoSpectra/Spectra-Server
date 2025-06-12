@@ -1,10 +1,10 @@
-import { WebsocketIncoming } from "./connector/websocketIncoming";
-import express, { Request, Response } from "express";
-import logging from "./util/Logging";
-import { MatchController } from "./controller/MatchController";
-import { PreviewHandler } from "./util/previews/PreviewHandler";
 import bodyParser from "body-parser";
 import cors from "cors";
+import express, { Request, Response } from "express";
+import { WebsocketIncoming } from "./connector/websocketIncoming";
+import { MatchController } from "./controller/MatchController";
+import logging from "./util/Logging";
+import { PreviewHandler } from "./util/previews/PreviewHandler";
 const Log = logging("Status");
 
 const websocketIncoming = new WebsocketIncoming();
