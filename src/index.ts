@@ -21,7 +21,7 @@ const port = 5101;
 
 app.get("/status", (req: Request, res: Response) => {
   const status = { status: "UP", matchesRunning: MatchController.getInstance().getMatchCount() };
-  res.json(status).header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "*").json(status);
 });
 
 app.put("/createPreview", async (req: Request, res: Response) => {
