@@ -7,6 +7,8 @@ import logging from "./util/Logging";
 import { PreviewHandler } from "./util/previews/PreviewHandler";
 import { readFileSync } from "fs";
 import { createServer as createSecureServer } from "https";
+import { DatabaseConnector } from "./connector/databaseConnector";
+import { handleDiscordAuth, handlePackageRequest } from "./util/SupportService";
 const Log = logging("Status");
 require("dotenv").config();
 
@@ -19,7 +21,7 @@ const port = 5101;
 
 app.get("/status", (req: Request, res: Response) => {
   const status = { status: "UP", matchesRunning: MatchController.getInstance().getMatchCount() };
-  res.json(status);
+  res.json(status).header("Access-Control-Allow-Origin", "*");
 });
 
 app.put("/createPreview", async (req: Request, res: Response) => {
@@ -38,6 +40,36 @@ app.get("/preview/:previewCode", async (req: Request, res: Response) => {
   }
   res.status(200).json(previewMatch);
 });
+
+app.get("/getOrgForKey", async (req, res) => {
+  const key = req.query.key;
+  if (!key || typeof key !== "string") {
+    res.status(400).header("Access-Control-Allow-Origin", "*").json({ error: "Key is required" });
+    return;
+  }
+
+  if (process.env.USE_BACKEND === "true") {
+    const validity = await DatabaseConnector.verifyAccessKey(key);
+    if (validity.valid) {
+      res
+        .status(200)
+        .header("Access-Control-Allow-Origin", "*")
+        .json({ id: validity.organizationId, name: validity.organizationName });
+      return;
+    }
+  }
+
+  res.status(401).header("Access-Control-Allow-Origin", "*").send("401 Unauthorized");
+});
+
+if (process.env.USE_BACKEND === "true") {
+  app.get("/getSupportPackages", async (req, res) => {
+    handlePackageRequest(res);
+  });
+  app.get("/client/oauth-callback", async (req, res) => {
+    handleDiscordAuth(req, res);
+  });
+}
 
 if (process.env.INSECURE == "true") {
   app.listen(port, () => {

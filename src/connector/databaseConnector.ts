@@ -6,6 +6,7 @@ export interface KeyValidity {
   valid: boolean;
   reason: ValidityReasons;
   organizationId?: string;
+  organizationName?: string;
 }
 
 export enum ValidityReasons {
@@ -17,13 +18,24 @@ export enum ValidityReasons {
 
 export class DatabaseConnector {
   public static async verifyAccessKey(key: string): Promise<KeyValidity> {
-    const res = await this.apiRequest(`system/validateAccessKey/${key}`, "get");
+    let res: Response;
+    try {
+      res = await this.apiRequest(`system/validateAccessKey/${key}`, "get");
+    } catch (e) {
+      Log.error(`API request failed: ${e}`);
+      return { valid: false, reason: ValidityReasons.UNKNOWN };
+    }
 
     // Key is valid
     if (res.status == 200) {
       const data = await res.json();
       Log.info(`Access key for organization ${data.id}:${data.name} verified`);
-      return { valid: true, reason: ValidityReasons.VALID, organizationId: data.id };
+      return {
+        valid: true,
+        reason: ValidityReasons.VALID,
+        organizationId: data.id,
+        organizationName: data.name,
+      };
     }
     // Key does not exist
     else if (res.status == 401) {
@@ -93,20 +105,24 @@ export class DatabaseConnector {
     method: "get" | "post" | "put",
     body?: any,
   ): Promise<any> {
-    const res = await fetch(process.env.BACKEND_URL + "/" + path, {
-      method: method,
-      body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-        "X-User-Token": process.env.BACKEND_TOKEN!,
-      },
-    });
+    try {
+      const res = await fetch(process.env.BACKEND_URL + "/" + path, {
+        method: method,
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Token": process.env.BACKEND_TOKEN!,
+        },
+      });
 
-    if (res.status) {
-      return res;
-    } else {
-      Log.error(`API request encountered an error. HTTP Code: ${res.status}`);
-      throw new Error(`API request encountered an error. HTTP Code: ${res.status}`);
+      if (res.status) {
+        return res;
+      } else {
+        Log.error(`API request encountered an error. HTTP Code: ${res.status}`);
+        throw new Error(`API request encountered an error. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`API request failed: ${e}`);
     }
   }
 }
