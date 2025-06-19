@@ -87,9 +87,68 @@ export async function handleDiscordAuth(req: Request, res: Response) {
     }
 
     userData.json().then((userData: DiscordUserResponse) => {
-      res.redirect(
-        `${process.env.SPECTRA_CLIENT_DEEPLINK!}?userId=${userData.id}&username=${userData.username}&avatar=${userData.avatar}`,
-      );
+      const deeplinkUrl = `${process.env.SPECTRA_CLIENT_DEEPLINK!}?userId=${userData.id}&username=${userData.username}&avatar=${userData.avatar}`;
+      res.send(`
+        <html>
+        <head>
+          <title>Discord OAuth Success</title>
+          <style>
+            html, body {
+              height: 100%;
+              margin: 0;
+              padding: 0;
+            }
+            body {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              width: 100vw;
+              background: linear-gradient(to right, #0e7490, #3b82f6, #4f46e5);
+            }
+            .centered-container {
+              text-align: center;
+              background: #fff;
+              padding: 1rem 3rem;
+              border-radius: 12px;
+              box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+              font-family: Arial, sans-serif;
+            }
+            .button {
+              display: inline-block;
+              margin-top: 1rem;
+              padding: 0.5rem 1.5rem;
+              background: #5865F2;
+              color: #fff;
+              border-radius: 6px;
+              text-decoration: none;
+              font-weight: bold;
+              font-size: 1rem;
+            }
+            .less-top {
+              margin-top: -20px;
+            }
+            .more-top {
+              margin-top: 50px;
+            }
+          </style>
+          <script>
+            setTimeout(function() {
+              window.location.href = "${deeplinkUrl}";
+            }, 2000);
+          </script>
+        </head>
+        <body>
+          <div class="centered-container">
+            <h1>Discord Login Successful</h1>
+            <h2 class="less-top">Welcome, ${userData.global_name ? userData.global_name : userData.username}!</h2>
+            <p class="more-top">You may close this window <b>after</b> being redirected to the Client and getting a confirmation.<br>
+            If you are not redirected automatically, please click the button below:</p>
+            <a href="${deeplinkUrl}" class="button">Open Spectra Client</a>
+          </div>
+        </body>
+        </html>
+      `);
     });
   } catch (e) {
     Log.error("Error during Discord OAuth: " + e);
