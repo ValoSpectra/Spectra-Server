@@ -54,7 +54,11 @@ app.get("/getOrgForKey", async (req, res) => {
       res
         .status(200)
         .header("Access-Control-Allow-Origin", "*")
-        .json({ id: validity.organizationId, name: validity.organizationName });
+        .json({
+          id: validity.organizationId,
+          name: validity.organizationName,
+          isSupporter: validity.isSupporter,
+        });
       return;
     }
   }

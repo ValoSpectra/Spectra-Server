@@ -7,6 +7,7 @@ export interface KeyValidity {
   reason: ValidityReasons;
   organizationId?: string;
   organizationName?: string;
+  isSupporter?: boolean;
 }
 
 export enum ValidityReasons {
@@ -30,11 +31,14 @@ export class DatabaseConnector {
     if (res.status == 200) {
       const data = await res.json();
       Log.info(`Access key for organization ${data.id}:${data.name} verified`);
+      const isSupporter = await this.checkIsSupporter(data.id);
+      Log.info(`Org ${isSupporter ? "is" : "isn't"} supporter`);
       return {
         valid: true,
         reason: ValidityReasons.VALID,
         organizationId: data.id,
         organizationName: data.name,
+        isSupporter: isSupporter,
       };
     }
     // Key does not exist
@@ -124,5 +128,23 @@ export class DatabaseConnector {
     } catch (e) {
       Log.error(`API request failed: ${e}`);
     }
+  }
+
+  private static async checkIsSupporter(orgId: string): Promise<boolean> {
+    try {
+      const res = await fetch(process.env.SUPPORTER_CHECK_URL + "/" + orgId, {
+        method: "get",
+      });
+
+      if (res.status == 200) {
+        return (await res.json()).isSupporter || false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      Log.error(`Supporter check request failed: ${e}`);
+    }
+    //catch all
+    return false;
   }
 }

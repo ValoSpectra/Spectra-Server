@@ -69,6 +69,16 @@ export class Match {
     this.teams.push(secondTeam);
 
     this.tools = new ToolsData(data.toolsData);
+    // Add Spectra logo to sponsors if enabled and not a supporter
+    if (this.tools.sponsorInfo.enabled && !data.isSupporter) {
+      this.tools.sponsorInfo.sponsors.push("https://auto.valospectra.com/assets/misc/logo.webp");
+    }
+    // Set Watermark info according to settings and supporter role
+    this.tools.watermarkInfo.spectraWatermark =
+      this.tools.watermarkInfo.spectraWatermark || !data.isSupporter;
+    // Deactivate custom text if not a supporter
+    this.tools.watermarkInfo.customTextEnabled =
+      this.tools.watermarkInfo.customTextEnabled && !!data.isSupporter;
 
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";
