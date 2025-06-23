@@ -90,6 +90,7 @@ export interface IAuthenticationData {
   toolsData: ToolsData;
   // organizationId added later, not in client
   organizationId?: string;
+  isSupporter?: boolean;
 }
 
 //#region Auxiliary data

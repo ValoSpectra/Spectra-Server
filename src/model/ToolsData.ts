@@ -21,6 +21,11 @@ export class ToolsData {
     duration: 5,
     sponsors: [],
   };
+  public watermarkInfo: IWatermarkInfo = {
+    spectraWatermark: true,
+    customTextEnabled: false,
+    customText: "",
+  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
@@ -29,11 +34,6 @@ export class ToolsData {
       this.tournamentInfo.enabled = true;
     } else {
       this.tournamentInfo.enabled = false;
-    }
-
-    // Add Spectra logo to sponsors if enabled (will move somewhere else in future)
-    if (this.sponsorInfo.enabled) {
-      this.sponsorInfo.sponsors.push("https://auto.valospectra.com/assets/misc/logo.webp");
     }
   }
 }
@@ -61,6 +61,12 @@ export type ISponsorInfo = {
   enabled: boolean;
   duration: number;
   sponsors: string[];
+};
+
+export type IWatermarkInfo = {
+  spectraWatermark: boolean;
+  customTextEnabled: boolean;
+  customText: string;
 };
 
 type BaseMapPoolInfo = {

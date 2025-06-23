@@ -111,9 +111,11 @@ export class WebsocketIncoming {
             );
             return;
           } else {
+            //key is valid
             if (validity.organizationId) {
               authenticationData.organizationId = validity.organizationId;
             }
+            authenticationData.isSupporter = validity.isSupporter;
           }
 
           // Check if the match can be created successfully
