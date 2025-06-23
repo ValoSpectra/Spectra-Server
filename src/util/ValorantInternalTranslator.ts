@@ -234,6 +234,7 @@ export enum Maps {
   "HURM_Yard" = "Piazza ",
   "HURM_Bowl" = "Kasbah",
   "HURM_Helix" = "Drift",
+  "Corrode_Map" = "Corrode",
 }
 
 export const Armor: string[] = ["None", "Light", "Heavy", "None", "Regen"] as const;

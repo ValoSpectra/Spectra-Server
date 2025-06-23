@@ -17,6 +17,7 @@ import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
 import { ToolsData } from "./ToolsData";
+import { log } from "console";
 const Log = logging("Match");
 
 export class Match {
@@ -250,6 +251,10 @@ export class Match {
 
       case DataTypes.MAP:
         this.map = Maps[data.data as keyof typeof Maps];
+        if (!this.map) {
+          //fallback to newest map when incomind data doesn't match any known
+          this.map = Maps["Corrode_Map"];
+        }
         break;
 
       case DataTypes.GAME_MODE:
