@@ -51,14 +51,11 @@ app.get("/getOrgForKey", async (req, res) => {
   if (process.env.USE_BACKEND === "true") {
     const validity = await DatabaseConnector.verifyAccessKey(key);
     if (validity.valid) {
-      res
-        .status(200)
-        .header("Access-Control-Allow-Origin", "*")
-        .json({
-          id: validity.organizationId,
-          name: validity.organizationName,
-          isSupporter: validity.isSupporter,
-        });
+      res.status(200).header("Access-Control-Allow-Origin", "*").json({
+        id: validity.organizationId,
+        name: validity.organizationName,
+        isSupporter: validity.isSupporter,
+      });
       return;
     }
   }
