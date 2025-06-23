@@ -118,6 +118,11 @@ export class ReplayConnectorService {
             duration: 5000,
             sponsors: [],
           },
+          watermarkInfo: {
+            spectraWatermark: true,
+            customText: "",
+            customTextEnabled: false,
+          },
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));
