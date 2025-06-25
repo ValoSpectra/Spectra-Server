@@ -17,7 +17,6 @@ import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
 import { ToolsData } from "./ToolsData";
-import { log } from "console";
 const Log = logging("Match");
 
 export class Match {
