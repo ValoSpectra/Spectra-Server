@@ -253,7 +253,7 @@ export class Match {
         this.map = Maps[data.data as keyof typeof Maps];
         if (!this.map) {
           //fallback to newest map when incomind data doesn't match any known
-          this.map = Maps["Corrode_Map"];
+          this.map = Maps["Rook"];
         }
         break;
 
