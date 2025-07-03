@@ -136,7 +136,10 @@ export class WebsocketIncoming {
           }
 
           // All checks passed, send logon acknolwedgement
-          ws.emit("obs_logon_ack", JSON.stringify({ type: DataTypes.AUTH, value: true }));
+          ws.emit(
+            "obs_logon_ack",
+            JSON.stringify({ type: DataTypes.AUTH, value: true, reason: "0.2.41" }),
+          );
           user.name = authenticationData.obsName;
           user.groupCode = authenticationData.groupCode;
           WebsocketIncoming.authedClients.push(user);

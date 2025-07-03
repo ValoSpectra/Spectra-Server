@@ -1,8 +1,8 @@
 {
   "name": "spectra-server",
-  "version": "0.2.40",
+  "version": "0.2.41",
   "author": {
-    "name": "Spectra Team",
+    "name": "Purple Shark UG (haftungsbeschränkt)",
     "url": "https://valospectra.com"
   },
   "description": "Server that ingests data from the Spectra Client for processing",
