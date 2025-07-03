@@ -27,6 +27,7 @@ export class Match {
 
   public groupCode;
   public isRunning: boolean = false;
+  private agentSelectStartTime?: number = undefined;
 
   public roundNumber: number = 0;
   public roundPhase: string = "LOBBY";
@@ -120,6 +121,9 @@ export class Match {
           return;
         }
 
+        if (this.agentSelectStartTime == undefined) {
+          this.agentSelectStartTime = data.timestamp;
+        }
         correctTeam.receiveTeamSpecificData(data);
         break;
 
