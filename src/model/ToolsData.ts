@@ -70,7 +70,7 @@ export type IWatermarkInfo = {
 };
 
 type BaseMapPoolInfo = {
-  type: "past" | "present" | "future";
+  type: "past" | "present" | "future" | "disabled";
 };
 
 type PastMapPoolInfo = BaseMapPoolInfo & {
@@ -97,4 +97,8 @@ type FutureMapPoolInfo = BaseMapPoolInfo & {
   logo: string;
 };
 
-export type MapPoolInfo = PastMapPoolInfo | PresentMapPoolInfo | FutureMapPoolInfo;
+type DisabledMapPoolInfo = BaseMapPoolInfo & {
+  type: "disabled";
+};
+
+export type MapPoolInfo = PastMapPoolInfo | PresentMapPoolInfo | FutureMapPoolInfo | DisabledMapPoolInfo;
