@@ -396,8 +396,8 @@ export class Match {
     const newMoney = scoreboardData.money;
     const oldMoney = team.getMoneyFor(scoreboardData.playerId);
 
-    // Received money during round, spike must have been planted
-    if (newMoney > oldMoney) {
+    // Received 300 money during round, spike must have been planted
+    if (newMoney > oldMoney && newMoney - oldMoney === 300) {
       this._setSpikePlanted(data.timestamp);
     }
   }
