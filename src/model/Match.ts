@@ -39,6 +39,7 @@ export class Match {
   private map: string = "Loading";
   private spikeState: SpikeStates = { planted: false, detonated: false, defused: false };
   private attackersWon: boolean = false;
+  private showAliveKDA: boolean = false;
 
   private timeoutState: TimeoutStates = {
     techPause: false,
@@ -309,6 +310,10 @@ export class Match {
         } else {
           clearTimeout(this.timeoutEndTimeout);
         }
+        break;
+
+      case DataTypes.SWITCH_KDA_CREDITS:
+        this.showAliveKDA = !this.showAliveKDA;
         break;
     }
 
