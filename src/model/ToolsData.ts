@@ -101,4 +101,8 @@ type DisabledMapPoolInfo = BaseMapPoolInfo & {
   type: "disabled";
 };
 
-export type MapPoolInfo = PastMapPoolInfo | PresentMapPoolInfo | FutureMapPoolInfo | DisabledMapPoolInfo;
+export type MapPoolInfo =
+  | PastMapPoolInfo
+  | PresentMapPoolInfo
+  | FutureMapPoolInfo
+  | DisabledMapPoolInfo;
