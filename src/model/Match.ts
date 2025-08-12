@@ -75,6 +75,9 @@ export class Match {
     if (this.tools.sponsorInfo.enabled && !data.isSupporter) {
       this.tools.sponsorInfo.sponsors.push("https://auto.valospectra.com/assets/misc/logo.webp");
     }
+
+    //Disabling the watermark/setting a custom text without Spectra Plus is against the License terms and strictly forbidden
+
     // Set Watermark info according to settings and supporter role
     this.tools.watermarkInfo.spectraWatermark =
       this.tools.watermarkInfo.spectraWatermark || !data.isSupporter;
