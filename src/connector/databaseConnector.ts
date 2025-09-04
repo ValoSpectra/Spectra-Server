@@ -1,4 +1,5 @@
 require("dotenv").config();
+import { IOverridesPlayercamsData } from "../model/ToolsData";
 import logging from "../util/Logging";
 const Log = logging("DatabaseConnector");
 
@@ -147,4 +148,34 @@ export class DatabaseConnector {
     //catch all
     return false;
   }
+
+  //#region Playercams
+  public static async getNameOverridesAndPlayercams(identifier: string, secret: string) {
+    try {
+      const playercamUrl = process.env.PLAYERCAM_URL;
+      if (!playercamUrl) return;
+
+      const res = await fetch(
+        playercamUrl + "/api/getNameOverridesAndPlayercams/" + identifier + "/" + secret,
+        {
+          method: "get",
+        },
+      );
+
+      if (res.status) {
+        const data = await res.json();
+        if (data.nameOverrides && data.enabledPlayers) {
+          return data as IOverridesPlayercamsData;
+        } else {
+          throw new Error("Invalid response from playercam server");
+        }
+      } else {
+        Log.error(`API request encountered an error. HTTP Code: ${res.status}`);
+        throw new Error(`API request encountered an error. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`Playercam API request failed: ${e}`);
+    }
+  }
+  //#endregion
 }

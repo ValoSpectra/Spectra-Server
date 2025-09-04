@@ -64,20 +64,20 @@ export class Match {
 
     this.replayLog = new ReplayLogging(data);
 
-    const firstTeam = new Team(data.leftTeam);
-    const secondTeam = new Team(data.rightTeam);
+    this.tools = new ToolsData(data.toolsData);
+
+    const firstTeam = new Team(data.leftTeam, this.tools.playercamsInfo.removeTricodes);
+    const secondTeam = new Team(data.rightTeam, this.tools.playercamsInfo.removeTricodes);
 
     this.teams.push(firstTeam);
     this.teams.push(secondTeam);
 
-    this.tools = new ToolsData(data.toolsData);
     // Add Spectra logo to sponsors if enabled and not a supporter
     if (this.tools.sponsorInfo.enabled && !data.isSupporter) {
       this.tools.sponsorInfo.sponsors.push("https://auto.valospectra.com/assets/misc/logo.webp");
     }
 
-    //Disabling the watermark/setting a custom text without Spectra Plus is against the License terms and strictly forbidden
-
+    // !!! Disabling the watermark/setting a custom text without Spectra Plus is against the License terms and strictly forbidden !!!
     // Set Watermark info according to settings and supporter role
     this.tools.watermarkInfo.spectraWatermark =
       this.tools.watermarkInfo.spectraWatermark || !data.isSupporter;
@@ -87,6 +87,7 @@ export class Match {
 
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";
+      this.updateNameOverridesAndPlayercams().then(() => {});
     }
   }
 
@@ -198,6 +199,10 @@ export class Match {
           case "shopping":
             if (this.roundNumber !== 1) {
               this.processRoundReasons();
+            }
+
+            if (process.env.USE_BACKEND === "true") {
+              this.updateNameOverridesAndPlayercams().then(() => {});
             }
 
             this.spikeState.planted = false;
@@ -432,6 +437,27 @@ export class Match {
     this.spikeState.planted = true;
     this.roundTimeoutTime = undefined;
     this.spikeDetonationTime = timestamp + 45 * 1000; // Add 45 seconds to the current time
+  }
+
+  private async updateNameOverridesAndPlayercams() {
+    if (
+      !this.tools.playercamsInfo.identifier ||
+      this.tools.playercamsInfo.identifier == "" ||
+      !this.tools.playercamsInfo.secret ||
+      this.tools.playercamsInfo.secret == ""
+    )
+      return;
+
+    const data = await DatabaseConnector.getNameOverridesAndPlayercams(
+      this.tools.playercamsInfo.identifier,
+      this.tools.playercamsInfo.secret,
+    );
+    if (!data) return;
+
+    this.tools.playercamsInfo.enabledPlayers = data.enabledPlayers;
+    this.tools.nameOverrides.overrides = data.nameOverrides;
+
+    this.eventNumber++;
   }
 
   private debugLogRoundInfo() {

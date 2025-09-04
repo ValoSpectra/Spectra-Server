@@ -85,9 +85,30 @@ export class WebsocketOutgoing {
   }
 
   sendMatchData(groupCode: string, data: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...formattedData } =
-      data;
-    this.wss.to(groupCode).emit("match_data", JSON.stringify(formattedData));
+    const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      replayLog,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      eventNumber,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      timeoutEndTimeout,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      timeoutRemainingLoop,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      playercamUrl,
+      ...formattedData
+    } = data;
+
+    const deepMod: any = structuredClone(formattedData);
+    if (
+      deepMod.tools &&
+      deepMod.tools.playercamsInfo &&
+      typeof deepMod.tools.playercamsInfo === "object"
+    ) {
+      delete deepMod.tools.playercamsInfo.secret;
+      delete deepMod.tools.playercamsInfo.endTime;
+    }
+
+    this.wss.to(groupCode).emit("match_data", JSON.stringify(deepMod));
   }
 }

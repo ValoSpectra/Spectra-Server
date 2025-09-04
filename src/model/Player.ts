@@ -29,6 +29,7 @@ export class Player {
   private tagline: string;
   private riotId: string;
   private searchName: string;
+  private fullName: string;
 
   private position: number;
   private locked: boolean = false;
@@ -78,6 +79,7 @@ export class Player {
     this.tagline = data.tagline;
     this.riotId = data.playerId;
     this.searchName = `${data.name} #${data.tagline}`;
+    this.fullName = `${data.name}#${data.tagline}`;
     this.position = data.position;
     this.agentInternal = data.agentInternal;
     this.agentProper = Agents[data.agentInternal] || data.agentInternal;
@@ -238,6 +240,12 @@ export class Player {
     this.auxiliaryAvailable.scoreboard = false;
     this.isAlive = true;
     this.health = 100;
+  }
+
+  removeTricodeFromName(teamTricode: string) {
+    if (this.name.startsWith(teamTricode)) {
+      this.name = this.name.replace(teamTricode, "").trim();
+    }
   }
 
   public getName(): string {

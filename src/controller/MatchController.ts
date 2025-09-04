@@ -102,9 +102,20 @@ export class MatchController {
 
   sendMatchDataForLogon(groupCode: string) {
     if (this.matches[groupCode] != null) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...formattedData } =
-        this.matches[groupCode] as any;
+      const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        replayLog,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        eventNumber,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        timeoutEndTimeout,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        timeoutRemainingLoop,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        playercamUrl,
+        ...formattedData
+      } = this.matches[groupCode] as any;
+
       this.outgoingWebsocketServer.sendMatchData(groupCode, formattedData);
     }
   }

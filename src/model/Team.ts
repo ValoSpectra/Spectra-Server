@@ -33,18 +33,21 @@ export class Team {
   public roundsWon: number = 0;
   private spentThisRound: number = 0;
   private roundRecord: RecordEntry[] = [];
+  private removeTricode: boolean = false;
 
   private players: Player[] = [];
   private playerCount = 0;
   private hasDuplicateAgents = false;
 
-  constructor(team: AuthTeam) {
+  constructor(team: AuthTeam, removeTricode: boolean) {
     this.teamName = team.name;
     this.teamTricode = team.tricode;
     this.teamUrl = team.url;
 
     this.isAttacking = team.attackStart;
     this.ingameTeamId = team.attackStart ? 0 : 1;
+
+    this.removeTricode = removeTricode;
 
     this.initRoundRecord();
   }
@@ -162,7 +165,12 @@ export class Team {
       correctPlayer.onRosterUpdate(data);
       return;
     } else if (this.playerCount < 5) {
-      this.players.push(new Player(data));
+      const newPlayer = new Player(data);
+      if (this.removeTricode) {
+        newPlayer.removeTricodeFromName(this.teamTricode);
+      }
+
+      this.players.push(newPlayer);
       this.isAttacking = data.startTeam == 0 ? true : false;
       this.playerCount++;
     } else {

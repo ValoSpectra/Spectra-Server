@@ -123,6 +123,17 @@ export class ReplayConnectorService {
             customText: "",
             customTextEnabled: false,
           },
+          playercamsInfo: {
+            enable: true,
+            removeTricodes: false,
+            identifier: "SPPCCDEBUG",
+            secret: "",
+            enabledPlayers: [],
+            endTime: 0,
+          },
+          nameOverrides: {
+            overrides: "[]",
+          },
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));

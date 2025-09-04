@@ -26,6 +26,17 @@ export class ToolsData {
     customTextEnabled: false,
     customText: "",
   };
+  public playercamsInfo: IPlayercamsInfo = {
+    enable: false,
+    removeTricodes: false,
+    identifier: "",
+    secret: "",
+    endTime: 0,
+    enabledPlayers: [],
+  };
+  public nameOverrides: INameOverrides = {
+    overrides: "[]",
+  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
@@ -67,6 +78,24 @@ export type IWatermarkInfo = {
   spectraWatermark: boolean;
   customTextEnabled: boolean;
   customText: string;
+};
+
+export type IPlayercamsInfo = {
+  enable: boolean;
+  removeTricodes: boolean;
+  identifier: string;
+  secret: string;
+  endTime: number;
+  enabledPlayers: string[];
+};
+
+export type INameOverrides = {
+  overrides: string; // JSON representation of Map<string, string> for easier transfer
+};
+
+export type IOverridesPlayercamsData = {
+  nameOverrides: string; // JSON representation of Map<string, string> for easier transfer
+  enabledPlayers: string[];
 };
 
 type BaseMapPoolInfo = {
