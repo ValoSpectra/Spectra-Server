@@ -215,6 +215,10 @@ export enum Agents {
   "Terra_PC_C" = "Waylay",
   "Terra" = "Waylay",
   "TX_Killfeed_Waylay" = "Terra",
+
+  "Pine_PC_C" = "Veto",
+  "Pine" = "Veto",
+  "TX_Killfeed_Veto" = "Pine",
 }
 
 export enum Maps {

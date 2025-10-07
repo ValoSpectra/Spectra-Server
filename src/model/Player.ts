@@ -310,6 +310,9 @@ export class Player {
       case Agents.Smonk:
         this.cloveSpecificChecks(data);
         break;
+      case Agents.Pine:
+        this.vetoSpecificChecks(data);
+        break;
       default:
         break;
     }
@@ -319,6 +322,7 @@ export class Player {
     switch (this.agentProper) {
       case Agents.Rift:
       case Agents.Smonk:
+      case Agents.Pine:
         this.resetIconNameSuffix();
         break;
       default:
@@ -346,6 +350,18 @@ export class Player {
     // Yes we don't know if the assist was damaging, but we're assuming it is since it's very very likely
     if (data.assists && data.assists > this.assists) {
       this.resetIconNameSuffix();
+    }
+  }
+
+  private vetoSpecificChecks(data: Partial<IFormattedScoreboard | IFormattedAuxScoreboardTeam>) {
+    // If veto has no stats (i.e. round "0"), don't do anything
+    if (data.kills == 0 && data.deaths == 0 && data.assists == 0) {
+      return;
+    }
+
+    // Veto using up all their ult points transforms them, set suffix for representative icon
+    if (data.currUltPoints == 0 && this.ultReady) {
+      this.setIconNameSuffix(IconNameSuffixes.VETO_ULTIMATE);
     }
   }
 
