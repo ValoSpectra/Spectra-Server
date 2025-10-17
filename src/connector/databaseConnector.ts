@@ -62,7 +62,7 @@ export class DatabaseConnector {
 
   public static async registerMatch(match: any) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, leftTimeoutCancellationTimer, rightTimeoutCancellationTimer, ...toSend } = match;
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...toSend } = match;
     const res = await this.apiRequest(`system/match/${match.matchId}/register`, "post", {
       match: toSend,
     });
@@ -77,7 +77,7 @@ export class DatabaseConnector {
 
   public static async updateMatch(match: any): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, leftTimeoutCancellationTimer, rightTimeoutCancellationTimer, ...toSend } = match;
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...toSend } = match;
     const res = await this.apiRequest(`system/match/${match.matchId}/update`, "put", {
       match: toSend,
     });
@@ -92,7 +92,7 @@ export class DatabaseConnector {
 
   public static async completeMatch(match: any): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, leftTimeoutCancellationTimer, rightTimeoutCancellationTimer, ...toSend } = match;
+    const { replayLog, eventNumber, timeoutEndTimeout, timeoutRemainingLoop, ...toSend } = match;
     const res = await this.apiRequest(`system/match/${match.matchId}/complete`, "put", {
       match: toSend,
     });
