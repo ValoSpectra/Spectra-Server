@@ -49,9 +49,8 @@ export class Match {
   };
   private timeoutEndTimeout: any = undefined;
   private timeoutRemainingLoop: any = undefined;
+  private timeoutGracePeriodPassed: boolean = false;
   
-  private leftTimeoutCancellationTimer: any = undefined;
-  private rightTimeoutCancellationTimer: any = undefined;
   private hasEnteredOvertime: boolean = false;
 
   private tools: ToolsData;
@@ -245,11 +244,11 @@ export class Match {
           case "game_end":
             this.isRunning = false;
             
-            // Clean up all timeout-related timers
-            clearTimeout(this.leftTimeoutCancellationTimer);
-            clearTimeout(this.rightTimeoutCancellationTimer);
-            this.leftTimeoutCancellationTimer = undefined;
-            this.rightTimeoutCancellationTimer = undefined;
+            // Clean up timeout-related timers
+            clearTimeout(this.timeoutEndTimeout);
+            clearInterval(this.timeoutRemainingLoop);
+            this.timeoutEndTimeout = undefined;
+            this.timeoutRemainingLoop = undefined;
             
             this.eventNumber++;
             MatchController.getInstance().removeMatch(this.groupCode);
@@ -306,12 +305,6 @@ export class Match {
           clearTimeout(this.timeoutEndTimeout);
           clearInterval(this.timeoutRemainingLoop);
           this.timeoutEndTimeout = null;
-          
-          // Clean up cancellation timers
-          clearTimeout(this.leftTimeoutCancellationTimer);
-          clearTimeout(this.rightTimeoutCancellationTimer);
-          this.leftTimeoutCancellationTimer = undefined;
-          this.rightTimeoutCancellationTimer = undefined;
         }
         break;
 
@@ -337,8 +330,18 @@ export class Match {
 
     clearInterval(this.timeoutRemainingLoop);
     this.timeoutRemainingLoop = null;
+    
+    this.timeoutGracePeriodPassed = false;
 
     this.timeoutEndTimeout = setTimeout(() => {
+      if (this.timeoutGracePeriodPassed) {
+        if (this.timeoutState.leftTeam) {
+          this.tools.timeoutCounter.left = Math.max(0, this.tools.timeoutCounter.left - 1);
+        } else if (this.timeoutState.rightTeam) {
+          this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
+        }
+      }
+      
       this.timeoutState.leftTeam = false;
       this.timeoutState.rightTeam = false;
       clearInterval(this.timeoutRemainingLoop);
@@ -348,6 +351,13 @@ export class Match {
     this.timeoutRemainingLoop = setInterval(() => {
       if (this.timeoutState.timeRemaining > 0) {
         this.timeoutState.timeRemaining--;
+        
+        // track if grace period has passed
+        const gracePeriodRemaining = this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
+        if (!this.timeoutGracePeriodPassed && this.timeoutState.timeRemaining <= gracePeriodRemaining) {
+          this.timeoutGracePeriodPassed = true;
+        }
+        
         this.eventNumber++;
       } else {
         clearInterval(this.timeoutRemainingLoop);
@@ -445,28 +455,14 @@ export class Match {
   private handleTeamTimeout(team: "left" | "right") {
     const isLeftTeam = team === "left";
     const currentState = isLeftTeam ? this.timeoutState.leftTeam : this.timeoutState.rightTeam;
-    const cancellationTimer = isLeftTeam ? this.leftTimeoutCancellationTimer : this.rightTimeoutCancellationTimer;
     
-    if (cancellationTimer) {
-      clearTimeout(cancellationTimer);
-      if (isLeftTeam) {
-        this.leftTimeoutCancellationTimer = undefined;
-      } else {
-        this.rightTimeoutCancellationTimer = undefined;
+    if (currentState) {
+      const gracePeriodRemaining = this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
+      const stillInGracePeriod = this.timeoutState.timeRemaining > gracePeriodRemaining;
+      
+      if (stillInGracePeriod && !this.timeoutGracePeriodPassed) {
       }
       
-      // Stop the current timeout
-      this.timeoutState.leftTeam = false;
-      this.timeoutState.rightTeam = false;
-      clearTimeout(this.timeoutEndTimeout);
-      clearInterval(this.timeoutRemainingLoop);
-      this.timeoutEndTimeout = undefined;
-      this.timeoutRemainingLoop = undefined;
-      
-      return;
-    }
-
-    if (currentState) {
       this.timeoutState.leftTeam = false;
       this.timeoutState.rightTeam = false;
       clearTimeout(this.timeoutEndTimeout);
@@ -485,23 +481,6 @@ export class Match {
       this.timeoutState.techPause = false;
       this.timeoutState.timeRemaining = this.tools.timeoutDuration;
       this.startTimeoutEndTimeout();
-      
-      const gracePeriodTimer = setTimeout(() => {
-        if (isLeftTeam) {
-          this.tools.timeoutCounter.left = Math.max(0, this.tools.timeoutCounter.left - 1);
-          this.leftTimeoutCancellationTimer = undefined;
-        } else {
-          this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
-          this.rightTimeoutCancellationTimer = undefined;
-        }
-        this.eventNumber++;
-      }, this.tools.timeoutCancellationGracePeriod * 1000);
-      
-      if (isLeftTeam) {
-        this.leftTimeoutCancellationTimer = gracePeriodTimer;
-      } else {
-        this.rightTimeoutCancellationTimer = gracePeriodTimer;
-      }
     }
   }
 

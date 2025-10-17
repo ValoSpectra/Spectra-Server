@@ -91,17 +91,9 @@ export class WebsocketOutgoing {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       eventNumber,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      timeoutEndTimeout,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      timeoutRemainingLoop,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      leftTimeoutCancellationTimer,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      rightTimeoutCancellationTimer,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       playercamUrl,
       ...formattedData
-    } = data;
+        } = data;
 
     const deepMod: any = structuredClone(formattedData);
     if (
