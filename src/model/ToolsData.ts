@@ -16,6 +16,11 @@ export class ToolsData {
     enabled: false,
   };
   public timeoutDuration: number = 60;
+  public timeoutCounter: ITimeoutInfo = {
+    left: 2,
+    right: 2,
+  };
+  public timeoutCancellationGracePeriod: number = 10;
   public sponsorInfo: ISponsorInfo = {
     enabled: false,
     duration: 5,
@@ -66,6 +71,11 @@ export type ITournamentInfo = {
   logoUrl: string;
   backdropUrl: string;
   enabled: boolean;
+};
+
+export type ITimeoutInfo = {
+  left: number;
+  right: number;
 };
 
 export type ISponsorInfo = {
