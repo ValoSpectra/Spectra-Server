@@ -134,6 +134,11 @@ export class ReplayConnectorService {
           nameOverrides: {
             overrides: "[]",
           },
+          timeoutCounter: {
+            left: 2,
+            right: 2,
+          },
+          timeoutCancellationGracePeriod: 10,
         },
       };
       this.ws.emit("obs_logon", JSON.stringify(authData));

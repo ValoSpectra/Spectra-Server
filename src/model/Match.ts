@@ -334,12 +334,10 @@ export class Match {
     this.timeoutGracePeriodPassed = false;
 
     this.timeoutEndTimeout = setTimeout(() => {
-      if (this.timeoutGracePeriodPassed) {
-        if (this.timeoutState.leftTeam) {
-          this.tools.timeoutCounter.left = Math.max(0, this.tools.timeoutCounter.left - 1);
-        } else if (this.timeoutState.rightTeam) {
-          this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
-        }
+      if (this.timeoutState.leftTeam) {
+        this.tools.timeoutCounter.left = Math.max(0, this.tools.timeoutCounter.left - 1);
+      } else if (this.timeoutState.rightTeam) {
+        this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
       }
       
       this.timeoutState.leftTeam = false;
@@ -460,9 +458,16 @@ export class Match {
       const gracePeriodRemaining = this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
       const stillInGracePeriod = this.timeoutState.timeRemaining > gracePeriodRemaining;
       
-      if (stillInGracePeriod && !this.timeoutGracePeriodPassed) {
+      // If grace period has passed, deduct a timeout
+      if (!stillInGracePeriod) {
+        if (isLeftTeam) {
+          this.tools.timeoutCounter.left = Math.max(0, this.tools.timeoutCounter.left - 1);
+        } else {
+          this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
+        }
       }
       
+      // Cancel the timeout
       this.timeoutState.leftTeam = false;
       this.timeoutState.rightTeam = false;
       clearTimeout(this.timeoutEndTimeout);

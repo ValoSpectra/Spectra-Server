@@ -92,6 +92,10 @@ export class WebsocketOutgoing {
       eventNumber,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       playercamUrl,
+      timeoutEndTimeout,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      timeoutRemainingLoop,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ...formattedData
         } = data;
 
