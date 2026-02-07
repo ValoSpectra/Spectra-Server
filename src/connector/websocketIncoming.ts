@@ -241,7 +241,7 @@ export class WebsocketIncoming {
     });
 
     serverInstance.listen(5100);
-    Log.info(`InhouseTracker Server ingesting on port 5100!`);
+    Log.info(`Spectra Server ingesting on port 5100!`);
   }
 
   private onAuthSuccess(user: ClientUser) {

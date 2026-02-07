@@ -82,7 +82,7 @@ export class DatabaseConnector {
       match: toSend,
     });
 
-    if (res.status == 200) {
+    if (res?.status == 200) {
       return;
     } else {
       Log.error(`Update match encountered an error. HTTP Code: ${res.status}`);

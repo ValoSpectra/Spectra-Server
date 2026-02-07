@@ -81,7 +81,7 @@ export class WebsocketOutgoing {
 
     serverInstance.listen(5200);
 
-    Log.info(`InhouseTracker Server outputting on port 5200!`);
+    Log.info(`Spectra Server outputting on port 5200!`);
   }
 
   sendMatchData(groupCode: string, data: any) {
