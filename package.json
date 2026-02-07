@@ -9,7 +9,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "start": "npm run dev",
+    "start": "yarn run dev",
     "start_single": "ts-node ./src/index.ts",
     "dev": "nodemon ./src/index.ts --ignore replay/",
     "build": "tsc",
@@ -21,7 +21,7 @@
     "replay_delay": "ts-node ./src/replay/replay.ts -delay",
     "replay_timestamps": "ts-node ./src/replay/replay.ts -timestamps",
     "replay_manual": "ts-node ./src/replay/replay.ts -manual",
-    "replay_file": "npm run replay_instant -- -game customGameTest.replay"
+    "replay_file": "yarn run replay_instant -- -game customGameTest.replay"
   },
   "license": "GPL-3.0-only",
   "devDependencies": {

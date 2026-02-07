@@ -17,6 +17,7 @@ export class ToolsData {
   };
   public timeoutDuration: number = 60;
   public timeoutCounter: ITimeoutInfo = {
+    max: 2,
     left: 2,
     right: 2,
   };
@@ -51,6 +52,8 @@ export class ToolsData {
     } else {
       this.tournamentInfo.enabled = false;
     }
+    this.timeoutCounter.left = this.timeoutCounter.max;
+    this.timeoutCounter.right = this.timeoutCounter.max;
   }
 }
 
@@ -74,6 +77,7 @@ export type ITournamentInfo = {
 };
 
 export type ITimeoutInfo = {
+  max: number;
   left: number;
   right: number;
 };
