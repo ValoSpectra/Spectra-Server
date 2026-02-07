@@ -24,6 +24,7 @@ export class Match {
   private matchType: "bomb" | "swift" | string = "bomb";
   private switchRound = 13;
   private firstOtRound = 25;
+  private handledNewRound = false;
 
   public groupCode;
   public isRunning: boolean = false;
@@ -66,8 +67,16 @@ export class Match {
 
     this.tools = new ToolsData(data.toolsData);
 
-    const firstTeam = new Team(data.leftTeam, this.tools.playercamsInfo.removeTricodes);
-    const secondTeam = new Team(data.rightTeam, this.tools.playercamsInfo.removeTricodes);
+    const firstTeam = new Team(
+      data.leftTeam,
+      this.tools.playercamsInfo.removeTricodes,
+      data.isSupporter,
+    );
+    const secondTeam = new Team(
+      data.rightTeam,
+      this.tools.playercamsInfo.removeTricodes,
+      data.isSupporter,
+    );
 
     this.teams.push(firstTeam);
     this.teams.push(secondTeam);
@@ -209,16 +218,7 @@ export class Match {
             this.spikeState.detonated = false;
             this.spikeState.defused = false;
 
-            // eslint-disable-next-line no-case-declarations
-            let isSwitchRound = false;
-            if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
-              for (const team of this.teams) {
-                team.switchSides();
-              }
-              isSwitchRound = true;
-            }
-
-            this.teams.forEach((team) => team.resetRoundSpecificValues(isSwitchRound));
+            this.newRoundHandler();
 
             if (this.isRegistered && this.roundNumber !== 1) {
               DatabaseConnector.updateMatch(this);
@@ -226,14 +226,20 @@ export class Match {
 
             break;
 
+          case "game_start":
+            this.newRoundHandler();
+            break;
+
           case "combat":
             this.teams.forEach((team) => team.findDuplicateAgents());
             this.roundTimeoutTime = data.timestamp + 99 * 1000; // Add 99 seconds to the current time
+            this.handledNewRound = false;
             break;
 
           case "end":
             this.roundTimeoutTime = undefined;
             this.spikeDetonationTime = undefined;
+            this.nextRoundMoneyHandler();
             break;
 
           case "game_end":
@@ -458,6 +464,26 @@ export class Match {
     this.tools.nameOverrides.overrides = data.nameOverrides;
 
     this.eventNumber++;
+  }
+
+  private newRoundHandler() {
+    if (this.handledNewRound) {
+      return;
+    }
+    this.handledNewRound = true;
+    let isSwitchRound = false;
+    if (this.roundNumber == this.switchRound || this.roundNumber >= this.firstOtRound) {
+      for (const team of this.teams) {
+        team.switchSides();
+      }
+      isSwitchRound = true;
+    }
+
+    this.teams.forEach((team) => team.resetRoundSpecificValues(isSwitchRound));
+  }
+
+  private nextRoundMoneyHandler() {
+    this.teams.forEach((team) => team.resetMoneyRoundSpecificValues(this.roundNumber + 1));
   }
 
   private debugLogRoundInfo() {

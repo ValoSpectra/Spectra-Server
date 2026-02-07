@@ -228,9 +228,8 @@ export class Player {
     this.auxiliaryAvailable.health = true;
   }
 
-  public resetRoundSpecificValues(isSideSwitch: boolean) {
+  public resetNonMoneyRoundSpecificValues(isSideSwitch: boolean) {
     this.resetKillsThisRound();
-    this.resetMoneyThisRound();
 
     if (isSideSwitch) {
       this.money = 800;
@@ -240,6 +239,10 @@ export class Player {
     this.auxiliaryAvailable.scoreboard = false;
     this.isAlive = true;
     this.health = 100;
+  }
+
+  public resetMoneyRoundSpecificValues() {
+    this.resetMoneyThisRound();
   }
 
   removeTricodeFromName(teamTricode: string) {
@@ -274,6 +277,10 @@ export class Player {
 
   public getMoneySpent(): number {
     return this.moneySpent;
+  }
+
+  public hasSpentThisRound(): boolean {
+    return this.spentMoneyThisRound;
   }
 
   public getKillsThisRound(): number {

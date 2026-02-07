@@ -23,6 +23,12 @@ export interface RecordEntry {
   round: number;
 }
 
+export interface MoneyRecord {
+  round: number;
+  start: number;
+  spent: number;
+}
+
 export class Team {
   public teamName: string;
   public teamTricode: string;
@@ -33,13 +39,15 @@ export class Team {
   public roundsWon: number = 0;
   private spentThisRound: number = 0;
   private roundRecord: RecordEntry[] = [];
+  private enableMoneyRecord: boolean = false;
+  private moneyRecord: MoneyRecord[] = [{ round: 1, start: 0, spent: 0 }];
   private removeTricode: boolean = false;
 
   private players: Player[] = [];
   private playerCount = 0;
   private hasDuplicateAgents = false;
 
-  constructor(team: AuthTeam, removeTricode: boolean) {
+  constructor(team: AuthTeam, removeTricode: boolean, isSupporter: boolean = false) {
     this.teamName = team.name;
     this.teamTricode = team.tricode;
     this.teamUrl = team.url;
@@ -48,6 +56,8 @@ export class Team {
     this.ingameTeamId = team.attackStart ? 0 : 1;
 
     this.removeTricode = removeTricode;
+
+    this.enableMoneyRecord = isSupporter;
 
     this.initRoundRecord();
   }
@@ -108,7 +118,14 @@ export class Team {
 
   resetRoundSpecificValues(isSideSwitch: boolean) {
     for (const player of this.players) {
-      player.resetRoundSpecificValues(isSideSwitch);
+      player.resetNonMoneyRoundSpecificValues(isSideSwitch);
+    }
+  }
+
+  resetMoneyRoundSpecificValues(nextRoundNumber: number) {
+    this.moneyRecord.push({ round: nextRoundNumber, start: 0, spent: 0 });
+    for (const player of this.players) {
+      player.resetMoneyRoundSpecificValues();
     }
   }
 
@@ -181,8 +198,17 @@ export class Team {
   private processScoreboardData(data: IFormattedScoreboard) {
     const player = this.players.find((player) => player.getPlayerId() === data.playerId);
     if (!player) return;
+
+    const oldMoney = player.getMoney();
+
     player.updateFromScoreboard(data);
     this.spentThisRound = this.getSpentThisRound();
+
+    if (player.getMoney() > oldMoney && player.hasSpentThisRound() == false) {
+      if (player.getMoney() - oldMoney > 300) {
+        this.moneyRecord[this.moneyRecord.length - 1].start += player.getMoney();
+      }
+    }
   }
 
   private processKillfeedData(data: IFormattedKillfeed) {
@@ -211,7 +237,16 @@ export class Team {
   private processAuxScoreboardData(data: IFormattedScoreboard) {
     const player = this.players.find((player) => player.getPlayerId() === data.playerId);
     if (!player) return;
+
+    const oldMoney = player.getMoney();
+
     player.updateFromAuxiliaryScoreboard(data);
+
+    if (player.getMoney() > oldMoney && player.hasSpentThisRound() == false) {
+      if (player.getMoney() - oldMoney > 300) {
+        this.moneyRecord[this.moneyRecord.length - 1].start += player.getMoney();
+      }
+    }
   }
 
   private processAuxAbilityData(data: IFormattedAuxiliary) {
