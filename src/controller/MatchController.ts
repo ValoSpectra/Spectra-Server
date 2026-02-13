@@ -24,8 +24,18 @@ export class MatchController {
 
   async createMatch(data: IAuthenticationData) {
     try {
-      if (this.matches[data.groupCode] != null) {
-        return false;
+      const existingMatch = this.matches[data.groupCode];
+      if (existingMatch != null) {
+        if (data.groupSecret !== existingMatch.groupSecret) {
+          Log.info(
+            `Match with group code ${data.groupCode} already exists with different secret, rejecting logon attempt.`,
+          );
+          return "";
+        }
+        Log.info(
+          `Match with group code ${data.groupCode} already exists and secret was correct, reconnected.`,
+        );
+        return "reconnected";
       }
       const newMatch = new Match(data);
 
@@ -33,10 +43,10 @@ export class MatchController {
       this.eventNumbers[data.groupCode] = 0;
       Log.info(`New match "${newMatch.groupCode}" registered!`);
       this.startOutgoingSendLoop();
-      return true;
+      return newMatch.groupSecret;
     } catch (e) {
       Log.info(`Failed to create match with group code ${data.groupCode}, ${e}`);
-      return false;
+      return "";
     }
   }
 

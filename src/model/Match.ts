@@ -26,6 +26,7 @@ export class Match {
   private firstOtRound = 25;
 
   public groupCode;
+  public groupSecret: string;
   public isRunning: boolean = false;
   private agentSelectStartTime?: number = undefined;
 
@@ -50,7 +51,7 @@ export class Match {
   private timeoutEndTimeout: any = undefined;
   private timeoutRemainingLoop: any = undefined;
   private timeoutGracePeriodPassed: boolean = false;
-  
+
   private hasEnteredOvertime: boolean = false;
 
   private tools: ToolsData;
@@ -64,6 +65,7 @@ export class Match {
 
   constructor(data: IAuthenticationData) {
     this.groupCode = data.groupCode;
+    this.groupSecret = this.newGroupSecret();
 
     this.replayLog = new ReplayLogging(data);
 
@@ -243,13 +245,13 @@ export class Match {
 
           case "game_end":
             this.isRunning = false;
-            
+
             // Clean up timeout-related timers
             clearTimeout(this.timeoutEndTimeout);
             clearInterval(this.timeoutRemainingLoop);
             this.timeoutEndTimeout = undefined;
             this.timeoutRemainingLoop = undefined;
-            
+
             this.eventNumber++;
             MatchController.getInstance().removeMatch(this.groupCode);
 
@@ -330,7 +332,7 @@ export class Match {
 
     clearInterval(this.timeoutRemainingLoop);
     this.timeoutRemainingLoop = null;
-    
+
     this.timeoutGracePeriodPassed = false;
 
     this.timeoutEndTimeout = setTimeout(() => {
@@ -339,7 +341,7 @@ export class Match {
       } else if (this.timeoutState.rightTeam) {
         this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
       }
-      
+
       this.timeoutState.leftTeam = false;
       this.timeoutState.rightTeam = false;
       clearInterval(this.timeoutRemainingLoop);
@@ -349,13 +351,17 @@ export class Match {
     this.timeoutRemainingLoop = setInterval(() => {
       if (this.timeoutState.timeRemaining > 0) {
         this.timeoutState.timeRemaining--;
-        
+
         // track if grace period has passed
-        const gracePeriodRemaining = this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
-        if (!this.timeoutGracePeriodPassed && this.timeoutState.timeRemaining <= gracePeriodRemaining) {
+        const gracePeriodRemaining =
+          this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
+        if (
+          !this.timeoutGracePeriodPassed &&
+          this.timeoutState.timeRemaining <= gracePeriodRemaining
+        ) {
           this.timeoutGracePeriodPassed = true;
         }
-        
+
         this.eventNumber++;
       } else {
         clearInterval(this.timeoutRemainingLoop);
@@ -453,11 +459,12 @@ export class Match {
   private handleTeamTimeout(team: "left" | "right") {
     const isLeftTeam = team === "left";
     const currentState = isLeftTeam ? this.timeoutState.leftTeam : this.timeoutState.rightTeam;
-    
+
     if (currentState) {
-      const gracePeriodRemaining = this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
+      const gracePeriodRemaining =
+        this.tools.timeoutDuration - this.tools.timeoutCancellationGracePeriod;
       const stillInGracePeriod = this.timeoutState.timeRemaining > gracePeriodRemaining;
-      
+
       // If grace period has passed, deduct a timeout
       if (!stillInGracePeriod) {
         if (isLeftTeam) {
@@ -466,7 +473,7 @@ export class Match {
           this.tools.timeoutCounter.right = Math.max(0, this.tools.timeoutCounter.right - 1);
         }
       }
-      
+
       // Cancel the timeout
       this.timeoutState.leftTeam = false;
       this.timeoutState.rightTeam = false;
@@ -475,12 +482,14 @@ export class Match {
       this.timeoutEndTimeout = undefined;
       this.timeoutRemainingLoop = undefined;
     } else {
-      const timeoutsRemaining = isLeftTeam ? this.tools.timeoutCounter.left : this.tools.timeoutCounter.right;
-      
+      const timeoutsRemaining = isLeftTeam
+        ? this.tools.timeoutCounter.left
+        : this.tools.timeoutCounter.right;
+
       if (timeoutsRemaining <= 0) {
         return;
       }
-      
+
       this.timeoutState.leftTeam = isLeftTeam;
       this.timeoutState.rightTeam = !isLeftTeam;
       this.timeoutState.techPause = false;
@@ -492,10 +501,10 @@ export class Match {
   private checkAndGrantOvertimeTimeout() {
     if (this.roundNumber >= this.firstOtRound && !this.hasEnteredOvertime) {
       this.hasEnteredOvertime = true;
-      
+
       this.tools.timeoutCounter.left = Math.min(2, this.tools.timeoutCounter.left + 1);
       this.tools.timeoutCounter.right = Math.min(2, this.tools.timeoutCounter.right + 1);
-      
+
       this.eventNumber++;
       Log.info(`Overtime reached! Each team granted an additional timeout.`);
     }
@@ -520,6 +529,15 @@ export class Match {
     this.tools.nameOverrides.overrides = data.nameOverrides;
 
     this.eventNumber++;
+  }
+
+  private newGroupSecret(): string {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+    for (let i = 0; i < 12; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
   }
 
   private debugLogRoundInfo() {

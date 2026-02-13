@@ -85,6 +85,7 @@ export interface IAuthenticationData {
   obsName: string;
   key: string;
   groupCode: string;
+  groupSecret?: string;
   leftTeam: AuthTeam;
   rightTeam: AuthTeam;
   toolsData: ToolsData;
