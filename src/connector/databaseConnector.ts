@@ -178,4 +178,82 @@ export class DatabaseConnector {
     }
   }
   //#endregion
+
+  //#region Stats
+  private static async statsApiRequest(
+    path: string,
+    method: "get" | "post",
+    body?: any,
+  ): Promise<any> {
+    try {
+      const res = await fetch(process.env.STATS_BACKEND_URL + "/" + path, {
+        method: method,
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+          Authentication: process.env.STATS_BACKEND_TOKEN!,
+        },
+      });
+
+      if (res.status) {
+        return res;
+      } else {
+        Log.error(`Stats API request encountered an error. HTTP Code: ${res.status}`);
+        throw new Error(`Stats API request encountered an error. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`Stats API request failed: ${e}`);
+    }
+  }
+
+  public static async statsAddMatch(groupCode: string, matchId: string) {
+    try {
+      const res = await this.statsApiRequest("addMatch", "post", {
+        code: groupCode,
+        matchUuid: matchId,
+      });
+
+      if (res.status == 200) {
+        return;
+      } else {
+        Log.error(`Adding match to stats backend failed. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`Adding match to stats backend failed: ${e}`);
+    }
+  }
+
+  public static async statsUpdateMatchRegion(matchId: string, playerId: string) {
+    try {
+      const res = await this.statsApiRequest("updateMatchRegion", "post", {
+        matchUuid: matchId,
+        accountPuuid: playerId,
+      });
+
+      if (res.status == 200) {
+        return;
+      } else {
+        Log.error(`Updating match region in stats backend failed. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`Updating match region in stats backend failed: ${e}`);
+    }
+  }
+
+  public static async statsFetchStats(matchId: string) {
+    try {
+      const res = await this.statsApiRequest(`fetchMatchStats`, "post", {
+        matchUuid: matchId,
+      });
+
+      if (res.status == 200) {
+        return;
+      } else {
+        Log.error(`Stats backend failed to fetch stats. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`Telling stats backend to fetch failed: ${e}`);
+    }
+  }
+  //#endregion
 }

@@ -62,6 +62,7 @@ export class Match {
   public eventNumber: number = 1;
   public organizationId: string = "";
   public isRegistered: boolean = false;
+  private orgIsSupporter: boolean = false;
 
   constructor(data: IAuthenticationData) {
     this.groupCode = data.groupCode;
@@ -77,18 +78,20 @@ export class Match {
     this.teams.push(firstTeam);
     this.teams.push(secondTeam);
 
+    this.orgIsSupporter = data.isSupporter || false;
+
     // Add Spectra logo to sponsors if enabled and not a supporter
-    if (this.tools.sponsorInfo.enabled && !data.isSupporter) {
+    if (this.tools.sponsorInfo.enabled && !this.orgIsSupporter) {
       this.tools.sponsorInfo.sponsors.push("https://auto.valospectra.com/assets/misc/logo.webp");
     }
 
     // !!! Disabling the watermark/setting a custom text without Spectra Plus is against the License terms and strictly forbidden !!!
     // Set Watermark info according to settings and supporter role
     this.tools.watermarkInfo.spectraWatermark =
-      this.tools.watermarkInfo.spectraWatermark || !data.isSupporter;
+      this.tools.watermarkInfo.spectraWatermark || !this.orgIsSupporter;
     // Deactivate custom text if not a supporter
     this.tools.watermarkInfo.customTextEnabled =
-      this.tools.watermarkInfo.customTextEnabled && !!data.isSupporter;
+      this.tools.watermarkInfo.customTextEnabled && !!this.orgIsSupporter;
 
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";
@@ -229,6 +232,14 @@ export class Match {
 
             if (this.isRegistered && this.roundNumber !== 1) {
               DatabaseConnector.updateMatch(this);
+
+              // Supporter Early Access, will be public in future
+              if (this.orgIsSupporter) {
+                // Wait 5 seconds to ensure API is ready
+                setTimeout(() => {
+                  DatabaseConnector.statsFetchStats(this.matchId);
+                }, 5000);
+              }
             }
 
             break;
@@ -257,6 +268,14 @@ export class Match {
 
             if (this.isRegistered) {
               DatabaseConnector.completeMatch(this);
+
+              // Supporter Early Access, will be public in future
+              if (this.orgIsSupporter) {
+                // Wait 5 seconds to ensure API is ready
+                setTimeout(() => {
+                  DatabaseConnector.statsFetchStats(this.matchId);
+                }, 5000);
+              }
             }
 
             return;
@@ -271,6 +290,15 @@ export class Match {
         if (process.env.USE_BACKEND === "true") {
           await DatabaseConnector.registerMatch(this);
           this.isRegistered = true;
+
+          // Supporter Early Access, will be public in future
+          if (this.orgIsSupporter) {
+            await DatabaseConnector.statsAddMatch(this.groupCode, this.matchId);
+            await DatabaseConnector.statsUpdateMatchRegion(
+              this.matchId,
+              this.teams[0].getFirstPlayerId(),
+            );
+          }
         }
 
         break;

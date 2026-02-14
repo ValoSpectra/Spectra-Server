@@ -63,6 +63,26 @@ app.get("/getOrgForKey", async (req, res) => {
   res.status(401).header("Access-Control-Allow-Origin", "*").send("401 Unauthorized");
 });
 
+app.get("/getTeamInfoForCode", async (req, res) => {
+  const groupCode = req.query.groupCode;
+  if (!groupCode || typeof groupCode !== "string") {
+    res
+      .status(400)
+      .header("Access-Control-Allow-Origin", "*")
+      .json({ error: "Group code is required" });
+    return;
+  }
+  const teamInfo = MatchController.getInstance().getTeamInfoForCode(groupCode);
+  if (teamInfo) {
+    res.status(200).header("Access-Control-Allow-Origin", "*").json(teamInfo);
+  } else {
+    res
+      .status(404)
+      .header("Access-Control-Allow-Origin", "*")
+      .json({ error: "Group code not found" });
+  }
+});
+
 if (process.env.USE_BACKEND === "true") {
   app.get("/getSupportPackages", async (req, res) => {
     handlePackageRequest(res);

@@ -1,5 +1,5 @@
 import { DatabaseConnector } from "../connector/databaseConnector";
-import { WebsocketIncoming } from "../connector/websocketIncoming";
+import { AuthTeam, WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
 import { IAuthedAuxData, IAuthedData, IAuthenticationData } from "../model/eventData";
@@ -15,7 +15,24 @@ export class MatchController {
   private eventNumbers: Record<string, number> = {};
   private eventTimes: Record<string, number> = {};
 
-  private constructor() {}
+  private codeToTeamInfo: Record<string, { leftTeam: AuthTeam; rightTeam: AuthTeam }> = {};
+  private teamInfoExpiry: Record<string, number> = {};
+
+  private constructor() {
+    const cleanupInterval = setInterval(
+      () => {
+        const now = Date.now();
+        for (const groupCode in this.teamInfoExpiry) {
+          if (now > this.teamInfoExpiry[groupCode]) {
+            delete this.codeToTeamInfo[groupCode];
+            delete this.teamInfoExpiry[groupCode];
+          }
+        }
+      },
+      1000 * 60 * 5,
+    ); // Check every 5 minutes
+    cleanupInterval.unref();
+  }
 
   public static getInstance(): MatchController {
     if (MatchController.instance == null) MatchController.instance = new MatchController();
@@ -41,6 +58,10 @@ export class MatchController {
 
       this.matches[data.groupCode] = newMatch;
       this.eventNumbers[data.groupCode] = 0;
+
+      this.codeToTeamInfo[data.groupCode] = { leftTeam: data.leftTeam, rightTeam: data.rightTeam };
+      this.teamInfoExpiry[data.groupCode] = Date.now() + 1000 * 60 * 60; // 12 hour expiry for team info
+
       Log.info(`New match "${newMatch.groupCode}" registered!`);
       this.startOutgoingSendLoop();
       return newMatch.groupSecret;
@@ -162,5 +183,14 @@ export class MatchController {
         }
       }
     }, 100);
+  }
+
+  public getTeamInfoForCode(groupCode: string) {
+    const teamInfo = this.codeToTeamInfo[groupCode];
+    if (teamInfo) {
+      return teamInfo;
+    } else {
+      return undefined;
+    }
   }
 }
