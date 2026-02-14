@@ -232,14 +232,6 @@ export class Match {
 
             if (this.isRegistered && this.roundNumber !== 1) {
               DatabaseConnector.updateMatch(this);
-
-              // Supporter Early Access, will be public in future
-              if (this.orgIsSupporter) {
-                // Wait 5 seconds to ensure API is ready
-                setTimeout(() => {
-                  DatabaseConnector.statsFetchStats(this.matchId);
-                }, 5000);
-              }
             }
 
             break;
@@ -274,7 +266,7 @@ export class Match {
                 // Wait 5 seconds to ensure API is ready
                 setTimeout(() => {
                   DatabaseConnector.statsFetchStats(this.matchId);
-                }, 5000);
+                }, 15000);
               }
             }
 
