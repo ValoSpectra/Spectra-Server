@@ -48,6 +48,7 @@ export class Player {
   private assists: number = 0;
   private kdRatio: number = 0;
   private killsThisRound: number = 0;
+  private deathsThisRound: number = 0;
 
   private currUltPoints: number = 0;
   private maxUltPoints: number = 0;
@@ -112,6 +113,9 @@ export class Player {
   private _updateSharedScoreboardData(data: IFormattedScoreboard | IFormattedAuxScoreboardTeam) {
     if (data.kills > this.kills) {
       this.killsThisRound++;
+    }
+    if (data.deaths > this.deaths) {
+      this.deathsThisRound++;
     }
     this.agentInternal = data.agentInternal;
     this.agentProper = Agents[data.agentInternal] || data.agentInternal;
@@ -196,6 +200,7 @@ export class Player {
       this.isAlive = false;
       this.health = 0;
       this.deaths++;
+      this.deathsThisRound++;
     } else {
       // The teamkill field is unreliable at the moment, so we're not using it for fallbacks
       this.runAgentSpecificScoreboardChecks({ kills: this.kills + 1 });
@@ -230,6 +235,7 @@ export class Player {
 
   public resetRoundSpecificValues(isSideSwitch: boolean) {
     this.resetKillsThisRound();
+    this.resetDeathsThisRound();
     this.resetMoneyThisRound();
 
     if (isSideSwitch) {
@@ -282,6 +288,14 @@ export class Player {
 
   public resetKillsThisRound(): void {
     this.killsThisRound = 0;
+  }
+
+  public getDeathsThisRound(): number {
+    return this.deathsThisRound;
+  }
+
+  public resetDeathsThisRound(): void {
+    this.deathsThisRound = 0;
   }
 
   public resetMoneyThisRound(): void {

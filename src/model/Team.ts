@@ -268,6 +268,21 @@ export class Team {
     }
   }
 
+  private teamDeaths(): number {
+    let count = 0;
+    for (const player of this.players) {
+      count += player.getDeathsThisRound();
+    }
+
+    return count;
+  }
+
+  private resetTeamDeaths() {
+    for (const player of this.players) {
+      player.resetDeathsThisRound();
+    }
+  }
+
   public alivePlayers(): number {
     if (this.playerCount == 0) return 1;
 
