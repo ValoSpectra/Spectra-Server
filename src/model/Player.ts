@@ -239,6 +239,7 @@ export class Player {
   public resetRoundSpecificValues(isSideSwitch: boolean) {
     this.resetKillsThisRound();
     this.resetDeathsThisRound();
+    this.resetKilledPlayerNames();
     this.resetMoneyThisRound();
 
     if (isSideSwitch) {
