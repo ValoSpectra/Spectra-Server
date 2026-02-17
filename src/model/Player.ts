@@ -49,6 +49,7 @@ export class Player {
   private kdRatio: number = 0;
   private killsThisRound: number = 0;
   private deathsThisRound: number = 0;
+  private killedPlayerNames: string[] = [];
 
   private currUltPoints: number = 0;
   private maxUltPoints: number = 0;
@@ -164,6 +165,8 @@ export class Player {
     } else {
       this.killsByWeaponsAndAbilities[data.weaponKillfeedInternal] = 1;
     }
+
+    this.killedPlayerNames.push(data.victim);
 
     // Store headshot data
     if (data.headshotKill == true) {
@@ -296,6 +299,9 @@ export class Player {
 
   public resetDeathsThisRound(): void {
     this.deathsThisRound = 0;
+  }
+  public resetKilledPlayerNames(): void {
+    this.killedPlayerNames = [];
   }
 
   public resetMoneyThisRound(): void {
