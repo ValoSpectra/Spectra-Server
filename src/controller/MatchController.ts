@@ -16,6 +16,10 @@ export class MatchController {
   private eventTimes: Record<string, number> = {};
 
   private codeToTeamInfo: Record<string, { leftTeam: AuthTeam; rightTeam: AuthTeam }> = {};
+  private finishedGamesTeamInfo: Record<
+    string,
+    { leftTeam: AuthTeam; rightTeam: AuthTeam; higherScore: 0 | 1 }
+  > = {};
   private teamInfoExpiry: Record<string, number> = {};
 
   private constructor() {
@@ -24,7 +28,7 @@ export class MatchController {
         const now = Date.now();
         for (const groupCode in this.teamInfoExpiry) {
           if (now > this.teamInfoExpiry[groupCode]) {
-            delete this.codeToTeamInfo[groupCode];
+            delete this.finishedGamesTeamInfo[groupCode];
             delete this.teamInfoExpiry[groupCode];
           }
         }
@@ -59,7 +63,10 @@ export class MatchController {
       this.matches[data.groupCode] = newMatch;
       this.eventNumbers[data.groupCode] = 0;
 
-      this.codeToTeamInfo[data.groupCode] = { leftTeam: data.leftTeam, rightTeam: data.rightTeam };
+      this.codeToTeamInfo[data.groupCode] = {
+        leftTeam: data.leftTeam,
+        rightTeam: data.rightTeam,
+      };
       this.teamInfoExpiry[data.groupCode] = Date.now() + 1000 * 60 * 60; // 12 hour expiry for team info
 
       Log.info(`New match "${newMatch.groupCode}" registered!`);
@@ -186,11 +193,19 @@ export class MatchController {
   }
 
   public getTeamInfoForCode(groupCode: string) {
-    const teamInfo = this.codeToTeamInfo[groupCode];
+    const teamInfo = this.finishedGamesTeamInfo[groupCode];
     if (teamInfo) {
       return teamInfo;
     } else {
       return undefined;
     }
+  }
+
+  public setWinningTeamInfo(groupCode: string, higherScoreTeam: 0 | 1) {
+    this.finishedGamesTeamInfo[groupCode] = {
+      leftTeam: this.codeToTeamInfo[groupCode].leftTeam,
+      rightTeam: this.codeToTeamInfo[groupCode].rightTeam,
+      higherScore: higherScoreTeam,
+    };
   }
 }

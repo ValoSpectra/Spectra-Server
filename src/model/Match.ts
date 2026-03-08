@@ -255,6 +255,11 @@ export class Match {
             this.timeoutEndTimeout = undefined;
             this.timeoutRemainingLoop = undefined;
 
+            MatchController.getInstance().setWinningTeamInfo(
+              this.groupCode,
+              this.teams[0].roundsWon > this.teams[1].roundsWon ? 0 : 1,
+            );
+
             this.eventNumber++;
             MatchController.getInstance().removeMatch(this.groupCode);
 
