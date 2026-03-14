@@ -134,6 +134,10 @@ export class ReplayConnectorService {
           nameOverrides: {
             overrides: "[]",
           },
+          roundWinBox: {
+            type: "tournamentInfo",
+            sponsors: [],
+          },
           timeoutCounter: {
             max: 2,
             left: 2,
