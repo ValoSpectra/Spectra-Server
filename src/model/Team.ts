@@ -136,6 +136,13 @@ export class Team {
     return this.playerCount;
   }
 
+  getFirstPlayerId(): string {
+    if (this.players.length > 0) {
+      return this.players[0].getPlayerId();
+    }
+    return "";
+  }
+
   findDuplicateAgents() {
     const seen: string[] = [];
     for (const player of this.players) {

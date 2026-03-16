@@ -119,7 +119,8 @@ export class WebsocketIncoming {
           }
 
           // Check if the match can be created successfully
-          if (!(await this.matchController.createMatch(authenticationData))) {
+          const groupSecret = await this.matchController.createMatch(authenticationData);
+          if (!groupSecret || groupSecret === "") {
             ws.emit(
               "obs_logon_ack",
               JSON.stringify({
@@ -138,7 +139,7 @@ export class WebsocketIncoming {
           // All checks passed, send logon acknolwedgement
           ws.emit(
             "obs_logon_ack",
-            JSON.stringify({ type: DataTypes.AUTH, value: true, reason: "0.2.41" }),
+            JSON.stringify({ type: DataTypes.AUTH, value: true, reason: groupSecret }),
           );
           user.name = authenticationData.obsName;
           user.groupCode = authenticationData.groupCode;
@@ -241,7 +242,7 @@ export class WebsocketIncoming {
     });
 
     serverInstance.listen(5100);
-    Log.info(`InhouseTracker Server ingesting on port 5100!`);
+    Log.info(`Spectra Server ingesting on port 5100!`);
   }
 
   private onAuthSuccess(user: ClientUser) {

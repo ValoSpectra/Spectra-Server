@@ -15,6 +15,9 @@ export enum WeaponsAndAbilities {
   "TX_Hud_Pistol_Sheriff" = "Sheriff",
   "TX_Hud_Pistol_Revolver_S" = "Sheriff",
 
+  "TX_Hud_Pistol_Compact" = "Bandit",
+  "TX_Hud_Pistol_Compact_S" = "Bandit",
+
   "TX_Hud_Shotguns_Pump" = "Bucky",
   "TX_Hud_Pump" = "Bucky",
 

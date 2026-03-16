@@ -81,7 +81,7 @@ export class WebsocketOutgoing {
 
     serverInstance.listen(5200);
 
-    Log.info(`InhouseTracker Server outputting on port 5200!`);
+    Log.info(`Spectra Server outputting on port 5200!`);
   }
 
   sendMatchData(groupCode: string, data: any) {
@@ -91,11 +91,14 @@ export class WebsocketOutgoing {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       eventNumber,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      groupSecret,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       playercamUrl,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       timeoutEndTimeout,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       timeoutRemainingLoop,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       ...formattedData
         } = data;
 

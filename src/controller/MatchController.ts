@@ -1,5 +1,5 @@
 import { DatabaseConnector } from "../connector/databaseConnector";
-import { WebsocketIncoming } from "../connector/websocketIncoming";
+import { AuthTeam, WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
 import { IAuthedAuxData, IAuthedData, IAuthenticationData } from "../model/eventData";
@@ -15,7 +15,28 @@ export class MatchController {
   private eventNumbers: Record<string, number> = {};
   private eventTimes: Record<string, number> = {};
 
-  private constructor() {}
+  private codeToTeamInfo: Record<string, { leftTeam: AuthTeam; rightTeam: AuthTeam }> = {};
+  private finishedGamesTeamInfo: Record<
+    string,
+    { leftTeam: AuthTeam; rightTeam: AuthTeam; higherScore: 0 | 1 }
+  > = {};
+  private teamInfoExpiry: Record<string, number> = {};
+
+  private constructor() {
+    const cleanupInterval = setInterval(
+      () => {
+        const now = Date.now();
+        for (const groupCode in this.teamInfoExpiry) {
+          if (now > this.teamInfoExpiry[groupCode]) {
+            delete this.finishedGamesTeamInfo[groupCode];
+            delete this.teamInfoExpiry[groupCode];
+          }
+        }
+      },
+      1000 * 60 * 5,
+    ); // Check every 5 minutes
+    cleanupInterval.unref();
+  }
 
   public static getInstance(): MatchController {
     if (MatchController.instance == null) MatchController.instance = new MatchController();
@@ -24,19 +45,36 @@ export class MatchController {
 
   async createMatch(data: IAuthenticationData) {
     try {
-      if (this.matches[data.groupCode] != null) {
-        return false;
+      const existingMatch = this.matches[data.groupCode];
+      if (existingMatch != null) {
+        if (data.groupSecret !== existingMatch.groupSecret) {
+          Log.info(
+            `Match with group code ${data.groupCode} already exists with different secret, rejecting logon attempt.`,
+          );
+          return "";
+        }
+        Log.info(
+          `Match with group code ${data.groupCode} already exists and secret was correct, reconnected.`,
+        );
+        return "reconnected";
       }
       const newMatch = new Match(data);
 
       this.matches[data.groupCode] = newMatch;
       this.eventNumbers[data.groupCode] = 0;
+
+      this.codeToTeamInfo[data.groupCode] = {
+        leftTeam: data.leftTeam,
+        rightTeam: data.rightTeam,
+      };
+      this.teamInfoExpiry[data.groupCode] = Date.now() + 1000 * 60 * 60; // 12 hour expiry for team info
+
       Log.info(`New match "${newMatch.groupCode}" registered!`);
       this.startOutgoingSendLoop();
-      return true;
+      return newMatch.groupSecret;
     } catch (e) {
       Log.info(`Failed to create match with group code ${data.groupCode}, ${e}`);
-      return false;
+      return "";
     }
   }
 
@@ -152,5 +190,22 @@ export class MatchController {
         }
       }
     }, 100);
+  }
+
+  public getTeamInfoForCode(groupCode: string) {
+    const teamInfo = this.finishedGamesTeamInfo[groupCode];
+    if (teamInfo) {
+      return teamInfo;
+    } else {
+      return undefined;
+    }
+  }
+
+  public setWinningTeamInfo(groupCode: string, higherScoreTeam: 0 | 1) {
+    this.finishedGamesTeamInfo[groupCode] = {
+      leftTeam: this.codeToTeamInfo[groupCode].leftTeam,
+      rightTeam: this.codeToTeamInfo[groupCode].rightTeam,
+      higherScore: higherScoreTeam,
+    };
   }
 }

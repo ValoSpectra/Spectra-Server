@@ -135,6 +135,7 @@ export class ReplayConnectorService {
             overrides: "[]",
           },
           timeoutCounter: {
+            max: 2,
             left: 2,
             right: 2,
           },
