@@ -13,7 +13,6 @@ export class ToolsData {
     name: "",
     logoUrl: "",
     backdropUrl: "",
-    enabled: false,
   };
   public timeoutDuration: number = 60;
   public timeoutCounter: ITimeoutInfo = {
@@ -50,12 +49,6 @@ export class ToolsData {
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
-
-    if (this.tournamentInfo.logoUrl != "" || this.tournamentInfo.name != "") {
-      this.tournamentInfo.enabled = true;
-    } else {
-      this.tournamentInfo.enabled = false;
-    }
     this.timeoutCounter.left = this.timeoutCounter.max;
     this.timeoutCounter.right = this.timeoutCounter.max;
   }
@@ -77,7 +70,6 @@ export type ITournamentInfo = {
   name: string;
   logoUrl: string;
   backdropUrl: string;
-  enabled: boolean;
 };
 
 export type ITimeoutInfo = {
