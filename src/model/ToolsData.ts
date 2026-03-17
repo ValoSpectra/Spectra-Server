@@ -43,6 +43,13 @@ export class ToolsData {
   public nameOverrides: INameOverrides = {
     overrides: "[]",
   };
+  public toastInfo: IToastInfo = {
+    duration: null,
+    message: "",
+    eventLogoEnabled: true,
+    selectedTeam: undefined,
+    active: false,
+  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
@@ -110,6 +117,14 @@ export type INameOverrides = {
 export type IOverridesPlayercamsData = {
   nameOverrides: string; // JSON representation of Map<string, string> for easier transfer
   enabledPlayers: string[];
+};
+
+export type IToastInfo = {
+  duration: number | null;
+  message: string;
+  eventLogoEnabled: boolean;
+  selectedTeam ?: "left" | "right";
+  active: boolean;
 };
 
 type BaseMapPoolInfo = {
