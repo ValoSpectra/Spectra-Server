@@ -222,6 +222,10 @@ export enum Agents {
   "Pine_PC_C" = "Veto",
   "Pine" = "Veto",
   "TX_Killfeed_Veto" = "Pine",
+
+  "Iris_PC_C" = "Miks",
+  "Iris" = "Miks",
+  "TX_Killfeed_Iris" = "Miks",
 }
 
 export enum Maps {
