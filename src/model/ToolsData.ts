@@ -110,7 +110,7 @@ export type IRoundWinBox = {
 
 export type IRoundWinBoxSponsors = {
   wonTeam: "all" | "left" | "right";
-  roundCeremonie: "all" | "normal" | "ace" | "clutch" | "teamAce" | "flawless" | "thrifty";
+  roundCeremonie: ("all" | "normal" | "ace" | "clutch" | "teamAce" | "flawless" | "thrifty")[];
   iconUrl: string;
   backdropUrl: string;
 };
