@@ -352,6 +352,12 @@ export class Match {
       case DataTypes.TOAST:
         this.handleToast();
         break;
+      case DataTypes.SWAP_A_D:
+        console.log("Swapping attacker/defender sides");
+        break;
+      case DataTypes.SWAP_L_R:
+        console.log("Swapping left/right teams");
+        break;
     }
 
     this.eventNumber++;
