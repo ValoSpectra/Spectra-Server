@@ -353,10 +353,10 @@ export class Match {
         this.handleToast();
         break;
       case DataTypes.SWAP_A_D:
-        console.log("Swapping attacker/defender sides");
+        this.handleSwapAD();
         break;
       case DataTypes.SWAP_L_R:
-        console.log("Swapping left/right teams");
+        this.handleSwapLR();
         break;
     }
 
@@ -513,6 +513,23 @@ export class Match {
       }
       // If duration is null, the toast stays until the hotkey is pressed again
     }
+  }
+
+  private handleSwapLR() {
+    this.teams.reverse();
+    const tempTO = this.tools.timeoutCounter.left;
+    this.tools.timeoutCounter.left = this.tools.timeoutCounter.right;
+    this.tools.timeoutCounter.right = tempTO;
+  }
+
+  private handleSwapAD() {
+    this.teams.forEach((team) => team.switchSides());
+    const tempWin = this.teams[0].roundsWon;
+    this.teams[0].roundsWon = this.teams[1].roundsWon;
+    this.teams[1].roundsWon = tempWin;
+    const tempRR = this.teams[0].getRoundReasons();
+    this.teams[0].setRoundReasons(this.teams[1].getRoundReasons());
+    this.teams[1].setRoundReasons(tempRR);
   }
 
   private handleTeamTimeout(team: "left" | "right") {
