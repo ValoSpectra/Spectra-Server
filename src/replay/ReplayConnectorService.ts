@@ -110,7 +110,6 @@ export class ReplayConnectorService {
             name: "Tournament Name",
             logoUrl: "",
             backdropUrl: "",
-            enabled: true,
           },
           timeoutDuration: 60,
           sponsorInfo: {
@@ -133,6 +132,10 @@ export class ReplayConnectorService {
           },
           nameOverrides: {
             overrides: "[]",
+          },
+          roundWinBox: {
+            type: "tournamentInfo",
+            sponsors: [],
           },
           timeoutCounter: {
             max: 2,
