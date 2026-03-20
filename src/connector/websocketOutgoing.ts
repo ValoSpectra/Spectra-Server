@@ -102,7 +102,7 @@ export class WebsocketOutgoing {
       toastEndTimeout,
 
       ...formattedData
-        } = data;
+    } = data;
 
     const deepMod: any = structuredClone(formattedData);
     if (

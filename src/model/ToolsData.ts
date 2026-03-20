@@ -131,7 +131,7 @@ export type IToastInfo = {
   duration: number | null;
   message: string;
   eventLogoEnabled: boolean;
-  selectedTeam ?: "left" | "right";
+  selectedTeam?: "left" | "right";
   active: boolean;
 };
 

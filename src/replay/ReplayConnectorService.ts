@@ -137,6 +137,12 @@ export class ReplayConnectorService {
             type: "tournamentInfo",
             sponsors: [],
           },
+          toastInfo: {
+            duration: null,
+            message: "",
+            eventLogoEnabled: false,
+            active: false,
+          },
           timeoutCounter: {
             max: 2,
             left: 2,
