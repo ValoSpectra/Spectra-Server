@@ -95,7 +95,11 @@ export class Match {
     this.tools.watermarkInfo.customTextEnabled =
       this.tools.watermarkInfo.customTextEnabled && !!this.orgIsSupporter;
 
-    if (this.tools.roundWinBox.type == "sponsors" && this.tools.roundWinBox.sponsors.length > 1) {
+    if (
+      this.tools.roundWinBox.type == "sponsors" &&
+      this.tools.roundWinBox.sponsors.length > 1 &&
+      !this.orgIsSupporter
+    ) {
       this.tools.roundWinBox.sponsors = [this.tools.roundWinBox.sponsors[0]];
       this.tools.roundWinBox.sponsors[0].roundCeremony = ["all"];
       this.tools.roundWinBox.sponsors[0].wonTeam = "all";
