@@ -52,6 +52,8 @@ export class Match {
   private timeoutRemainingLoop: any = undefined;
   private timeoutGracePeriodPassed: boolean = false;
 
+  private toastEndTimeout: any = undefined;
+
   private hasEnteredOvertime: boolean = false;
 
   private tools: ToolsData;
@@ -346,6 +348,10 @@ export class Match {
       case DataTypes.SWITCH_KDA_CREDITS:
         this.showAliveKDA = !this.showAliveKDA;
         break;
+
+      case DataTypes.TOAST:
+        this.handleToast();
+        break;
     }
 
     this.eventNumber++;
@@ -479,6 +485,28 @@ export class Match {
     this.spikeState.planted = true;
     this.roundTimeoutTime = undefined;
     this.spikeDetonationTime = timestamp + 45 * 1000; // Add 45 seconds to the current time
+  }
+
+  private handleToast() {
+    if (this.tools.toastInfo.active) {
+      // Toast is active — deactivate it immediately
+      this.tools.toastInfo.active = false;
+      clearTimeout(this.toastEndTimeout);
+      this.toastEndTimeout = undefined;
+    } else {
+      // Activate the toast
+      this.tools.toastInfo.active = true;
+
+      if (this.tools.toastInfo.duration !== null) {
+        // Auto-deactivate after the configured duration (ms)
+        this.toastEndTimeout = setTimeout(() => {
+          this.tools.toastInfo.active = false;
+          this.toastEndTimeout = undefined;
+          this.eventNumber++;
+        }, this.tools.toastInfo.duration);
+      }
+      // If duration is null, the toast stays until the hotkey is pressed again
+    }
   }
 
   private handleTeamTimeout(team: "left" | "right") {

@@ -180,6 +180,7 @@ export enum DataTypes {
   LEFT_TIMEOUT = "left_timeout",
   RIGHT_TIMEOUT = "right_timeout",
   SWITCH_KDA_CREDITS = "switch_kda_credits",
+  TOAST = "toast",
   // Preview data types
   PREVIEW = "preview",
 }

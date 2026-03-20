@@ -98,9 +98,11 @@ export class WebsocketOutgoing {
       timeoutEndTimeout,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       timeoutRemainingLoop,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      toastEndTimeout,
 
       ...formattedData
-    } = data;
+        } = data;
 
     const deepMod: any = structuredClone(formattedData);
     if (
