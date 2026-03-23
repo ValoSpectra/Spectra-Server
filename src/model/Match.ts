@@ -97,6 +97,16 @@ export class Match {
     this.tools.watermarkInfo.customTextEnabled =
       this.tools.watermarkInfo.customTextEnabled && !!this.orgIsSupporter;
 
+    if (
+      this.tools.roundWinBox.type == "sponsors" &&
+      this.tools.roundWinBox.sponsors.length > 1 &&
+      !this.orgIsSupporter
+    ) {
+      this.tools.roundWinBox.sponsors = [this.tools.roundWinBox.sponsors[0]];
+      this.tools.roundWinBox.sponsors[0].roundCeremony = ["all"];
+      this.tools.roundWinBox.sponsors[0].wonTeam = "all";
+    }
+
     if (process.env.USE_BACKEND === "true") {
       this.organizationId = data.organizationId || "";
       this.updateNameOverridesAndPlayercams().then(() => {});
@@ -515,6 +525,23 @@ export class Match {
       }
       // If duration is null, the toast stays until the hotkey is pressed again
     }
+  }
+
+  private handleSwapLR() {
+    this.teams.reverse();
+    const tempTO = this.tools.timeoutCounter.left;
+    this.tools.timeoutCounter.left = this.tools.timeoutCounter.right;
+    this.tools.timeoutCounter.right = tempTO;
+  }
+
+  private handleSwapAD() {
+    this.teams.forEach((team) => team.switchSides());
+    const tempWin = this.teams[0].roundsWon;
+    this.teams[0].roundsWon = this.teams[1].roundsWon;
+    this.teams[1].roundsWon = tempWin;
+    const tempRR = this.teams[0].getRoundReasons();
+    this.teams[0].setRoundReasons(this.teams[1].getRoundReasons());
+    this.teams[1].setRoundReasons(tempRR);
   }
 
   private handleTeamTimeout(team: "left" | "right") {

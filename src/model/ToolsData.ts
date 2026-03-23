@@ -110,7 +110,7 @@ export type IRoundWinBox = {
 
 export type IRoundWinBoxSponsors = {
   wonTeam: "all" | "left" | "right";
-  roundCeremonie: ("all" | "normal" | "ace" | "clutch" | "teamAce" | "flawless" | "thrifty")[];
+  roundCeremony: ("all" | "normal" | "ace" | "clutch" | "teamAce" | "flawless" | "thrifty")[];
   iconUrl: string;
   backdropUrl: string;
 };
@@ -118,6 +118,14 @@ export type IRoundWinBoxSponsors = {
 export type IOverridesPlayercamsData = {
   nameOverrides: string; // JSON representation of Map<string, string> for easier transfer
   enabledPlayers: string[];
+};
+
+export type IToastInfo = {
+  duration: number | null;
+  message: string;
+  eventLogoEnabled: boolean;
+  selectedTeam?: "left" | "right";
+  active: boolean;
 };
 
 type BaseMapPoolInfo = {

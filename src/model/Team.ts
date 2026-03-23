@@ -304,6 +304,14 @@ export class Team {
     }
   }
 
+  getRoundReasons() {
+    return this.roundRecord;
+  }
+
+  setRoundReasons(reasons: RecordEntry[]) {
+    this.roundRecord = reasons;
+  }
+
   public setAuxDisconnected(playerId: string): void {
     const player = this.players.find((player) => player.getPlayerId() === playerId);
     if (player) {

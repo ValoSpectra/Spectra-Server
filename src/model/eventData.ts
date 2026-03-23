@@ -187,6 +187,10 @@ export enum DataTypes {
   TOAST = "toast",
   // Preview data types
   PREVIEW = "preview",
+  // Mid Match data types
+  TOAST = "toast",
+  SWAP_L_R = "swap_left_right",
+  SWAP_A_D = "swap_attacker_defender",
 }
 
 export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData {

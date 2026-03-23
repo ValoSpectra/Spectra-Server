@@ -12,10 +12,12 @@
     "start": "yarn run dev",
     "start_single": "tsx ./src/index.ts",
     "dev": "tsx watch ./src/index.ts",
+    "prepare": "husky",
     "build": "tsc",
     "lint": "eslint src/",
     "lint-fix": "eslint --fix src/",
     "format": "prettier --write src/",
+    "lint-staged": "lint-staged",
     "replay": "tsx ./src/replay/replay.ts",
     "replay_instant": "tsx ./src/replay/replay.ts -instant",
     "replay_delay": "tsx ./src/replay/replay.ts -delay",
@@ -33,6 +35,8 @@
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
     "globals": "^15.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
     "prettier": "3.5.3",
     "rimraf": "^6.0.1",
     "ts-loader": "^9.5.2",
@@ -56,6 +60,15 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.9",
     "utf-8-validate": "^6.0.5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "yarn@4.7.0"
 }
