@@ -65,6 +65,10 @@ export interface IAuthedData {
     | boolean
     | string
     | number;
+  toastMessage?: string;
+  toastDuration?: number | null;
+  toastEventLogoEnabled?: boolean;
+  toastSelectedTeam?: "left" | "right" | "none";
 }
 
 export interface IFormattedData {
@@ -196,6 +200,14 @@ export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData
   }
   return false;
 }
+
+export type IToastInfo = {
+  duration: number | null;
+  message: string;
+  eventLogoEnabled: boolean;
+  selectedTeam?: "left" | "right" | "none";
+  active: boolean;
+};
 
 //#region Preview
 export interface IPreviewData {

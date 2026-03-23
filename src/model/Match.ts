@@ -10,6 +10,7 @@ import {
   IFormattedRoundInfo,
   IFormattedScore,
   IFormattedScoreboard,
+  IToastInfo,
 } from "./eventData";
 import logging from "../util/Logging";
 import { ReplayLogging } from "../util/ReplayLogging";
@@ -53,6 +54,7 @@ export class Match {
   private timeoutGracePeriodPassed: boolean = false;
 
   private toastEndTimeout: any = undefined;
+  private toastInfo: IToastInfo = { active: false, message: "", duration: null, eventLogoEnabled: true, selectedTeam: undefined };
 
   private hasEnteredOvertime: boolean = false;
 
@@ -350,7 +352,7 @@ export class Match {
         break;
 
       case DataTypes.TOAST:
-        this.handleToast();
+        this.handleToast(data as IAuthedData);
         break;
     }
 
@@ -487,23 +489,29 @@ export class Match {
     this.spikeDetonationTime = timestamp + 45 * 1000; // Add 45 seconds to the current time
   }
 
-  private handleToast() {
-    if (this.tools.toastInfo.active) {
+  private handleToast(data: IAuthedData) {
+    if (this.toastInfo.active) {
       // Toast is active — deactivate it immediately
-      this.tools.toastInfo.active = false;
+      this.toastInfo.active = false;
       clearTimeout(this.toastEndTimeout);
       this.toastEndTimeout = undefined;
     } else {
-      // Activate the toast
-      this.tools.toastInfo.active = true;
+      // Activate the toast with data from the event
+      this.toastInfo = {
+        active: true,
+        message: data.toastMessage ?? "",
+        duration: data.toastDuration ?? null,
+        eventLogoEnabled: data.toastEventLogoEnabled ?? true,
+        selectedTeam: data.toastSelectedTeam,
+      };
 
-      if (this.tools.toastInfo.duration !== null) {
+      if (this.toastInfo.duration !== null) {
         // Auto-deactivate after the configured duration (ms)
         this.toastEndTimeout = setTimeout(() => {
-          this.tools.toastInfo.active = false;
+          this.toastInfo.active = false;
           this.toastEndTimeout = undefined;
           this.eventNumber++;
-        }, this.tools.toastInfo.duration);
+        }, this.toastInfo.duration);
       }
       // If duration is null, the toast stays until the hotkey is pressed again
     }
