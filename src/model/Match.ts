@@ -56,6 +56,7 @@ export class Match {
   private toastEndTimeout: any = undefined;
   private toastInfo: IToastInfo = {
     active: false,
+    title: "",
     message: "",
     duration: null,
     eventLogoEnabled: true,

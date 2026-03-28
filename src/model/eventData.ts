@@ -203,6 +203,7 @@ export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData
 
 export type IToastInfo = {
   duration: number | null;
+  title: string;
   message: string;
   eventLogoEnabled: boolean;
   selectedTeam?: "left" | "right" | "none";
