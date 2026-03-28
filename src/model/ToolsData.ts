@@ -46,7 +46,7 @@ export class ToolsData {
     type: "disabled",
     sponsors: [],
   };
-  
+
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
     this.timeoutCounter.left = this.timeoutCounter.max;

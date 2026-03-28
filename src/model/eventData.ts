@@ -62,13 +62,10 @@ export interface IAuthedData {
     | IFormattedRoundInfo
     | IFormattedScore
     | IFormattedAuxiliary
+    | IToastInfo
     | boolean
     | string
     | number;
-  toastMessage?: string;
-  toastDuration?: number | null;
-  toastEventLogoEnabled?: boolean;
-  toastSelectedTeam?: "left" | "right" | "none";
 }
 
 export interface IFormattedData {
@@ -170,6 +167,7 @@ export enum DataTypes {
   SPIKE_DETONATED = "spike_detonated",
   SPIKE_DEFUSED = "spike_defused",
   AUTH = "authenticate",
+  TOAST = "toast",
   // Aux data types
   AUX_AUTH = "aux_authenticate",
   AUX_ABILITIES = "aux_abilities",
@@ -184,11 +182,9 @@ export enum DataTypes {
   LEFT_TIMEOUT = "left_timeout",
   RIGHT_TIMEOUT = "right_timeout",
   SWITCH_KDA_CREDITS = "switch_kda_credits",
-  TOAST = "toast",
   // Preview data types
   PREVIEW = "preview",
   // Mid Match data types
-  TOAST = "toast",
   SWAP_L_R = "swap_left_right",
   SWAP_A_D = "swap_attacker_defender",
 }
