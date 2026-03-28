@@ -54,7 +54,14 @@ export class Match {
   private timeoutGracePeriodPassed: boolean = false;
 
   private toastEndTimeout: any = undefined;
-  private toastInfo: IToastInfo = { active: false, message: "", duration: null, eventLogoEnabled: true, selectedTeam: undefined };
+  private toastInfo: IToastInfo = {
+    active: false,
+    title: "",
+    message: "",
+    duration: null,
+    eventLogoEnabled: true,
+    selectedTeam: undefined,
+  };
 
   private hasEnteredOvertime: boolean = false;
 
@@ -362,7 +369,13 @@ export class Match {
         break;
 
       case DataTypes.TOAST:
-        this.handleToast(data as IAuthedData);
+        this.handleToast(data.data as IToastInfo);
+        break;
+      case DataTypes.SWAP_A_D:
+        this.handleSwapAD();
+        break;
+      case DataTypes.SWAP_L_R:
+        this.handleSwapLR();
         break;
     }
 
@@ -499,7 +512,7 @@ export class Match {
     this.spikeDetonationTime = timestamp + 45 * 1000; // Add 45 seconds to the current time
   }
 
-  private handleToast(data: IAuthedData) {
+  private handleToast(data: IToastInfo) {
     if (this.toastInfo.active) {
       // Toast is active — deactivate it immediately
       this.toastInfo.active = false;
@@ -507,13 +520,8 @@ export class Match {
       this.toastEndTimeout = undefined;
     } else {
       // Activate the toast with data from the event
-      this.toastInfo = {
-        active: true,
-        message: data.toastMessage ?? "",
-        duration: data.toastDuration ?? null,
-        eventLogoEnabled: data.toastEventLogoEnabled ?? true,
-        selectedTeam: data.toastSelectedTeam,
-      };
+      this.toastInfo = data;
+      this.toastInfo.active = true;
 
       if (this.toastInfo.duration !== null) {
         // Auto-deactivate after the configured duration (ms)
