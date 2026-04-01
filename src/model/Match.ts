@@ -260,6 +260,7 @@ export class Match {
           case "combat":
             this.teams.forEach((team) => team.findDuplicateAgents());
             this.roundTimeoutTime = data.timestamp + 99 * 1000; // Add 99 seconds to the current time
+            this.toastInfo.active = false;
             break;
 
           case "end":
@@ -522,6 +523,7 @@ export class Match {
       // Activate the toast with data from the event
       this.toastInfo = data;
       this.toastInfo.active = true;
+      this.eventNumber++;
 
       if (this.toastInfo.duration !== null) {
         // Auto-deactivate after the configured duration (ms)
