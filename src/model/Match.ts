@@ -288,13 +288,10 @@ export class Match {
             if (this.isRegistered) {
               DatabaseConnector.completeMatch(this);
 
-              // Supporter Early Access, will be public in future
-              if (this.orgIsSupporter) {
-                // Wait 5 seconds to ensure API is ready
-                setTimeout(() => {
-                  DatabaseConnector.statsFetchStats(this.matchId);
-                }, 15000);
-              }
+              // Wait 15 seconds to ensure API is ready
+              setTimeout(() => {
+                DatabaseConnector.statsFetchStats(this.matchId);
+              }, 15000);
             }
 
             return;
@@ -310,14 +307,11 @@ export class Match {
           await DatabaseConnector.registerMatch(this);
           this.isRegistered = true;
 
-          // Supporter Early Access, will be public in future
-          if (this.orgIsSupporter) {
-            await DatabaseConnector.statsAddMatch(this.groupCode, this.matchId);
-            await DatabaseConnector.statsUpdateMatchRegion(
-              this.matchId,
-              this.teams[0].getFirstPlayerId(),
-            );
-          }
+          await DatabaseConnector.statsAddMatch(this.groupCode, this.matchId);
+          await DatabaseConnector.statsUpdateMatchRegion(
+            this.matchId,
+            this.teams[0].getFirstPlayerId(),
+          );
         }
 
         break;
