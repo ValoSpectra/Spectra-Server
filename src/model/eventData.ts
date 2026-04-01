@@ -62,6 +62,7 @@ export interface IAuthedData {
     | IFormattedRoundInfo
     | IFormattedScore
     | IFormattedAuxiliary
+    | IToastInfo
     | boolean
     | string
     | number;
@@ -199,6 +200,15 @@ export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData
   }
   return false;
 }
+
+export type IToastInfo = {
+  duration: number | null;
+  title: string;
+  message: string;
+  eventLogoEnabled: boolean;
+  selectedTeam?: "left" | "right" | "none";
+  active: boolean;
+};
 
 //#region Preview
 export interface IPreviewData {

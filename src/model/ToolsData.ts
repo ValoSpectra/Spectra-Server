@@ -46,13 +46,6 @@ export class ToolsData {
     type: "disabled",
     sponsors: [],
   };
-  public toastInfo: IToastInfo = {
-    duration: null,
-    message: "",
-    eventLogoEnabled: true,
-    selectedTeam: undefined,
-    active: false,
-  };
 
   public constructor(init?: Partial<ToolsData>) {
     Object.assign(this, init);
