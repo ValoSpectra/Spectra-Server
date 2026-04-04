@@ -3,6 +3,7 @@ import { AuthTeam, WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
 import { IAuthedAuxData, IAuthedData, IAuthenticationData } from "../model/eventData";
+import { ITournamentInfo, ISponsorInfo } from "../model/ToolsData";
 import logging from "../util/Logging";
 const Log = logging("MatchController");
 
@@ -18,7 +19,7 @@ export class MatchController {
   private codeToTeamInfo: Record<string, { leftTeam: AuthTeam; rightTeam: AuthTeam }> = {};
   private finishedGamesTeamInfo: Record<
     string,
-    { leftTeam: AuthTeam; rightTeam: AuthTeam; higherScore: 0 | 1 }
+    { leftTeam: AuthTeam; rightTeam: AuthTeam; higherScore: 0 | 1; tournamentInfo: ITournamentInfo; sponsorInfo: ISponsorInfo; isSupporter: boolean }
   > = {};
   private teamInfoExpiry: Record<string, number> = {};
 
@@ -201,11 +202,14 @@ export class MatchController {
     }
   }
 
-  public setWinningTeamInfo(groupCode: string, higherScoreTeam: 0 | 1) {
+  public setWinningTeamInfo(groupCode: string, higherScoreTeam: 0 | 1, sponsorInfo: ISponsorInfo, tournamentInfo: ITournamentInfo, isSupporter: boolean) {
     this.finishedGamesTeamInfo[groupCode] = {
       leftTeam: this.codeToTeamInfo[groupCode].leftTeam,
       rightTeam: this.codeToTeamInfo[groupCode].rightTeam,
       higherScore: higherScoreTeam,
+      tournamentInfo: tournamentInfo,
+      sponsorInfo: sponsorInfo,
+      isSupporter: isSupporter,
     };
   }
 }

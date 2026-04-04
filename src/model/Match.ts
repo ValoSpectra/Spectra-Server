@@ -17,7 +17,7 @@ import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
-import { ToolsData } from "./ToolsData";
+import { ToolsData, ITournamentInfo, ISponsorInfo } from "./ToolsData";
 const Log = logging("Match");
 
 export class Match {
@@ -280,6 +280,9 @@ export class Match {
             MatchController.getInstance().setWinningTeamInfo(
               this.groupCode,
               this.teams[0].roundsWon > this.teams[1].roundsWon ? 0 : 1,
+              this.tools.sponsorInfo,
+              this.tools.tournamentInfo,
+              this.orgIsSupporter,
             );
 
             this.eventNumber++;
