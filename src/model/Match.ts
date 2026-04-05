@@ -17,7 +17,7 @@ import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
-import { ToolsData, ITournamentInfo, ISponsorInfo } from "./ToolsData";
+import { ToolsData } from "./ToolsData";
 const Log = logging("Match");
 
 export class Match {
