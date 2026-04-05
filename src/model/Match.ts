@@ -280,6 +280,9 @@ export class Match {
             MatchController.getInstance().setWinningTeamInfo(
               this.groupCode,
               this.teams[0].roundsWon > this.teams[1].roundsWon ? 0 : 1,
+              this.tools.sponsorInfo,
+              this.tools.tournamentInfo,
+              this.orgIsSupporter,
             );
 
             this.eventNumber++;
