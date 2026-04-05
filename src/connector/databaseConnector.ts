@@ -1,5 +1,5 @@
 require("dotenv").config();
-import { IOverridesPlayercamsData } from "../model/ToolsData";
+import { IOverridesPlayercamsData, IPlayerMMRInfo } from "../model/ToolsData";
 import logging from "../util/Logging";
 const Log = logging("DatabaseConnector");
 
@@ -213,7 +213,7 @@ export class DatabaseConnector {
         matchUuid: matchId,
       });
 
-      if (res.status == 200) {
+      if (res.status == 200 || res.status == 201) {
         return;
       } else {
         Log.error(`Adding match to stats backend failed. HTTP Code: ${res.status}`);
@@ -237,6 +237,26 @@ export class DatabaseConnector {
       }
     } catch (e) {
       Log.error(`Updating match region in stats backend failed: ${e}`);
+    }
+  }
+
+  public static async statsGetPlayerMMR(
+    matchId: string,
+    playerIds: string[],
+  ): Promise<{ results: IPlayerMMRInfo[] } | void> {
+    try {
+      const res = await this.statsApiRequest("fetchPlayerMMR", "post", {
+        matchUuid: matchId,
+        accountPuuids: playerIds,
+      });
+
+      if (res.status == 200) {
+        return await res.json();
+      } else {
+        Log.error(`Getting player MMR from stats backend failed. HTTP Code: ${res.status}`);
+      }
+    } catch (e) {
+      Log.error(`Getting player MMR from stats backend failed: ${e}`);
     }
   }
 

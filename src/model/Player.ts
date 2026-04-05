@@ -62,6 +62,9 @@ export class Player {
   private armorName: (typeof Armor)[number] = Armor[0];
   private highestWeapon: ValueOf<WeaponsAndAbilities> = WeaponsAndAbilities["unknown"];
 
+  private currentMMRTier: number | null = null;
+  private peakMMRTier: number | null = null;
+
   // Data extrapolated from Killfeed
   private teamKills: number = 0;
   private headshotKills: number = 0;
@@ -256,6 +259,11 @@ export class Player {
     if (this.name.startsWith(teamTricode)) {
       this.name = this.name.replace(teamTricode, "").trim();
     }
+  }
+
+  setMMR(currentMMRTier: number, peakMMRTier: number) {
+    this.currentMMRTier = currentMMRTier;
+    this.peakMMRTier = peakMMRTier;
   }
 
   public getName(): string {

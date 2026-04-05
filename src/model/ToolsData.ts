@@ -128,6 +128,12 @@ export type IToastInfo = {
   active: boolean;
 };
 
+export type IPlayerMMRInfo = {
+  puuid: string;
+  currentMMRTier: number;
+  peakMMRTier: number;
+};
+
 type BaseMapPoolInfo = {
   type: "past" | "present" | "future" | "disabled";
 };

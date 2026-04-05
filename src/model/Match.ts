@@ -17,7 +17,7 @@ import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
-import { ToolsData } from "./ToolsData";
+import { IPlayerMMRInfo, ToolsData } from "./ToolsData";
 const Log = logging("Match");
 
 export class Match {
@@ -315,6 +315,11 @@ export class Match {
             this.matchId,
             this.teams[0].getFirstPlayerId(),
           );
+          const allUUIDs = this.teams[0]
+            .getAllPlayerUUIDs()
+            .concat(this.teams[1].getAllPlayerUUIDs());
+          const playerMMRs = await DatabaseConnector.statsGetPlayerMMR(this.matchId, allUUIDs);
+          this.handlePlayerMMRInfo(playerMMRs?.results || []);
         }
 
         break;
@@ -624,6 +629,12 @@ export class Match {
     this.tools.nameOverrides.overrides = data.nameOverrides;
 
     this.eventNumber++;
+  }
+
+  private handlePlayerMMRInfo(playerMMRInfos: IPlayerMMRInfo[]) {
+    for (const playerMMRInfo of playerMMRInfos) {
+      this.teams.forEach((team) => team.setPlayerMMR(playerMMRInfo));
+    }
   }
 
   private newGroupSecret(): string {

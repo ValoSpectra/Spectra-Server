@@ -13,6 +13,7 @@ import {
 import logging from "../util/Logging";
 import { AuthTeam } from "../connector/websocketIncoming";
 import { Agents } from "../util/ValorantInternalTranslator";
+import { IPlayerMMRInfo } from "./ToolsData";
 const Log = logging("Team").level(1);
 
 type RecordType = "detonated" | "defused" | "kills" | "kills" | "timeout" | "lost" | "upcoming";
@@ -301,6 +302,17 @@ export class Team {
         wasAttack: this.isAttacking,
         round: roundNumber + future,
       };
+    }
+  }
+
+  public getAllPlayerUUIDs(): string[] {
+    return this.players.map((player) => player.getPlayerId());
+  }
+
+  public setPlayerMMR(playerMMRInfo: IPlayerMMRInfo): void {
+    const player = this.players.find((player) => player.getPlayerId() === playerMMRInfo.puuid);
+    if (player) {
+      player.setMMR(playerMMRInfo.currentMMRTier, playerMMRInfo.peakMMRTier);
     }
   }
 
