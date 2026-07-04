@@ -38,5 +38,5 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           tags: |
-            ghcr.io/ianmdesign/valorantesportsserver:latest
-            ghcr.io/ianmdesign/valorantesportsserver:${{ env.RELEASE_TAG }}
+            ghcr.io/valospectra/server:latest
+            ghcr.io/valospectra/server:${{ env.RELEASE_TAG }}
