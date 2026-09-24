@@ -36,6 +36,9 @@ export enum WeaponsAndAbilities {
   "TX_Hud_Rifles_DMR" = "Guardian",
   "tx_hud_dmr" = "Guardian",
 
+  "TX_Hud_Rifles_BattleRifle" = "Warden",
+  "TX_Hud_BattleRifle" = "Warden",
+
   "TX_Hud_Rifles_Ghost" = "Phantom",
   "TX_Hud_Assault_AR10A2_S" = "Phantom",
 
@@ -100,6 +103,7 @@ export enum WeaponCosts {
   "Bulldog" = 2050,
   "Guardian" = 2250,
   "Phantom" = 2900,
+  "Warden" = 2900,
   "Vandal" = 2900,
   "Marshal" = 950,
   "Operator" = 4700,
