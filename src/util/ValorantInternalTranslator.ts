@@ -250,6 +250,7 @@ export enum Maps {
   "HURM_Bowl" = "Kasbah",
   "HURM_Helix" = "Drift",
   "Rook" = "Corrode",
+  "Plummet" = "Summit",
 }
 
 export const Armor: string[] = ["None", "Light", "Heavy", "None", "Regen"] as const;
