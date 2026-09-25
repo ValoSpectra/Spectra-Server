@@ -46,11 +46,14 @@ export class ToolsData {
     type: "disabled",
     sponsors: [],
   };
+  public agentSelectAutostart: boolean = true;
+  public agentSelectActive: boolean = false;
 
-  public constructor(init?: Partial<ToolsData>) {
+  public constructor(init?: Partial<ToolsData> & { agentSelectHotkeyEnabled?: boolean }) {
     Object.assign(this, init);
     this.timeoutCounter.left = this.timeoutCounter.max;
     this.timeoutCounter.right = this.timeoutCounter.max;
+    this.agentSelectAutostart = !(init?.agentSelectHotkeyEnabled ?? false);
   }
 }
 

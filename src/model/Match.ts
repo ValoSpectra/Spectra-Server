@@ -158,6 +158,9 @@ export class Match {
         if (this.agentSelectStartTime == undefined) {
           this.agentSelectStartTime = data.timestamp;
         }
+        if (this.tools.agentSelectAutostart) {
+          this.tools.agentSelectActive = true;
+        }
         correctTeam.receiveTeamSpecificData(data);
         break;
 
@@ -369,6 +372,10 @@ export class Match {
 
       case DataTypes.SWITCH_KDA_CREDITS:
         this.showAliveKDA = !this.showAliveKDA;
+        break;
+
+      case DataTypes.TOGGLE_AGENT_SELECT:
+        this.tools.agentSelectActive = !this.tools.agentSelectActive;
         break;
 
       case DataTypes.TOAST:
