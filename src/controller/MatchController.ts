@@ -3,7 +3,7 @@ import { AuthTeam, WebsocketIncoming } from "../connector/websocketIncoming";
 import { WebsocketOutgoing } from "../connector/websocketOutgoing";
 import { Match } from "../model/Match";
 import { IAuthedAuxData, IAuthedData, IAuthenticationData } from "../model/eventData";
-import { ITournamentInfo, ISponsorInfo } from "../model/ToolsData";
+import { ITournamentInfo, ISponsorInfo, IPlayercamsListenIn } from "../model/ToolsData";
 import logging from "../util/Logging";
 const Log = logging("MatchController");
 
@@ -164,6 +164,24 @@ export class MatchController {
 
       this.outgoingWebsocketServer.sendMatchData(groupCode, formattedData);
     }
+  }
+
+  getPlayercamsInfo(groupCode: string) {
+    const match = this.matches[groupCode];
+    if (!match) return null;
+    return match.getPlayercamsInfo();
+  }
+
+  isSupporter(groupCode: string) {
+    const match = this.matches[groupCode];
+    if (!match) return false;
+    return match.isSupporter();
+  }
+
+  setPlayercamsListenIn(groupCode: string, team: IPlayercamsListenIn) {
+    const match = this.matches[groupCode];
+    if (!match) return null;
+    match.setPlayercamsListenIn(team);
   }
 
   private startOutgoingSendLoop() {

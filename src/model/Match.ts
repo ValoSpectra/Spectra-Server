@@ -17,7 +17,7 @@ import { ReplayLogging } from "../util/ReplayLogging";
 import { Maps } from "../util/ValorantInternalTranslator";
 import { MatchController } from "../controller/MatchController";
 import { DatabaseConnector } from "../connector/databaseConnector";
-import { IPlayerMMRInfo, ToolsData } from "./ToolsData";
+import { IPlayercamsListenIn, IPlayerMMRInfo, ToolsData } from "./ToolsData";
 const Log = logging("Match");
 
 export class Match {
@@ -655,6 +655,18 @@ export class Match {
     Log.debug(
       `Attacking Team: ${attackingTeam?.alivePlayers()} - Defending Team: ${defendingTeam?.alivePlayers()}`,
     );
+  }
+
+  public getPlayercamsInfo() {
+    return this.tools.playercamsInfo;
+  }
+
+  public isSupporter() {
+    return this.orgIsSupporter;
+  }
+
+  public setPlayercamsListenIn(team: IPlayercamsListenIn) {
+    this.getPlayercamsInfo().listenIn = team;
   }
 }
 

@@ -9,6 +9,7 @@ import { readFileSync } from "fs";
 import { createServer as createSecureServer } from "https";
 import { DatabaseConnector } from "./connector/databaseConnector";
 import { handleDiscordAuth, handlePackageRequest } from "./util/SupportService";
+import { IPlayercamsListenIn } from "./model/ToolsData";
 const Log = logging("Status");
 require("dotenv").config();
 
@@ -91,6 +92,66 @@ if (process.env.USE_BACKEND === "true") {
     handleDiscordAuth(req, res);
   });
 }
+
+app.get("/listenin", async (req, res) => {
+  const groupCode = req.query.groupCode;
+  const secret = req.query.secret;
+  const team = req.query.team;
+  if (!groupCode || typeof groupCode !== "string") {
+    res
+      .status(400)
+      .header("Access-Control-Allow-Origin", "*")
+      .json({ error: "Group code is required" });
+    return;
+  }
+  const matchController = MatchController.getInstance();
+  const playercamsInfo = matchController.getPlayercamsInfo(groupCode);
+
+  if (!playercamsInfo) {
+    res
+      .status(404)
+      .header("Access-Control-Allow-Origin", "*")
+      .json({ error: "Group code not found" });
+  } else {
+    const isSupporter = matchController.isSupporter(groupCode);
+    if (!isSupporter) {
+      res
+        .status(401)
+        .header("Access-Control-Allow-Origin", "*")
+        .json({ error: "Listen-in is a supporter feature" });
+    } else {
+      if (!playercamsInfo.enable) {
+        res
+          .status(404)
+          .header("Access-Control-Allow-Origin", "*")
+          .json({ error: "Playercams are not enabled" });
+      } else {
+        if (!secret || playercamsInfo.secret !== secret) {
+          res
+            .status(401)
+            .header("Access-Control-Allow-Origin", "*")
+            .json({ error: "Missing or invalid playercams secret" });
+        } else {
+          if (!team || !(team === "none" || team === "left" || team === "right")) {
+            res
+              .status(401)
+              .header("Access-Control-Allow-Origin", "*")
+              .json({ error: "Missing or invalid team" });
+          } else {
+            let fTeam: IPlayercamsListenIn = false;
+            if (team === "left") fTeam = "left";
+            if (team === "right") fTeam = "right";
+
+            if (fTeam === playercamsInfo.listenIn && fTeam !== false) fTeam = false;
+
+            matchController.setPlayercamsListenIn(groupCode, fTeam);
+            res.status(200).header("Access-Control-Allow-Origin", "*").json({listenIn: fTeam});
+          }
+        }
+      }
+    }
+  }
+});
 
 if (process.env.INSECURE == "true") {
   app.listen(port, () => {
