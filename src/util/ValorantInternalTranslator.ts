@@ -36,7 +36,7 @@ export enum WeaponsAndAbilities {
   "TX_Hud_Rifles_DMR" = "Guardian",
   "tx_hud_dmr" = "Guardian",
 
-  "TX_Hud_Rifles_BattleRifle" = "Warden",
+  "TX_Hud_Rifle_BattleRifle" = "Warden",
   "TX_Hud_BattleRifle" = "Warden",
 
   "TX_Hud_Rifles_Ghost" = "Phantom",
