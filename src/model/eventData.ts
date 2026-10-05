@@ -181,6 +181,7 @@ export enum DataTypes {
   LEFT_TIMEOUT = "left_timeout",
   RIGHT_TIMEOUT = "right_timeout",
   SWITCH_KDA_CREDITS = "switch_kda_credits",
+  TOGGLE_AGENT_SELECT = "toggle_agent_select",
   // Preview data types
   PREVIEW = "preview",
   // Mid Match data types
