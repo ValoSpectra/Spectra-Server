@@ -129,6 +129,7 @@ export class ReplayConnectorService {
             secret: "",
             enabledPlayers: [],
             endTime: 0,
+            listenIn: false,
           },
           nameOverrides: {
             overrides: "[]",
