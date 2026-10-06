@@ -145,6 +145,7 @@ app.get("/listenin", async (req, res) => {
             if (fTeam === playercamsInfo.listenIn && fTeam !== false) fTeam = false;
 
             matchController.setPlayercamsListenIn(groupCode, fTeam);
+            matchController.sendMatchDataForLogon(groupCode);
             res.status(200).header("Access-Control-Allow-Origin", "*").json({ listenIn: fTeam });
           }
         }

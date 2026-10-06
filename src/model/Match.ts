@@ -380,6 +380,8 @@ export class Match {
       case DataTypes.SWAP_L_R:
         this.handleSwapLR();
         break;
+      case DataTypes.PLAYERCAM_LISTENIN:
+        this.tools.playercamsInfo.listenIn = data.data as IPlayercamsListenIn;
     }
 
     this.eventNumber++;

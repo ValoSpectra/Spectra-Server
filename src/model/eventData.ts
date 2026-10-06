@@ -1,6 +1,6 @@
 import { AuthTeam } from "../connector/websocketIncoming";
 import { Agents, WeaponsAndAbilities } from "../util/ValorantInternalTranslator";
-import { ToolsData } from "./ToolsData";
+import { IPlayercamsListenIn, ToolsData } from "./ToolsData";
 
 export interface IFormattedScoreboard {
   name: string;
@@ -63,6 +63,7 @@ export interface IAuthedData {
     | IFormattedScore
     | IFormattedAuxiliary
     | IToastInfo
+    | IPlayercamsListenIn
     | boolean
     | string
     | number;
@@ -187,6 +188,7 @@ export enum DataTypes {
   TOAST = "toast",
   SWAP_L_R = "swap_left_right",
   SWAP_A_D = "swap_attacker_defender",
+  PLAYERCAM_LISTENIN = "playercam_listenin",
 }
 
 export function isAuthedData(data: object): data is IAuthedData | IAuthedAuxData {
