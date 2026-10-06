@@ -38,6 +38,7 @@ export class ToolsData {
     secret: "",
     endTime: 0,
     enabledPlayers: [],
+    listenIn: false,
   };
   public nameOverrides: INameOverrides = {
     overrides: "[]",
@@ -97,7 +98,10 @@ export type IPlayercamsInfo = {
   secret: string;
   endTime: number;
   enabledPlayers: string[];
+  listenIn: IPlayercamsListenIn;
 };
+
+export type IPlayercamsListenIn = false | "left" | "right";
 
 export type INameOverrides = {
   overrides: string; // JSON representation of Map<string, string> for easier transfer

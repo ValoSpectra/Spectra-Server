@@ -126,9 +126,10 @@ export class ReplayConnectorService {
             enable: true,
             removeTricodes: false,
             identifier: "SPPCCDEBUG",
-            secret: "",
+            secret: "DEBUG",
             enabledPlayers: [],
             endTime: 0,
+            listenIn: false,
           },
           nameOverrides: {
             overrides: "[]",
