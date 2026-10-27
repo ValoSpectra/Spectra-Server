@@ -230,6 +230,10 @@ export enum Agents {
   "Iris_PC_C" = "Miks",
   "Iris" = "Miks",
   "TX_Killfeed_Iris" = "Miks",
+
+  "Paprika_PC_C" = "Hush",
+  "Paprika" = "Hush",
+  "TX_Killfeed_Paprika" = "Hush",
 }
 
 export enum Maps {
